@@ -6,16 +6,28 @@
 </head>
 
 <body>
-  <style>
-    iron-grid div.first {
+  <style is="custom-style">
+    #static {
+      --iron-grid-row-height: auto;
+    }
+
+    #static div.first {
       color: blue;
+    }
+
+    #static .big {
+      height: 120px;
+    }
+
+    #static div > div {
+      height: 48px;
     }
   </style>
 
-  <iron-grid style="width: 800px;margin-bottom: 50px;">
+  <iron-grid id="static" style="width: 800px;margin-bottom: 50px;">
     <grid-column name="First Name">
       <template>
-        <div class="first">[[item.name.first]]</div>
+        <div class$="[[item.customClass]]">[[item.name.first]]</div>
       </template>
     </grid-column>
     <grid-column name="Last Name">
@@ -107,6 +119,7 @@
       var grid = document.querySelector('iron-grid');
 
       grid.items = [{
+          customClass: 'big',
           name: {
             first: 'amber',
             last: 'crawford'
@@ -119,6 +132,7 @@
           },
           email: 'zoe.caldwell@example.com'
       }, {
+          customClass: 'big',
           name: {
             first: 'jessie',
             last: 'brooks'
