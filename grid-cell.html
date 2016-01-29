@@ -1,0 +1,84 @@
+<dom-module id="grid-cell">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+
+    <content></content>
+  </template>
+  <script>
+    window.vaadin = window.vaadin || {};
+    vaadin.elements = vaadin.elements || {};
+    vaadin.elements.grid = vaadin.elements.grid || {};
+    vaadin.elements.grid.cell = vaadin.elements.grid.cell || 0;
+
+    Polymer({
+      is: 'grid-cell',
+
+      behaviors: [
+        Polymer.Templatizer,
+      ],
+
+      properties: {
+        template: {
+          type: Object,
+          observer: 'templatize'
+        },
+
+        bind: {
+          type: Object,
+          observer: '_bindChanged'
+        },
+
+        _contentElement: {
+          type: Object
+        },
+
+        _content: {
+          type: Object
+        }
+      },
+
+      attached: function() {
+        var id = vaadin.elements.grid.cell++;
+
+        this._contentElement = document.createElement('content');
+        this._contentElement.setAttribute('select', '#cell' + id);
+
+        this._content = document.createElement('div');
+        this._content.id = 'cell' + id;
+
+        this._updateContent();
+
+        Polymer.dom(this).appendChild(this._contentElement);
+        Polymer.dom(this.domHost).appendChild(this._content);
+        Polymer.dom.flush();
+      },
+
+      detached: function() {
+        Polymer.dom(this).removeChild(this._contentElement);
+        Polymer.dom(this.domHost).removeChild(this._content);
+        Polymer.dom.flush();
+      },
+
+      _bindChanged: function(data) {
+        if (this._templatized) {
+          this._instance = this.stamp({item: data});
+
+          this._updateContent();
+        }
+      },
+
+      _updateContent: function() {
+        if (this._content && this._instance) {
+          this._content.innerHTML = '';
+
+          Polymer.dom(this._content).appendChild(this._instance.root);
+          Polymer.dom.flush();
+        }
+      }
+    });
+  </script>
+</dom-module>

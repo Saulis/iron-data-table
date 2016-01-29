@@ -6,9 +6,17 @@
 </head>
 
 <body>
+  <style>
+    iron-grid div.first {
+      color: blue;
+    }
+  </style>
+
   <iron-grid style="width: 800px;margin-bottom: 50px;">
     <grid-column name="First Name">
-      <template>[[item.name.first]]</template>
+      <template>
+        <div class="first">[[item.name.first]]</div>
+      </template>
     </grid-column>
     <grid-column name="Last Name">
       <template>[[item.name.last]]</template>
@@ -19,9 +27,6 @@
   </iron-grid>
 
   <iron-grid id="lazy" style="width: 800px;margin-bottom: 50px">
-    <grid-column name="#">
-      <template><b style="color: red">[[index]]</b></template>
-    </grid-column>
     <grid-column name="First Name">
       <template>[[item.user.name.first]]
       </template>
@@ -34,9 +39,29 @@
     </grid-column>
   </iron-grid>
 
+  <style>
+    #max > div {
+      width: 100%;
+    }
+
+    #max div.pic {
+      display: flex;
+      justify-content: center;
+    }
+
+    #max img {
+      height: 24px;
+      width: 24px;
+    }
+  </style>
+
   <iron-grid id="max" style="width: 800px">
-    <grid-column name="#">
-      <template><b style="color: red">[[index]]</b></template>
+    <grid-column>
+      <template>
+        <div class="pic">
+          <img src="[[item.user.picture.medium]]" />
+        </div>
+      </template>
     </grid-column>
     <grid-column name="First Name">
       <template>[[item.user.name.first]]

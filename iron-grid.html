@@ -1,5 +1,6 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="grid-column.html">
+<link rel="import" href="grid-cell.html">
 <link rel="import" href="../iron-list/iron-list.html">
 
 <dom-module id="iron-grid">
@@ -40,7 +41,7 @@
         opacity: 1;
       }
 
-      .item > div {
+      .item > grid-cell {
         width: 100%;
         overflow: hidden;
         height: 48px;
@@ -56,9 +57,13 @@
       </template>
     </div>
 
-    <iron-list id="list" as="item" on-scroll="_onScroll">
-      <template preserve-content>
-        <div class="item"></div>
+    <iron-list id="list" as="item" items="[[items]]" on-scroll="_onScroll">
+      <template>
+        <div class="item">
+          <template is="dom-repeat" items="[[_columns]]" as="column">
+            <grid-cell template="[[column.template]]" bind="[[item]]"></grid-cell>
+          </template>
+        </div>
       </template>
     </iron-list>
   </template>
@@ -69,8 +74,7 @@
 
       properties: {
         items: {
-          type: Object,
-          observer: '_itemsChanged'
+          type: Object
         },
 
         lazyItems: {
@@ -100,16 +104,6 @@
             return Polymer.dom(this).querySelectorAll('grid-column');
           }
         }
-      },
-
-      ready: function() {
-        var item = Polymer.dom(this.$.list).querySelector('template').content.firstElementChild;
-
-        Array.prototype.forEach.call(this._columns, function(col) {
-          var cell = document.createElement('div');
-          cell.appendChild(col.querySelector('template').content);
-          item.appendChild(cell);
-        });
       },
 
       // not a good idea.
@@ -153,31 +147,19 @@
       },
 
       _lazyItemsChanged: function(fn) {
-        if (Polymer.dom(this.$.list).querySelector('template').content.firstElementChild !== null) {
-          var items = fn(this._loadedSize, 10);
+        var items = fn(this._loadedSize, 10);
 
-          this._loadedSize = items.length;
-          /*
-          if (items.length < 10) {
-            this.size = items.length;
-          }*/
+        this._loadedSize = items.length;
+        /*
+        if (items.length < 10) {
+          this.size = items.length;
+        }*/
 
-          for (var i = items.length; i < this.size; i++) {
-            items.push({});
-          }
-
-          this.$.list.items = items;
+        for (var i = items.length; i < this.size; i++) {
+          items.push({});
         }
-      },
 
-      _itemsChanged: function(items) {
-        if (Polymer.dom(this.$.list).querySelector('template').content.firstElementChild !== null) {
-          this.$.list.items = items;
-        }
-      },
-
-      _columnData: function(column, item) {
-        return item[column];
+        this.$.list.items = items;
       }
     });
   </script>
