@@ -6,6 +6,10 @@
       }
     </style>
 
+    <template is="header">
+      <div>[[name]]</div>
+    </template>
+
   </template>
   <script>
     Polymer({
@@ -16,6 +20,19 @@
           type: String,
           notify: true,
           value: ''
+        },
+
+        width: {
+          type: String,
+          notify: true,
+          value: "100%"
+        },
+
+        headerTemplate: {
+          type: Object,
+          value: function() {
+            return Polymer.dom(this.root).querySelector('template');
+          }
         },
 
         template: {

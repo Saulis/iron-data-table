@@ -24,7 +24,7 @@
         box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 2px 0 rgba(0, 0, 0, 0.075), 0 3px 0 rgba(0, 0, 0, 0.05), 0 4px 0 rgba(0, 0, 0, 0.015);
       }
 
-      #header > div {
+      #header > grid-cell {
         width: 100%;
         padding: 0 24px 0 24px;
         align-self: center;
@@ -52,16 +52,17 @@
     </style>
 
     <div id="header">
-      <template is="dom-repeat" items="[[_columns]]">
-        <div>[[item.name]]</div>
+      <template is="dom-repeat" items="[[_columns]]" as="col">
+        <grid-cell column="[[col]]" template="[[col.headerTemplate]]" bind="[[col.name]]"></grid-cell>
       </template>
     </div>
+
 
     <iron-list id="list" as="item" items="[[items]]" on-scroll="_onScroll">
       <template>
         <div class="item">
           <template is="dom-repeat" items="[[_columns]]" as="column">
-            <grid-cell template="[[column.template]]" bind="[[item]]"></grid-cell>
+            <grid-cell column="[[column]]" template="[[column.template]]" bind="[[item]]"></grid-cell>
           </template>
         </div>
       </template>
@@ -74,7 +75,7 @@
 
       properties: {
         items: {
-          type: Object
+          type: Array
         },
 
         lazyItems: {
@@ -98,10 +99,21 @@
         },
 
         _columns: {
-          type: Object,
-          //observer: '_columnsChanged',
+          type: Array,
           value: function() {
             return Polymer.dom(this).querySelectorAll('grid-column');
+          }
+        },
+
+        _columnWidths: {
+          type: String,
+          value: '100%'
+        },
+
+        _headerTemplate: {
+          type: Object,
+          value: function() {
+            return Polymer.dom(this.root).querySelector('#headerTemplate');
           }
         }
       },

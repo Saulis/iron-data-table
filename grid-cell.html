@@ -22,9 +22,14 @@
       ],
 
       properties: {
+        column: {
+          type: Object,
+          observer: '_columnChanged'
+        },
+
         template: {
           type: Object,
-          observer: 'templatize'
+          observer: '_templateChanged'
         },
 
         bind: {
@@ -63,10 +68,33 @@
         Polymer.dom.flush();
       },
 
+      _columnChanged: function(column, oldColumn) {
+        this.style.width = '';
+        if (oldColumn !== undefined) {
+          this.unlisten(oldColumn, 'width-changed', '_widthChanged');
+        }
+
+        this.listen(column, 'width-changed', '_widthChanged');
+      },
+
+      _widthChanged: function(e) {
+        this.style.width = e.detail.value;
+      },
+
       _bindChanged: function(data) {
         if (this._templatized) {
           this._instance = this.stamp({item: data});
 
+          this._updateContent();
+        }
+      },
+
+      _templateChanged: function(template) {
+        this.templatize(template);
+
+        if (this.bind !== undefined) {
+          console.log(this.bind);
+          this._instance = this.stamp({item: this.bind});
           this._updateContent();
         }
       },
