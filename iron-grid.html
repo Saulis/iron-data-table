@@ -17,14 +17,10 @@
       #header {
         display: flex;
         justify-content: space-between;
-
         color: rgba(0, 0, 0, 0.54);
         font-size: 12px;
         height: 56px;
-        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06),
-                    0 2px 0 rgba(0, 0, 0, 0.075),
-                    0 3px 0 rgba(0, 0, 0, 0.05),
-                    0 4px 0 rgba(0, 0, 0, 0.015);
+        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 2px 0 rgba(0, 0, 0, 0.075), 0 3px 0 rgba(0, 0, 0, 0.05), 0 4px 0 rgba(0, 0, 0, 0.015);
       }
 
       #header > div {
@@ -40,7 +36,6 @@
       .item {
         display: flex;
         justify-content: space-between;
-
         border-bottom: 1px solid #e3e3e3;
         opacity: 1;
       }
@@ -50,7 +45,6 @@
         overflow: hidden;
         height: 48px;
         padding: 0 24px 0 24px;
-
         display: flex;
         align-items: center;
       }
@@ -62,16 +56,9 @@
       </template>
     </div>
 
-    <!-- dom-repeat would be wrapped in a <grid-columns> element or something -->
-    <div class="item">
-      <template is="dom-repeat" items="[[_columns]]">
-        <div>[[item.template.content.textContent]]</div>
-      </template>
-    </div>
-
-    <iron-list id="list" as="item">
+    <iron-list id="list" as="item" on-scroll="_onScroll">
       <template preserve-content>
-
+        <div class="item"></div>
       </template>
     </iron-list>
   </template>
@@ -83,8 +70,22 @@
       properties: {
         items: {
           type: Object,
-          observer: '_itemsChanged',
-          value: []
+          observer: '_itemsChanged'
+        },
+
+        lazyItems: {
+          type: Function,
+          observer: '_lazyItemsChanged'
+        },
+
+        size: {
+          type: Number,
+          value: 0
+        },
+
+        _loadedSize: {
+          type: Number,
+          value: 0
         },
 
         columns: {
@@ -102,9 +103,71 @@
       },
 
       ready: function() {
-        var item = Polymer.dom(this.root).querySelector('.item');
+        var item = Polymer.dom(this.$.list).querySelector('template').content.firstElementChild;
 
-        Polymer.dom(this.$.list).querySelector('template').content.appendChild(item);
+        Array.prototype.forEach.call(this._columns, function(col) {
+          var cell = document.createElement('div');
+          cell.appendChild(col.querySelector('template').content);
+          item.appendChild(cell);
+        });
+      },
+
+      // not a good idea.
+      _sizeChanged: function(size, oldSize) {
+        if (this.$.list.items !== undefined) {
+          if (size > this.$.list.items.length) {
+            while (this.$.list.items.length < size) {
+              this.$.list.items.push({});
+            }
+          } else {
+            while (this.$.list.items.length > size) {
+              this.$.list.items.pop();
+            }
+          }
+        }
+      },
+
+      _onScroll: function(e) {
+        if (this.lazyItems !== undefined) {
+          var first = Math.max(this.$.list.firstVisibleIndex - 30, 0);
+          for (var i = first; i < Math.min(first + 30, this.size); i++) {
+            if (Object.keys(this.$.list.items[i]).length === 0) {
+              this._loadItems(i);
+
+              // force render.
+              this.$.list.notifyResize();
+
+              return;
+            }
+          }
+        }
+      },
+
+      _loadItems: function(index) {
+        //console.log(index);
+        var items = this.lazyItems(index, 60);
+
+        for (var i = 0; i < items.length; i++) {
+          this.$.list.items[index + i] = items[i];
+        }
+      },
+
+      _lazyItemsChanged: function(fn) {
+        if (Polymer.dom(this.$.list).querySelector('template').content.firstElementChild !== null) {
+          var items = fn(this._loadedSize, 10);
+
+          this._loadedSize = items.length;
+          /*
+          if (items.length < 10) {
+            this.size = items.length;
+          }*/
+
+          for (var i = items.length; i < this.size; i++) {
+            items.push({});
+          }
+
+          this.$.list.items = items;
+        }
       },
 
       _itemsChanged: function(items) {

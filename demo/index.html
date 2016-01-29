@@ -6,7 +6,7 @@
 </head>
 
 <body>
-  <iron-grid style="height: 300px;width: 800px;">
+  <iron-grid style="width: 800px;margin-bottom: 50px;">
     <grid-column name="First Name">
       <template>[[item.name.first]]</template>
     </grid-column>
@@ -18,11 +18,68 @@
     </grid-column>
   </iron-grid>
 
-  <script>
-    document.addEventListener('WebComponentsReady', function() {
-      var grid = document.querySelector('iron-grid');
+  <iron-grid id="lazy" style="width: 800px;margin-bottom: 50px">
+    <grid-column name="#">
+      <template><b style="color: red">[[index]]</b></template>
+    </grid-column>
+    <grid-column name="First Name">
+      <template>[[item.user.name.first]]
+      </template>
+    </grid-column>
+    <grid-column name="Last Name">
+      <template>[[item.user.name.last]]</template>
+    </grid-column>
+    <grid-column name="Email">
+      <template>[[item.user.email]]</template>
+    </grid-column>
+  </iron-grid>
 
-      //grid.columns = ['name.first', 'name.last', 'email'];
+  <iron-grid id="max" style="width: 800px">
+    <grid-column name="#">
+      <template><b style="color: red">[[index]]</b></template>
+    </grid-column>
+    <grid-column name="First Name">
+      <template>[[item.user.name.first]]
+      </template>
+    </grid-column>
+    <grid-column name="Last Name">
+      <template>[[item.user.name.last]]</template>
+    </grid-column>
+    <grid-column name="Email">
+      <template>[[item.user.email]]</template>
+    </grid-column>
+  </iron-grid>
+
+  <script>
+  var users;
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState == XMLHttpRequest.DONE) {
+      if (xhr.status == 200) {
+        var json = JSON.parse(xhr.responseText);
+        users = json.results;
+      }
+    }
+  };
+
+  xhr.open("GET", 'users.json', true);
+  xhr.send();
+
+    document.addEventListener('WebComponentsReady', function() {
+
+      var lazygrid = document.querySelector('#lazy');
+      lazygrid.size = users.length;
+      lazygrid.lazyItems = function(index, count) {
+        return users.slice(index, index + count);
+      };
+
+      var maxgrid = document.querySelector('#max');
+      maxgrid.size = 100000;
+      maxgrid.lazyItems = function(index, count) {
+        return users.slice(0, count);
+      };
+
+      var grid = document.querySelector('iron-grid');
 
       grid.items = [{
           name: {
