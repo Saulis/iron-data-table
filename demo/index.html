@@ -1,0 +1,158 @@
+<html>
+
+<head>
+  <script type="text/javascript" src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../iron-grid.html">
+</head>
+
+<body>
+  <iron-grid style="height: 300px;width: 800px;">
+    <grid-column name="First Name">
+      <template>[[item.name.first]]</template>
+    </grid-column>
+    <grid-column name="Last Name">
+      <template>[[item.name.last]]</template>
+    </grid-column>
+    <grid-column name="Email">
+      <template>[[item.email]]</template>
+    </grid-column>
+  </iron-grid>
+
+  <script>
+    document.addEventListener('WebComponentsReady', function() {
+      var grid = document.querySelector('iron-grid');
+
+      //grid.columns = ['name.first', 'name.last', 'email'];
+
+      grid.items = [{
+          name: {
+            first: 'amber',
+            last: 'crawford'
+          },
+          email: 'amber.crawford@example.com'
+      }, {
+          name: {
+            first: 'zoe',
+            last: 'caldwell'
+          },
+          email: 'zoe.caldwell@example.com'
+      }, {
+          name: {
+            first: 'jessie',
+            last: 'brooks'
+          },
+          email: 'jessie.brooks@example.com'
+      },{
+          name: {
+            first: 'amber',
+            last: 'crawford'
+          },
+          email: 'amber.crawford@example.com'
+      }, {
+          name: {
+            first: 'zoe',
+            last: 'caldwell'
+          },
+          email: 'zoe.caldwell@example.com'
+      }, {
+          name: {
+            first: 'jessie',
+            last: 'brooks'
+          },
+          email: 'jessie.brooks@example.com'
+      },{
+          name: {
+            first: 'amber',
+            last: 'crawford'
+          },
+          email: 'amber.crawford@example.com'
+      }, {
+          name: {
+            first: 'zoe',
+            last: 'caldwell'
+          },
+          email: 'zoe.caldwell@example.com'
+      }, {
+          name: {
+            first: 'jessie',
+            last: 'brooks'
+          },
+          email: 'jessie.brooks@example.com'
+      },{
+          name: {
+            first: 'amber',
+            last: 'crawford'
+          },
+          email: 'amber.crawford@example.com'
+      }, {
+          name: {
+            first: 'zoe',
+            last: 'caldwell'
+          },
+          email: 'zoe.caldwell@example.com'
+      }, {
+          name: {
+            first: 'jessie',
+            last: 'brooks'
+          },
+          email: 'jessie.brooks@example.com'
+      },{
+          name: {
+            first: 'amber',
+            last: 'crawford'
+          },
+          email: 'amber.crawford@example.com'
+      }, {
+          name: {
+            first: 'zoe',
+            last: 'caldwell'
+          },
+          email: 'zoe.caldwell@example.com'
+      }, {
+          name: {
+            first: 'jessie',
+            last: 'brooks'
+          },
+          email: 'jessie.brooks@example.com'
+      },{
+          name: {
+            first: 'amber',
+            last: 'crawford'
+          },
+          email: 'amber.crawford@example.com'
+      }, {
+          name: {
+            first: 'zoe',
+            last: 'caldwell'
+          },
+          email: 'zoe.caldwell@example.com'
+      }, {
+          name: {
+            first: 'jessie',
+            last: 'brooks'
+          },
+          email: 'jessie.brooks@example.com'
+      },{
+          name: {
+            first: 'amber',
+            last: 'crawford'
+          },
+          email: 'amber.crawford@example.com'
+      }, {
+          name: {
+            first: 'zoe',
+            last: 'caldwell'
+          },
+          email: 'zoe.caldwell@example.com'
+      }, {
+          name: {
+            first: 'jessie',
+            last: 'brooks'
+          },
+          email: 'jessie.brooks@example.com'
+      }];
+    });
+  </script>
+</body>
+
+</html>

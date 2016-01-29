@@ -1,0 +1,30 @@
+<dom-module id="grid-column">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'grid-column',
+
+      properties: {
+        name: {
+          type: String,
+          notify: true,
+          value: ''
+        },
+
+        template: {
+          type: Object,
+          value: function() {
+            return Polymer.dom(this).querySelector('template');
+          }
+        }
+      }
+    });
+  </script>
+</dom-module>

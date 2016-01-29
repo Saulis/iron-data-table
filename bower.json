@@ -1,0 +1,25 @@
+{
+  "name": "iron-grid",
+  "authors": [
+    "Sauli Tähkäpää <sauli@vaadin.com>"
+  ],
+  "description": "",
+  "main": "iron-grid.html",
+  "moduleType": [],
+  "license": "Apache 2.0",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "^1.2.4",
+    "iron-list": "polymerelements/iron-list#^1.1.7"
+  },
+  "devDependencies": {
+    "webcomponentsjs": "^0.7.20"
+  }
+}

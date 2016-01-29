@@ -1,0 +1,121 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="grid-column.html">
+<link rel="import" href="../iron-list/iron-list.html">
+
+<dom-module id="iron-grid">
+  <template>
+    <style>
+      :host {
+        display: block;
+        font: 400 100%/1.5 Roboto, sans-serif;
+        font-size: 13px;
+        font-weight: 400;
+        line-height: 1.1;
+        color: rgba(0, 0, 0, 0.87);
+      }
+
+      #header {
+        display: flex;
+        justify-content: space-between;
+
+        color: rgba(0, 0, 0, 0.54);
+        font-size: 12px;
+        height: 56px;
+        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06),
+                    0 2px 0 rgba(0, 0, 0, 0.075),
+                    0 3px 0 rgba(0, 0, 0, 0.05),
+                    0 4px 0 rgba(0, 0, 0, 0.015);
+      }
+
+      #header > div {
+        width: 100%;
+        padding: 0 24px 0 24px;
+        align-self: center;
+      }
+
+      #list {
+        height: 400px;
+      }
+
+      .item {
+        display: flex;
+        justify-content: space-between;
+
+        border-bottom: 1px solid #e3e3e3;
+        opacity: 1;
+      }
+
+      .item > div {
+        width: 100%;
+        overflow: hidden;
+        height: 48px;
+        padding: 0 24px 0 24px;
+
+        display: flex;
+        align-items: center;
+      }
+    </style>
+
+    <div id="header">
+      <template is="dom-repeat" items="[[_columns]]">
+        <div>[[item.name]]</div>
+      </template>
+    </div>
+
+    <!-- dom-repeat would be wrapped in a <grid-columns> element or something -->
+    <div class="item">
+      <template is="dom-repeat" items="[[_columns]]">
+        <div>[[item.template.content.textContent]]</div>
+      </template>
+    </div>
+
+    <iron-list id="list" as="item">
+      <template preserve-content>
+
+      </template>
+    </iron-list>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'iron-grid',
+
+      properties: {
+        items: {
+          type: Object,
+          observer: '_itemsChanged',
+          value: []
+        },
+
+        columns: {
+          type: Object,
+          value: []
+        },
+
+        _columns: {
+          type: Object,
+          //observer: '_columnsChanged',
+          value: function() {
+            return Polymer.dom(this).querySelectorAll('grid-column');
+          }
+        }
+      },
+
+      ready: function() {
+        var item = Polymer.dom(this.root).querySelector('.item');
+
+        Polymer.dom(this.$.list).querySelector('template').content.appendChild(item);
+      },
+
+      _itemsChanged: function(items) {
+        if (Polymer.dom(this.$.list).querySelector('template').content.firstElementChild !== null) {
+          this.$.list.items = items;
+        }
+      },
+
+      _columnData: function(column, item) {
+        return item[column];
+      }
+    });
+  </script>
+</dom-module>
