@@ -209,6 +209,23 @@
                 </iron-grid>
               </template>
             </demo-snippet>
+
+            <h3>Filtering (work in progress, iron-list rendering issues in Shadow DOM)</h3>
+            <demo-snippet>
+              <template>
+                <iron-grid id="grid7">
+                  <grid-column name="First Name" filter="user.name.first">
+                    <template>[[item.user.name.first]]</template>
+                  </grid-column>
+                  <grid-column name="Last Name" filter="user.name.last">
+                    <template>[[item.user.name.last]]</template>
+                  </grid-column>
+                  <grid-column name="Email">
+                    <template>[[item.user.email]]</template>
+                  </grid-column>
+                </iron-grid>
+              </template>
+            </demo-snippet>
   </div>
 
   <script>
@@ -232,6 +249,7 @@
       document.querySelector('#grid3').items = users;
       document.querySelector('#grid5').items = users;
       document.querySelector('#grid6').items = users;
+      document.querySelector('#grid7').items = users;
     });
   </script>
 </body>

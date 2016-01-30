@@ -1,3 +1,5 @@
+<link rel="import" href="grid-filter.html">
+
 <dom-module id="grid-column">
   <template>
     <style>
@@ -6,9 +8,14 @@
       }
     </style>
 
-    <template is="header">
+    <template id="header">
       <div>[[name]]</div>
     </template>
+
+    <template id="filter">
+      <grid-filter name="[[name]]" path="[[filter]]"></grid-filter>
+    </template>
+
 
   </template>
   <script>
@@ -20,6 +27,11 @@
           type: String,
           notify: true,
           value: ''
+        },
+
+        filter: {
+          type: String,
+          observer: '_filterChanged'
         },
 
         hidden: {
@@ -37,7 +49,7 @@
         headerTemplate: {
           type: Object,
           value: function() {
-            return Polymer.dom(this.root).querySelector('template');
+            return Polymer.dom(this.root).querySelector('#header');
           }
         },
 
@@ -46,6 +58,12 @@
           value: function() {
             return Polymer.dom(this).querySelector('template');
           }
+        }
+      },
+
+      _filterChanged: function(filter) {
+        if (filter !== undefined) {
+          this.headerTemplate = Polymer.dom(this.root).querySelector('#filter');
         }
       }
     });

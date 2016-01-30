@@ -52,7 +52,7 @@
     </style>
 
     <div id="header">
-      <template is="dom-repeat" items="[[columns]]" as="col">
+      <template is="dom-repeat" items="[[columns]]" as="col" observe="columns.*">
         <grid-cell column="[[col]]" template="[[col.headerTemplate]]" bind="[[col.name]]" hidden="[[col.hidden]]"></grid-cell>
       </template>
     </div>
@@ -79,6 +79,10 @@
   <script>
     Polymer({
       is: 'iron-grid',
+
+      listeners: {
+        'filter-changed': '_onFilterChanged'
+      },
 
       properties: {
         items: {
@@ -107,6 +111,41 @@
             return Polymer.dom(this).querySelectorAll('grid-column');
           }
         }
+      },
+
+      _onFilterChanged: function(e) {
+        this._filter = this._filter || {};
+        this._filter[e.detail.path] = e.detail.filter;
+
+        if (this.items) {
+          this.$.list.items = Array.prototype.filter.call(this.items, function(item, index) {
+            for(var prop in this._filter) {
+              var value = this._deepFind(item, prop);
+
+              if (value.indexOf(this._filter[prop]) === -1) {
+                return false;
+              }
+            }
+
+            return true;
+          }.bind(this));
+        }
+      },
+
+      // we need to find values from deep properties like user.name.first
+      // snatched from http://stackoverflow.com/questions/8817394/javascript-get-deep-value-from-object-by-passing-path-to-it-as-string
+      _deepFind: function(obj, path) {
+        var paths = path.split('.');
+        var current = obj;
+
+        for (var i = 0; i < paths.length; ++i) {
+          if (current[paths[i]] == undefined) {
+            return undefined;
+          } else {
+            current = current[paths[i]];
+          }
+        }
+        return current;
       },
 
       _onScroll: function(e) {

@@ -1,0 +1,28 @@
+<link rel="import" href="../paper-input/paper-input.html">
+
+<dom-module id="grid-filter">
+  <template>
+    <paper-input label="[[name]]" on-bind-value-changed="_bindValueChanged"></paper-input>
+  </template>
+  <script>
+    Polymer({
+      is: 'grid-filter',
+
+      properties: {
+        name: {
+          type: String
+        },
+
+        path: {
+          type: String
+        }
+      },
+
+      _bindValueChanged: function(event) {
+        this.debounce('filter', function() {
+          this.fire('filter-changed', { path: this.path, filter: event.detail.value });
+        }, 250);
+      }
+    });
+  </script>
+</dom-module>
