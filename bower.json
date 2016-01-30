@@ -23,6 +23,7 @@
     "webcomponentsjs": "^0.7.20",
     "iron-demo-helpers": "polymerelements/iron-demo-helpers#^1.0.3",
     "paper-input": "polymerelements/paper-input#^1.1.5",
-    "paper-checkbox": "polymerelements/paper-checkbox#^1.1.0"
+    "paper-checkbox": "polymerelements/paper-checkbox#^1.1.0",
+    "paper-button": "polymerelements/paper-button#^1.0.11"
   }
 }

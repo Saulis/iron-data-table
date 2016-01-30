@@ -57,16 +57,17 @@
       },
 
       detached: function() {
+        Polymer.dom(this._content.parentNode).removeChild(this._content);
         Polymer.dom(this).removeChild(this._contentElement);
-        Polymer.dom(this.domHost).removeChild(this._content);
         Polymer.dom.flush();
       },
 
-      // we need to observe changes in the columns. Done manually because
-      // couldn't get the array observer to work.
+      // we need to observe changes in the column sub-properties.
+      // Needs to be done manually like this OR
+      // using Polymer data-binding but then changing needs to be done using grid.set('columns.0.hidden', true); etc.
       _columnChanged: function(column, oldColumn) {
-        this.style.width = '';
-        this.hidden = false;
+        this.style.width = column.width;
+        this.hidden = column.hidden;
 
         if (oldColumn !== undefined) {
           this.unlisten(oldColumn, 'width-changed', '_widthChanged');

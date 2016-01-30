@@ -57,6 +57,13 @@
       </template>
     </div>
 
+    <!---https://www.polymer-project.org/1.0/docs/devguide/templates.html#path-binding
+
+    <template is="dom-repeat" items="{{employees}}"
+        filter="isEngineer" observe="type manager.type">
+
+    this.set('employees.0.manager.type', 'engineer'
+    -->
 
     <iron-list id="list" as="item" items="[[items]]" on-scroll="_onScroll">
       <template>
@@ -95,6 +102,7 @@
 
         columns: {
           type: Array,
+          notify: true,
           value: function() {
             return Polymer.dom(this).querySelectorAll('grid-column');
           }

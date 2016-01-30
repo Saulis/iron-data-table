@@ -6,6 +6,7 @@
   <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
   <link rel="import" href="../../paper-input/paper-input.html">
   <link rel="import" href="../../paper-checkbox/paper-checkbox.html">
+  <link rel="import" href="../../paper-button/paper-button.html">
 
   <link rel="import" href="../iron-grid.html">
 
@@ -168,6 +169,38 @@
           </iron-grid>
       </template>
     </demo-snippet>
+
+    <h3>Column Reordering</h3>
+    <demo-snippet>
+      <template>
+        <paper-button id="reorder">Switch 1st and 2nd Columns</paper-button>
+        <script>
+          document.querySelector('#reorder').addEventListener('tap', function(e) {
+            var grid = document.querySelector('#grid6');
+
+            var cols = grid.columns;
+            var col = cols.shift();
+            cols.push(col);
+            grid.columns = undefined;
+            grid.columns = cols;
+
+            //var col = grid.shift('columns');
+            //grid.push('columns', col);
+          });
+        </script>
+          <iron-grid id="grid6">
+            <grid-column name="First Name">
+              <template>[[item.user.name.first]]</template>
+            </grid-column>
+            <grid-column name="Last Name">
+              <template>[[item.user.name.last]]</template>
+            </grid-column>
+            <grid-column name="Email">
+              <template>[[item.user.email]]</template>
+            </grid-column>
+          </iron-grid>
+      </template>
+    </demo-snippet>
   </div>
 
   <script>
@@ -190,6 +223,7 @@
       document.querySelector('#grid2').items = users;
       document.querySelector('#grid3').items = users;
       document.querySelector('#grid5').items = users;
+      document.querySelector('#grid6').items = users;
     });
   </script>
 </body>
