@@ -1,11 +1,5 @@
 <dom-module id="grid-cell">
   <template>
-    <style>
-      :host {
-        display: block;
-      }
-    </style>
-
     <content></content>
   </template>
   <script>
@@ -68,13 +62,23 @@
         Polymer.dom.flush();
       },
 
+      // we need to observe changes in the columns. Done manually because
+      // couldn't get the array observer to work.
       _columnChanged: function(column, oldColumn) {
         this.style.width = '';
+        this.hidden = false;
+
         if (oldColumn !== undefined) {
           this.unlisten(oldColumn, 'width-changed', '_widthChanged');
+          this.unlisten(oldColumn, 'hidden-changed', '_hiddenChanged');
         }
 
         this.listen(column, 'width-changed', '_widthChanged');
+        this.listen(column, 'hidden-changed', '_hiddenChanged');
+      },
+
+      _hiddenChanged: function(e) {
+        this.hidden = e.detail.value;
       },
 
       _widthChanged: function(e) {

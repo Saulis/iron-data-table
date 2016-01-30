@@ -5,6 +5,7 @@
   <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
   <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
   <link rel="import" href="../../paper-input/paper-input.html">
+  <link rel="import" href="../../paper-checkbox/paper-checkbox.html">
 
   <link rel="import" href="../iron-grid.html">
 
@@ -143,6 +144,30 @@
           </iron-grid>
       </template>
     </demo-snippet>
+
+    <h3>Column Hiding</h3>
+    <demo-snippet>
+      <template>
+        nicely placed checkbox (show/hide 1st column)
+        <paper-checkbox id="hide" checked></paper-input>
+        <script>
+          document.querySelector('#hide').addEventListener('change', function(e) {
+            document.querySelector('#grid5').columns[0].hidden = !document.querySelector('#hide').checked;
+          });
+        </script>
+          <iron-grid id="grid5">
+            <grid-column name="First Name">
+              <template>[[item.user.name.first]]</template>
+            </grid-column>
+            <grid-column name="Last Name">
+              <template>[[item.user.name.last]]</template>
+            </grid-column>
+            <grid-column name="Email">
+              <template>[[item.user.email]]</template>
+            </grid-column>
+          </iron-grid>
+      </template>
+    </demo-snippet>
   </div>
 
   <script>
@@ -164,6 +189,7 @@
       document.querySelector('#grid1').items = users;
       document.querySelector('#grid2').items = users;
       document.querySelector('#grid3').items = users;
+      document.querySelector('#grid5').items = users;
     });
   </script>
 </body>
