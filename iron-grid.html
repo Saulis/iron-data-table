@@ -52,7 +52,7 @@
     </style>
 
     <div id="header">
-      <template is="dom-repeat" items="[[_columns]]" as="col">
+      <template is="dom-repeat" items="[[columns]]" as="col">
         <grid-cell column="[[col]]" template="[[col.headerTemplate]]" bind="[[col.name]]"></grid-cell>
       </template>
     </div>
@@ -61,7 +61,7 @@
     <iron-list id="list" as="item" items="[[items]]" on-scroll="_onScroll">
       <template>
         <div class="item">
-          <template is="dom-repeat" items="[[_columns]]" as="column">
+          <template is="dom-repeat" items="[[columns]]" as="column">
             <grid-cell column="[[column]]" template="[[column.template]]" bind="[[item]]"></grid-cell>
           </template>
         </div>
@@ -94,41 +94,9 @@
         },
 
         columns: {
-          type: Object,
-          value: []
-        },
-
-        _columns: {
           type: Array,
           value: function() {
             return Polymer.dom(this).querySelectorAll('grid-column');
-          }
-        },
-
-        _columnWidths: {
-          type: String,
-          value: '100%'
-        },
-
-        _headerTemplate: {
-          type: Object,
-          value: function() {
-            return Polymer.dom(this.root).querySelector('#headerTemplate');
-          }
-        }
-      },
-
-      // not a good idea.
-      _sizeChanged: function(size, oldSize) {
-        if (this.$.list.items !== undefined) {
-          if (size > this.$.list.items.length) {
-            while (this.$.list.items.length < size) {
-              this.$.list.items.push({});
-            }
-          } else {
-            while (this.$.list.items.length > size) {
-              this.$.list.items.pop();
-            }
           }
         }
       },
@@ -150,7 +118,6 @@
       },
 
       _loadItems: function(index) {
-        //console.log(index);
         var items = this.lazyItems(index, 60);
 
         for (var i = 0; i < items.length; i++) {
@@ -162,10 +129,6 @@
         var items = fn(this._loadedSize, 10);
 
         this._loadedSize = items.length;
-        /*
-        if (items.length < 10) {
-          this.size = items.length;
-        }*/
 
         for (var i = items.length; i < this.size; i++) {
           items.push({});
