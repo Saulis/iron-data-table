@@ -2,251 +2,168 @@
 
 <head>
   <script type="text/javascript" src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+  <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+  <link rel="import" href="../../paper-input/paper-input.html">
+
   <link rel="import" href="../iron-grid.html">
+
+  <style is="custom-style" include="demo-pages-shared-styles">
+    .vertical-section-container {
+      max-width: 500px;
+    }
+
+    paper-button {
+      margin-left: 10px;
+      margin-right: 10px;
+    }
+  </style>
 </head>
 
 <body>
-  <style is="custom-style">
-    #static {
-      --iron-grid-row-height: auto;
-    }
+  <div class="vertical-section-container centered">
+    <style>
+      .centered {
+        max-width: 800px;
+      }
+    </style>
 
-    #static div.first {
-      color: blue;
-    }
-
-    #static .big {
-      height: 120px;
-    }
-
-    #static div > div {
-      height: 48px;
-    }
-  </style>
-
-  <iron-grid id="static" style="width: 800px;margin-bottom: 50px;">
-    <grid-column name="First Name">
+    <h4>Template Support - Shady + Native Shadow DOM support, templates can be fully styled while having default styles on the table hidden.<h4>
+    <demo-snippet>
       <template>
-        <div class$="[[item.customClass]]">[[item.name.first]]</div>
+        <style>
+          #grid1 .custom {
+            color: red;
+          }
+        </style>
+
+        <iron-grid id="grid1">
+          <grid-column name="First Name">
+            <template>
+              <div class="custom">[[item.user.name.first]]</div>
+            </template>
+          </grid-column>
+          <grid-column name="Last Name">
+            <template>[[item.user.name.last]]</template>
+          </grid-column>
+          <grid-column name="Email">
+            <template>[[item.user.email]]</template>
+          </grid-column>
+        </iron-grid>
       </template>
-    </grid-column>
-    <grid-column name="Last Name">
-      <template>[[item.name.last]]</template>
-    </grid-column>
-    <grid-column name="Email">
-      <template>[[item.email]]</template>
-    </grid-column>
-  </iron-grid>
+    </demo-snippet>
 
-  <iron-grid id="lazy" style="width: 800px;margin-bottom: 50px">
-    <grid-column name="First Name">
-      <template>[[item.user.name.first]]
-      </template>
-    </grid-column>
-    <grid-column name="Last Name">
-      <template>[[item.user.name.last]]</template>
-    </grid-column>
-    <grid-column name="Email">
-      <template>[[item.user.email]]</template>
-    </grid-column>
-  </iron-grid>
-
-  <style>
-    #max > div {
-      width: 100%;
-    }
-
-    #max div.pic {
-      display: flex;
-      justify-content: center;
-    }
-
-    #max img {
-      height: 24px;
-      width: 24px;
-    }
-  </style>
-
-  <iron-grid id="max" style="width: 800px">
-    <grid-column>
+    <h4>Variable Row Height (Shady DOM support in progress)<h4>
+    <demo-snippet>
       <template>
-        <div class="pic">
-          <img src="[[item.user.picture.medium]]" />
-        </div>
+        <style is="custom-style">
+          #grid2 {
+            --iron-grid-row-height: auto;
+          }
+
+          #grid2 div > div {
+            height: 48px;
+            display: flex;
+            align-items: center;
+          }
+
+          #grid2 .hawaii {
+            height: 20px;
+          }
+
+          #grid2 .iowa {
+            height: 60px;
+          }
+        </style>
+
+        <iron-grid id="grid2">
+          <grid-column name="First Name">
+            <template>[[item.user.name.first]]</template>
+          </grid-column>
+          <grid-column name="Last Name">
+            <template>[[item.user.name.last]]</template>
+          </grid-column>
+          <grid-column name="State">
+            <template>
+              <div class$="[[item.user.location.state]]">[[item.user.location.state]]</div>
+            </template>
+          </grid-column>
+        </iron-grid>
       </template>
-    </grid-column>
-    <grid-column name="First Name">
-      <template>[[item.user.name.first]]
+    </demo-snippet>
+
+    <h3>Column Resizing (using display:flex, not sure how the CSS width affects the actual width :-))</h3>
+    <demo-snippet>
+      <template>
+        <paper-input id="resize" label="1st Column Width" value="100%"></paper-input>
+        <script>
+          document.querySelector('#resize').addEventListener('bind-value-changed', function(e) {
+            document.querySelector('#grid3').columns[0].width = e.detail.value;
+          });
+        </script>
+          <iron-grid id="grid3">
+            <grid-column name="First Name">
+              <template>[[item.user.name.first]]</template>
+            </grid-column>
+            <grid-column name="Last Name">
+              <template>[[item.user.name.last]]</template>
+            </grid-column>
+            <grid-column name="Email">
+              <template>[[item.user.email]]</template>
+            </grid-column>
+          </iron-grid>
       </template>
-    </grid-column>
-    <grid-column name="Last Name">
-      <template>[[item.user.name.last]]</template>
-    </grid-column>
-    <grid-column name="Email">
-      <template>[[item.user.email]]</template>
-    </grid-column>
-  </iron-grid>
+    </demo-snippet>
+
+    <h3>Lazy Loading (work in progess)</h3>
+    <demo-snippet>
+      <template>
+        <script>
+          document.addEventListener('WebComponentsReady', function() {
+            document.querySelector('#grid4').lazyItems = function(index, count) {
+              return users.slice(index, index + count);
+            };
+          });
+        </script>
+          <iron-grid id="grid4" size="200">
+            <grid-column>
+              <template>
+                <img src="[[item.user.picture.medium]]" />
+              </template>
+            </grid-column>
+            <grid-column name="First Name">
+              <template>[[item.user.name.first]]</template>
+            </grid-column>
+            <grid-column name="Last Name">
+              <template>[[item.user.name.last]]</template>
+            </grid-column>
+            <grid-column name="Email">
+              <template>[[item.user.email]]</template>
+            </grid-column>
+          </iron-grid>
+      </template>
+    </demo-snippet>
+  </div>
 
   <script>
-  var users;
-  var xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState == XMLHttpRequest.DONE) {
-      if (xhr.status == 200) {
-        var json = JSON.parse(xhr.responseText);
-        users = json.results;
+    var users;
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState == XMLHttpRequest.DONE) {
+        if (xhr.status == 200) {
+          var json = JSON.parse(xhr.responseText);
+          users = json.results;
+        }
       }
-    }
-  };
+    };
 
-  xhr.open("GET", 'users.json', true);
-  xhr.send();
+    xhr.open("GET", 'users.json', true);
+    xhr.send();
 
     document.addEventListener('WebComponentsReady', function() {
-
-      var lazygrid = document.querySelector('#lazy');
-      lazygrid.size = users.length;
-      lazygrid.lazyItems = function(index, count) {
-        return users.slice(index, index + count);
-      };
-
-      var maxgrid = document.querySelector('#max');
-      maxgrid.size = 100000;
-      maxgrid.lazyItems = function(index, count) {
-        return users.slice(0, count);
-      };
-
-      var grid = document.querySelector('iron-grid');
-
-      grid.items = [{
-          customClass: 'big',
-          name: {
-            first: 'amber',
-            last: 'crawford'
-          },
-          email: 'amber.crawford@example.com'
-      }, {
-          name: {
-            first: 'zoe',
-            last: 'caldwell'
-          },
-          email: 'zoe.caldwell@example.com'
-      }, {
-          customClass: 'big',
-          name: {
-            first: 'jessie',
-            last: 'brooks'
-          },
-          email: 'jessie.brooks@example.com'
-      },{
-          name: {
-            first: 'amber',
-            last: 'crawford'
-          },
-          email: 'amber.crawford@example.com'
-      }, {
-          name: {
-            first: 'zoe',
-            last: 'caldwell'
-          },
-          email: 'zoe.caldwell@example.com'
-      }, {
-          name: {
-            first: 'jessie',
-            last: 'brooks'
-          },
-          email: 'jessie.brooks@example.com'
-      },{
-          name: {
-            first: 'amber',
-            last: 'crawford'
-          },
-          email: 'amber.crawford@example.com'
-      }, {
-          name: {
-            first: 'zoe',
-            last: 'caldwell'
-          },
-          email: 'zoe.caldwell@example.com'
-      }, {
-          name: {
-            first: 'jessie',
-            last: 'brooks'
-          },
-          email: 'jessie.brooks@example.com'
-      },{
-          name: {
-            first: 'amber',
-            last: 'crawford'
-          },
-          email: 'amber.crawford@example.com'
-      }, {
-          name: {
-            first: 'zoe',
-            last: 'caldwell'
-          },
-          email: 'zoe.caldwell@example.com'
-      }, {
-          name: {
-            first: 'jessie',
-            last: 'brooks'
-          },
-          email: 'jessie.brooks@example.com'
-      },{
-          name: {
-            first: 'amber',
-            last: 'crawford'
-          },
-          email: 'amber.crawford@example.com'
-      }, {
-          name: {
-            first: 'zoe',
-            last: 'caldwell'
-          },
-          email: 'zoe.caldwell@example.com'
-      }, {
-          name: {
-            first: 'jessie',
-            last: 'brooks'
-          },
-          email: 'jessie.brooks@example.com'
-      },{
-          name: {
-            first: 'amber',
-            last: 'crawford'
-          },
-          email: 'amber.crawford@example.com'
-      }, {
-          name: {
-            first: 'zoe',
-            last: 'caldwell'
-          },
-          email: 'zoe.caldwell@example.com'
-      }, {
-          name: {
-            first: 'jessie',
-            last: 'brooks'
-          },
-          email: 'jessie.brooks@example.com'
-      },{
-          name: {
-            first: 'amber',
-            last: 'crawford'
-          },
-          email: 'amber.crawford@example.com'
-      }, {
-          name: {
-            first: 'zoe',
-            last: 'caldwell'
-          },
-          email: 'zoe.caldwell@example.com'
-      }, {
-          name: {
-            first: 'jessie',
-            last: 'brooks'
-          },
-          email: 'jessie.brooks@example.com'
-      }];
+      document.querySelector('#grid1').items = users;
+      document.querySelector('#grid2').items = users;
+      document.querySelector('#grid3').items = users;
     });
   </script>
 </body>

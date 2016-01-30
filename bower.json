@@ -20,6 +20,8 @@
     "iron-list": "polymerelements/iron-list#^1.1.7"
   },
   "devDependencies": {
-    "webcomponentsjs": "^0.7.20"
+    "webcomponentsjs": "^0.7.20",
+    "iron-demo-helpers": "polymerelements/iron-demo-helpers#^1.0.3",
+    "paper-input": "polymerelements/paper-input#^1.1.5"
   }
 }
