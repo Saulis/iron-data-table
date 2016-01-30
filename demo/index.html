@@ -172,7 +172,7 @@
               </template>
             </demo-snippet>
 
-            <h3>Column Reordering</h3>
+            <h3>Column Reordering (work in progress, dom-repeat issues)</h3>
             <demo-snippet>
               <template>
                 <paper-button id="reorder">Switch 1st and 2nd Columns</paper-button>
@@ -184,8 +184,11 @@
                     //var col = cols.shift();
                     //cols.push(col);
 
-                    var col = grid.columns.shift();
-                    grid.notifyPath('columns.*', grid.columns);
+                    var col = grid.shift('columns');
+                    grid.push('columns', col);
+
+                    //var col = grid.columns.shift();
+                    //grid.notifyPath('columns.*', grid.columns);
                     //grid.columns = undefined;
                     //grid.columns = cols;
 
