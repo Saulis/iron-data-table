@@ -172,28 +172,17 @@
               </template>
             </demo-snippet>
 
-            <h3>Column Reordering (work in progress, dom-repeat issues)</h3>
+            <h3>Column Reordering (works from console, but not from the button)</h3>
             <demo-snippet>
               <template>
-                <paper-button id="reorder">Switch 1st and 2nd Columns</paper-button>
+                <paper-button id="reorder">Recycle Columns</paper-button>
                 <script>
                   document.querySelector('#reorder').addEventListener('tap', function(e) {
                     var grid = document.querySelector('#grid6');
 
-                    //var cols = grid.columns;
-                    //var col = cols.shift();
-                    //cols.push(col);
-
+                    // See https://github.com/Polymer/polymer/issues/2752
                     var col = grid.shift('columns');
                     grid.push('columns', col);
-
-                    //var col = grid.columns.shift();
-                    //grid.notifyPath('columns.*', grid.columns);
-                    //grid.columns = undefined;
-                    //grid.columns = cols;
-
-                    //var col = grid.shift('columns');
-                    //grid.push('columns', col);
                   });
                 </script>
                 <iron-grid id="grid6">
