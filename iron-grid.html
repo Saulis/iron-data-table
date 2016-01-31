@@ -35,12 +35,60 @@
       }
 
       .item {
+        cursor: pointer;
         display: flex;
         justify-content: space-between;
         border-bottom: 1px solid #e3e3e3;
         opacity: 1;
       }
 
+      .item:hover {
+        background-color: #eee;
+      }
+
+      .item:after {
+        background-color: var(--default-primary-color, #03A9F4);
+        bottom: 0;
+        content: "";
+        height: 2px;
+        left: 0;
+        pointer-events: none;
+        position: absolute;
+        right: 0;
+        transition: all 0.16s ease-in-out;
+        -webkit-transform: scaleX(0.0);
+        transform: scaleX(0.0);
+        z-index: 1;
+      }
+
+      .item[selected]:after {
+        -webkit-transform: scaleX(1.0);
+        transform: scaleX(1.0);
+      }
+
+      .item[selected] {
+        -webkit-animation: item-focused 820ms ease-in-out;
+        animation: item-focused 820ms ease-in-out;
+      }
+
+      @-webkit-keyframes item-focused {
+        50% {
+          color: #03A9F4;
+        }
+        100% {
+          color: inherit;
+        }
+      }
+
+      @keyframes item-focused {
+        50% {
+          color: #03A9F4;
+        }
+        100% {
+          color: inherit;
+        }
+      }
+      
       .item > grid-cell:not([hidden]) {
         width: 100%;
         overflow: hidden;
@@ -57,9 +105,9 @@
       </template>
     </div>
 
-    <iron-list id="list" as="item" items="[[items]]" on-scroll="_onScroll">
+    <iron-list id="list" as="item" items="[[items]]" on-scroll="_onScroll" selection-enabled>
       <template>
-        <div class="item">
+        <div class="item" selected$=[[selected]]>
           <template is="dom-repeat" items="[[columns]]" as="column">
             <grid-cell template="[[column.template]]" bind="[[item]]" width="[[column.width]]" hidden="[[column.hidden]]" order="[[column.order]]"></grid-cell>
           </template>
