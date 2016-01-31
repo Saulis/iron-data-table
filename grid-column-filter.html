@@ -1,6 +1,15 @@
 <link rel="import" href="../paper-input/paper-input.html">
 
 <dom-module id="grid-column-filter">
+  <style is="custom-style">
+    paper-input {
+      margin-bottom: 20px;
+      --paper-input-container-label: {
+        font-size: inherit;
+      }
+    }
+  </style>
+
   <template>
     <paper-input label="[[name]]" on-bind-value-changed="_bindValueChanged"></paper-input>
   </template>
