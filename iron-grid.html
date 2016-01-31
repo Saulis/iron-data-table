@@ -88,7 +88,7 @@
           color: inherit;
         }
       }
-      
+
       .item > grid-cell:not([hidden]) {
         width: 100%;
         overflow: hidden;
@@ -121,12 +121,20 @@
       is: 'iron-grid',
 
       listeners: {
-        'filter-changed': '_onFilterChanged'
+        'column-filter-changed': '_onColumnFilterChanged'
       },
+
+      observers: ['_filterChanged(filter.*)'],
 
       properties: {
         items: {
           type: Array
+        },
+
+        filter: {
+          type: Array,
+          notify: true,
+          value: []
         },
 
         lazyItems: {
@@ -153,16 +161,13 @@
         }
       },
 
-      _onFilterChanged: function(e) {
-        this._filter = this._filter || {};
-        this._filter[e.detail.path] = e.detail.filter;
-
+      _filterChanged: function() {
         if (this.items) {
           this.$.list.items = Array.prototype.filter.call(this.items, function(item, index) {
-            for (var prop in this._filter) {
-              var value = this._deepFind(item, prop);
+            for (var i=0;i<this.filter.length;i++) {
+              var value = this._deepFind(item, this.filter[i].path);
 
-              if (value.indexOf(this._filter[prop]) === -1) {
+              if (value.indexOf(this.filter[i].filter) === -1) {
                 return false;
               }
             }
@@ -170,6 +175,17 @@
             return true;
           }.bind(this));
         }
+      },
+
+      _onColumnFilterChanged: function(e) {
+        for (var i=0;i<this.filter.length;i++) {
+          if (this.filter[i].path === e.detail.path) {
+            this.set('filter.' + i + '.filter', e.detail.filter);
+            return;
+          }
+        }
+
+        this.push('filter', e.detail);
       },
 
       // we need to find values from deep properties like user.name.first
