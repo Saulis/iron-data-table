@@ -16,11 +16,6 @@
       ],
 
       properties: {
-        column: {
-          type: Object,
-          observer: '_columnChanged'
-        },
-
         template: {
           type: Object,
           observer: '_templateChanged'
@@ -33,8 +28,12 @@
 
         order: {
           type: Number,
-          observer: '_orderChanged',
-          value: 0
+          observer: '_orderChanged'
+        },
+
+        width: {
+          type: String,
+          observer: '_widthChanged'
         },
 
         _contentElement: {
@@ -71,32 +70,12 @@
         Polymer.dom.flush();
       },
 
-      // we need to observe changes in the column sub-properties.
-      // Needs to be done manually like this OR
-      // using Polymer data-binding but then changing needs to be done using grid.set('columns.0.hidden', true); etc.
-      _columnChanged: function(column, oldColumn) {
-        this.style.width = column.width;
-        this.hidden = column.hidden;
-
-        if (oldColumn !== undefined) {
-          this.unlisten(oldColumn, 'width-changed', '_widthChanged');
-          this.unlisten(oldColumn, 'hidden-changed', '_hiddenChanged');
-        }
-
-        this.listen(column, 'width-changed', '_widthChanged');
-        this.listen(column, 'hidden-changed', '_hiddenChanged');
-      },
-
       _orderChanged: function(order) {
         this.style.order = order;
       },
 
-      _hiddenChanged: function(e) {
-        this.hidden = e.detail.value;
-      },
-
-      _widthChanged: function(e) {
-        this.style.width = e.detail.value;
+      _widthChanged: function(width) {
+        this.style.width = width;
       },
 
       // data and template might be bound in different order, depending on how <grid-cell>

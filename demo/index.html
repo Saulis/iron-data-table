@@ -102,7 +102,7 @@
                 <paper-input id="resize" label="1st Column Width" value="100%"></paper-input>
                 <script>
                   document.querySelector('#resize').addEventListener('bind-value-changed', function(e) {
-                    document.querySelector('#grid3').columns[0].width = e.detail.value;
+                    document.querySelector('#grid3').set('columns.0.width', e.detail.value);
                   });
                 </script>
                 <iron-grid id="grid3">
@@ -155,7 +155,7 @@
                 <paper-checkbox id="hide" checked></paper-input>
                   <script>
                     document.querySelector('#hide').addEventListener('change', function(e) {
-                      document.querySelector('#grid5').columns[0].hidden = !document.querySelector('#hide').checked;
+                      document.querySelector('#grid5').set('columns.0.hidden', !document.querySelector('#hide').checked);
                     });
                   </script>
                   <iron-grid id="grid5">
