@@ -53,7 +53,7 @@
 
     <div id="header">
       <template is="dom-repeat" items="[[columns]]" as="col">
-        <grid-cell column="[[col]]" template="[[col.headerTemplate]]" bind="[[col.name]]" hidden="[[col.hidden]]"></grid-cell>
+        <grid-cell column="[[col]]" template="[[col.headerTemplate]]" bind="[[col.name]]" hidden="[[col.hidden]]" order="[[col.order]]"></grid-cell>
       </template>
     </div>
 
@@ -61,7 +61,7 @@
       <template>
         <div class="item">
           <template is="dom-repeat" items="[[columns]]" as="column">
-            <grid-cell column="[[column]]" template="[[column.template]]" bind="[[item]]" hidden="[[column.hidden]]"></grid-cell>
+            <grid-cell column="[[column]]" template="[[column.template]]" bind="[[item]]" hidden="[[column.hidden]]" order="[[column.order]]"></grid-cell>
           </template>
         </div>
       </template>

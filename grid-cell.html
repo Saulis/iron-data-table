@@ -31,6 +31,12 @@
           observer: '_bindChanged'
         },
 
+        order: {
+          type: Number,
+          observer: '_orderChanged',
+          value: 0
+        },
+
         _contentElement: {
           type: Object
         },
@@ -79,6 +85,10 @@
 
         this.listen(column, 'width-changed', '_widthChanged');
         this.listen(column, 'hidden-changed', '_hiddenChanged');
+      },
+
+      _orderChanged: function(order) {
+        this.style.order = order;
       },
 
       _hiddenChanged: function(e) {

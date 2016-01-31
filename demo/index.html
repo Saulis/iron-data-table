@@ -172,17 +172,20 @@
               </template>
             </demo-snippet>
 
-            <h3>Column Reordering (works from console, but not from the button)</h3>
+            <h3>Column Reordering (using flexbox order)</h3>
             <demo-snippet>
               <template>
-                <paper-button id="reorder">Recycle Columns</paper-button>
+                <paper-button id="reorder">Move 1st Column to 2nd</paper-button>
                 <script>
                   document.querySelector('#reorder').addEventListener('tap', function(e) {
                     var grid = document.querySelector('#grid6');
 
-                    // See https://github.com/Polymer/polymer/issues/2752
-                    var col = grid.shift('columns');
-                    grid.push('columns', col);
+                    grid.set('columns.0.order', grid.columns[0].order ? 0 : 1);
+
+                    // Modifying columns array order doesn't work nicely. See https://github.com/Polymer/polymer/issues/2752
+                    //var col = grid.shift('columns');
+                    //grid.push('columns', col);
+                    //this requires doing grid.columns = undefined; grid.columns = columns;
                   });
                 </script>
                 <iron-grid id="grid6">
@@ -192,7 +195,7 @@
                   <grid-column name="Last Name">
                     <template>[[item.user.name.last]]</template>
                   </grid-column>
-                  <grid-column name="Email">
+                  <grid-column name="Email" order="2">
                     <template>[[item.user.email]]</template>
                   </grid-column>
                 </iron-grid>
