@@ -30,194 +30,218 @@
       }
     </style>
 
-    <h4>Template Support - Shady + Native Shadow DOM support, templates can be fully styled while having default styles on the table hidden.
-      <h4>
-        <demo-snippet>
-          <template>
-            <style>
-              #grid1 .custom {
-                color: red;
+    <h4>Template Support - Shady + Native Shadow DOM support, templates can be fully styled while having default styles on the table hidden.</h4>
+    <demo-snippet>
+      <template>
+        <style>
+          #grid1 .custom {
+            color: red;
+          }
+        </style>
+
+        <iron-grid id="grid1">
+          <grid-column name="First Name">
+            <template>
+              <div class="custom">[[item.user.name.first]]</div>
+            </template>
+          </grid-column>
+          <grid-column name="Last Name">
+            <template>[[item.user.name.last]]</template>
+          </grid-column>
+          <grid-column name="Email">
+            <template>[[item.user.email]]</template>
+          </grid-column>
+        </iron-grid>
+      </template>
+    </demo-snippet>
+
+    <h4>Template Support - Two-Way Binding Support (lacking grid.set('items.0.user.name.first', 'foo'); still).</h4>
+    <demo-snippet>
+      <template>
+
+        <template is="dom-bind" id="t" foo="bar">
+          <style is="custom-style">
+            paper-input {
+              margin-bottom: 20px;
+              --paper-input-container-label: {
+                font-size: inherit;
               }
-            </style>
-
-            <iron-grid id="grid1">
-              <grid-column name="First Name">
-                <template>
-                  <div class="custom">[[item.user.name.first]]</div>
-                </template>
-              </grid-column>
-              <grid-column name="Last Name">
-                <template>[[item.user.name.last]]</template>
-              </grid-column>
-              <grid-column name="Email">
-                <template>[[item.user.email]]</template>
-              </grid-column>
-            </iron-grid>
-          </template>
-        </demo-snippet>
-
-        <h4>Variable Row Height
-          <h4>
-            <demo-snippet>
+            }
+          </style>
+          <iron-grid items="[[users]]">
+            <grid-column name="First Name">
               <template>
-                <style is="custom-style">
-                  #grid2 {
-                    --iron-grid-row-height: auto;
-                  }
-                </style>
-
-                <style>
-                  #grid2 .hawaii {
-                    display: flex;
-                    align-items: center;
-                    height: 40px;
-                  }
-
-                  #grid2 .iowa {
-                    display: flex;
-                    align-items: center;
-                    height: 80px;
-                  }
-                </style>
-
-                <iron-grid id="grid2">
-                  <grid-column name="First Name">
-                    <template>[[item.user.name.first]]</template>
-                  </grid-column>
-                  <grid-column name="Last Name">
-                    <template>[[item.user.name.last]]</template>
-                  </grid-column>
-                  <grid-column name="State">
-                    <template>
-                      <div class$="[[item.user.location.state]]">[[item.user.location.state]]</div>
-                    </template>
-                  </grid-column>
-                </iron-grid>
+                <paper-input value="{{foo}}"></paper-input>
               </template>
-            </demo-snippet>
-
-            <h3>Column Resizing (using display:flex, not sure how the CSS width affects the actual width :-))</h3>
-            <demo-snippet>
+            </grid-column>
+            <grid-column name="Last Name">
               <template>
-                <paper-input id="resize" label="1st Column Width" value="100%"></paper-input>
-                <script>
-                  document.querySelector('#resize').addEventListener('bind-value-changed', function(e) {
-                    document.querySelector('#grid3').set('columns.0.width', e.detail.value);
-                  });
-                </script>
-                <iron-grid id="grid3">
-                  <grid-column name="First Name">
-                    <template>[[item.user.name.first]]</template>
-                  </grid-column>
-                  <grid-column name="Last Name">
-                    <template>[[item.user.name.last]]</template>
-                  </grid-column>
-                  <grid-column name="Email">
-                    <template>[[item.user.email]]</template>
-                  </grid-column>
-                </iron-grid>
+                <paper-input value="{{item.user.name.last}}"></paper-input>
               </template>
-            </demo-snippet>
+            </grid-column>
+            <grid-column name="Email">
+              <template>[[item.user.email]]</template>
+            </grid-column>
+          </iron-grid>
+        </template>
+      </template>
+    </demo-snippet>
 
-            <h3>Lazy Loading (work in progess)</h3>
-            <demo-snippet>
-              <template>
-                <script>
-                  document.addEventListener('WebComponentsReady', function() {
-                    document.querySelector('#grid4').lazyItems = function(index, count) {
-                      return users.slice(index, index + count);
-                    };
-                  });
-                </script>
-                <iron-grid id="grid4" size="200">
-                  <grid-column>
-                    <template>
-                      <img src="[[item.user.picture.medium]]" />
-                    </template>
-                  </grid-column>
-                  <grid-column name="First Name">
-                    <template>[[item.user.name.first]]</template>
-                  </grid-column>
-                  <grid-column name="Last Name">
-                    <template>[[item.user.name.last]]</template>
-                  </grid-column>
-                  <grid-column name="Email">
-                    <template>[[item.user.email]]</template>
-                  </grid-column>
-                </iron-grid>
-              </template>
-            </demo-snippet>
+    <h4>Variable Row Height</h4>
+    <demo-snippet>
+      <template>
+        <style is="custom-style">
+          #grid2 {
+            --iron-grid-row-height: auto;
+          }
+        </style>
 
-            <h3>Column Hiding</h3>
-            <demo-snippet>
-              <template>
-                nicely placed checkbox (show/hide 1st column)
-                <paper-checkbox id="hide" checked></paper-input>
-                  <script>
-                    document.querySelector('#hide').addEventListener('change', function(e) {
-                      document.querySelector('#grid5').set('columns.0.hidden', !document.querySelector('#hide').checked);
-                    });
-                  </script>
-                  <iron-grid id="grid5">
-                    <grid-column name="First Name">
-                      <template>[[item.user.name.first]]</template>
-                    </grid-column>
-                    <grid-column name="Last Name">
-                      <template>[[item.user.name.last]]</template>
-                    </grid-column>
-                    <grid-column name="Email">
-                      <template>[[item.user.email]]</template>
-                    </grid-column>
-                  </iron-grid>
-              </template>
-            </demo-snippet>
+        <style>
+          #grid2 .hawaii {
+            display: flex;
+            align-items: center;
+            height: 40px;
+          }
 
-            <h3>Column Reordering (using flexbox order)</h3>
-            <demo-snippet>
-              <template>
-                <paper-button id="reorder">Move 1st Column to 2nd</paper-button>
-                <script>
-                  document.querySelector('#reorder').addEventListener('tap', function(e) {
-                    var grid = document.querySelector('#grid6');
+          #grid2 .iowa {
+            display: flex;
+            align-items: center;
+            height: 80px;
+          }
+        </style>
 
-                    grid.set('columns.0.order', grid.columns[0].order ? 0 : 1);
+        <iron-grid id="grid2">
+          <grid-column name="First Name">
+            <template>[[item.user.name.first]]</template>
+          </grid-column>
+          <grid-column name="Last Name">
+            <template>[[item.user.name.last]]</template>
+          </grid-column>
+          <grid-column name="State">
+            <template>
+              <div class$="[[item.user.location.state]]">[[item.user.location.state]]</div>
+            </template>
+          </grid-column>
+        </iron-grid>
+      </template>
+    </demo-snippet>
 
-                    // Modifying columns array order doesn't work nicely. See https://github.com/Polymer/polymer/issues/2752
-                    //var col = grid.shift('columns');
-                    //grid.push('columns', col);
-                    //this requires doing grid.columns = undefined; grid.columns = columns;
-                  });
-                </script>
-                <iron-grid id="grid6">
-                  <grid-column name="First Name">
-                    <template>[[item.user.name.first]]</template>
-                  </grid-column>
-                  <grid-column name="Last Name">
-                    <template>[[item.user.name.last]]</template>
-                  </grid-column>
-                  <grid-column name="Email" order="2">
-                    <template>[[item.user.email]]</template>
-                  </grid-column>
-                </iron-grid>
-              </template>
-            </demo-snippet>
+    <h3>Column Resizing (using display:flex, not sure how the CSS width affects the actual width :-))</h3>
+    <demo-snippet>
+      <template>
+        <template is="dom-bind" id="t2">
+          <paper-input id="resize" label="1st Column Width" value="{{width}}"></paper-input>
+          <iron-grid id="grid3">
+            <grid-column name="First Name" width="[[width]]">
+              <template>[[item.user.name.first]]</template>
+            </grid-column>
+            <grid-column name="Last Name">
+              <template>[[item.user.name.last]]</template>
+            </grid-column>
+            <grid-column name="Email">
+              <template>[[item.user.email]]</template>
+            </grid-column>
+          </iron-grid>
+        </template>
+      </template>
+    </demo-snippet>
 
-            <h3>Filtering (work in progress, iron-list rendering issues in Shadow DOM)</h3>
-            <demo-snippet>
-              <template>
-                <iron-grid id="grid7">
-                  <grid-column name="First Name" filter="user.name.first">
-                    <template>[[item.user.name.first]]</template>
-                  </grid-column>
-                  <grid-column name="Last Name" filter="user.name.last">
-                    <template>[[item.user.name.last]]</template>
-                  </grid-column>
-                  <grid-column name="Email">
-                    <template>[[item.user.email]]</template>
-                  </grid-column>
-                </iron-grid>
-              </template>
-            </demo-snippet>
+    <h3>Lazy Loading (work in progess)</h3>
+    <demo-snippet>
+      <template>
+        <script>
+          document.addEventListener('WebComponentsReady', function() {
+            document.querySelector('#grid4').lazyItems = function(index, count) {
+              return users.slice(index, index + count);
+            };
+          });
+        </script>
+        <iron-grid id="grid4" size="200">
+          <grid-column>
+            <template>
+              <img src="[[item.user.picture.medium]]" />
+            </template>
+          </grid-column>
+          <grid-column name="First Name">
+            <template>[[item.user.name.first]]</template>
+          </grid-column>
+          <grid-column name="Last Name">
+            <template>[[item.user.name.last]]</template>
+          </grid-column>
+          <grid-column name="Email">
+            <template>[[item.user.email]]</template>
+          </grid-column>
+        </iron-grid>
+      </template>
+    </demo-snippet>
+
+    <h3>Column Hiding</h3>
+    <demo-snippet>
+      <template>
+        <template is="dom-bind">
+          nicely placed checkbox (show/hide 1st column)
+          <paper-checkbox id="hide" checked="{{checked}}"></paper-checkbox>
+          <iron-grid id="grid5">
+            <grid-column name="First Name" hidden="[[!checked]]">
+              <template>[[item.user.name.first]]</template>
+            </grid-column>
+            <grid-column name="Last Name">
+              <template>[[item.user.name.last]]</template>
+            </grid-column>
+            <grid-column name="Email">
+              <template>[[item.user.email]]</template>
+            </grid-column>
+          </iron-grid>
+        </template>
+      </template>
+    </demo-snippet>
+
+    <h3>Column Reordering (using flexbox order)</h3>
+    <demo-snippet>
+      <template>
+        <paper-button id="reorder">Move 1st Column to 2nd</paper-button>
+        <script>
+          document.querySelector('#reorder').addEventListener('tap', function(e) {
+            var grid = document.querySelector('#grid6');
+
+            grid.columns[0].order = grid.columns[0].order ? 0 : 1;
+
+            // Modifying columns array order doesn't work nicely. See https://github.com/Polymer/polymer/issues/2752
+            //var col = grid.shift('columns');
+            //grid.push('columns', col);
+            //this requires doing grid.columns = undefined; grid.columns = columns;
+          });
+        </script>
+        <iron-grid id="grid6">
+          <grid-column name="First Name">
+            <template>[[item.user.name.first]]</template>
+          </grid-column>
+          <grid-column name="Last Name">
+            <template>[[item.user.name.last]]</template>
+          </grid-column>
+          <grid-column name="Email" order="2">
+            <template>[[item.user.email]]</template>
+          </grid-column>
+        </iron-grid>
+      </template>
+    </demo-snippet>
+
+    <h3>Filtering (work in progress, iron-list rendering issues in Shadow DOM)</h3>
+    <demo-snippet>
+      <template>
+        <iron-grid id="grid7">
+          <grid-column name="First Name" filter="user.name.first">
+            <template>[[item.user.name.first]]</template>
+          </grid-column>
+          <grid-column name="Last Name" filter="user.name.last">
+            <template>[[item.user.name.last]]</template>
+          </grid-column>
+          <grid-column name="Email">
+            <template>[[item.user.email]]</template>
+          </grid-column>
+        </iron-grid>
+      </template>
+    </demo-snippet>
   </div>
 
   <script>
@@ -236,6 +260,7 @@
     xhr.send();
 
     document.addEventListener('WebComponentsReady', function() {
+      document.querySelector('#t').users = users;
       document.querySelector('#grid1').items = users;
       document.querySelector('#grid2').items = users;
       document.querySelector('#grid3').items = users;

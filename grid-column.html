@@ -9,11 +9,11 @@
     </style>
 
     <template id="header">
-      <div>[[name]]</div>
+      <div>[[item.name]]</div>
     </template>
 
     <template id="filter">
-      <grid-column-filter name="[[name]]" path="[[filter]]"></grid-column-filter>
+      <grid-column-filter name="[[item.name]]" path="[[item.filter]]"></grid-column-filter>
     </template>
 
 
@@ -21,6 +21,10 @@
   <script>
     Polymer({
       is: 'grid-column',
+
+      behaviors: [
+        Polymer.Templatizer,
+      ],
 
       properties: {
         name: {
@@ -40,6 +44,12 @@
           value: "100%"
         },
 
+        hidden: {
+          type: Boolean,
+          notify: true,
+          value: false
+        },
+
         order: {
           type: Number,
           notify: true
@@ -57,7 +67,52 @@
           value: function() {
             return Polymer.dom(this).querySelector('template');
           }
+        },
+
+        _templateInstances: {
+          type: Array,
+          value: []
+        },
+
+        _parentProps: {
+          type: Object,
+          value: {}
         }
+      },
+
+      observer: ['_parentPropsChanged(_parentProps.*)'],
+
+      _forwardParentProp: function(prop, value) {
+        // Store parent properties so that new templateInstances can be initialized from them. (should use an observer for that)
+        //this._parentProps[prop] = value;
+        this.set('_parentProps.' + prop, value);
+        //console.log(prop, value);
+
+        this._templateInstances.forEach(function(t) {
+          t[prop] = value;
+        });
+      },
+
+/*      _forwardParentPath: function(path, value) {
+        console.log(path, value);
+      },
+*/
+      _templateInstancesChanged: function() {
+        // TODO: send parent props here for new instances.
+      },
+
+      //TODO: fix this..
+      _parentPropsChanged: function(changeRecord) {
+        // TODO: update templateInstances here.
+        console.log(changeRecord);
+      },
+
+      ready: function() {
+        // we need to templatize all user-provided templates asap to prevent [[item...]] from being
+        // bound to a parent dom-bind template or a parent web component.
+        // Note (Saulis): if the internal templates have something else than [[item..]] they will get screwed when setting properi
+        this._instanceProps = { item: true };
+        this.templatize(Polymer.dom(this).querySelector('template'));
       },
 
       _filterChanged: function(filter) {

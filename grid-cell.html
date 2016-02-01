@@ -11,10 +11,6 @@
     Polymer({
       is: 'grid-cell',
 
-      behaviors: [
-        Polymer.Templatizer,
-      ],
-
       properties: {
         template: {
           type: Object,
@@ -24,6 +20,11 @@
         bind: {
           type: Object,
           observer: '_bindChanged'
+        },
+
+        column: {
+          type: Object,
+          observer: '_columnChanged'
         },
 
         order: {
@@ -74,26 +75,66 @@
         this.style.order = order;
       },
 
-      _widthChanged: function(width) {
-        this.style.width = width;
+      _onOrderChanged: function(e) {
+        this.order = e.detail.value;
+      },
+
+      _widthChanged: function(e) {
+        this.style.width = e.detail.value;
+      },
+
+      _hiddenChanged: function(e) {
+        this.hidden = e.detail.value;
       },
 
       // data and template might be bound in different order, depending on how <grid-cell>
       // is placed in the DOM. We need to call _render() after they've been both bound.
       _bindChanged: function(data) {
-        if (this._templatized) {
-          this._instance = this.stamp({item: data});
-
-          this._render();
+        if (this.column && this.template) {
+          if (!this.column._templatized) {
+            this._templateChanged(this.template);
+          } else {
+            if (!this._instance) {
+              this._instance = this.column.stamp({item: data});
+              this.column._templateInstances.push(this._instance);
+              this._render();
+            } else {
+              this._instance.item = data;
+            }
+          }
         }
       },
 
-      _templateChanged: function(template) {
-        this.templatize(template);
+      _columnChanged: function(column) {
+        this.order = column.order;
 
-        if (this.bind !== undefined) {
-          this._instance = this.stamp({item: this.bind});
+        if (this.template) {
+          this._templateChanged(this.template);
+        }
+
+        this.listen(column, 'width-changed', '_widthChanged');
+        this.listen(column, 'hidden-changed', '_hiddenChanged');
+        this.listen(column, 'order-changed', '_onOrderChanged');
+
+        //TODO: remember to unlisten
+      },
+
+      _templateChanged: function(template) {
+        if (this.column) {
+          this.column.templatize(template);
+          this._instance = this.column.stamp({});
+          this.column._templateInstances.push(this._instance);
+
+          // move this to grid-column template instance observer.
+          for (var prop in this.column._parentProps) {
+            this._instance[prop] = this.column._parentProps[prop];
+          }
+
           this._render();
+
+          if (this.bind) {
+            this._instance.item = this.bind;
+          }
         }
       },
 
