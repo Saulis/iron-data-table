@@ -39,8 +39,8 @@
                 color: red;
               }
             </style>
-
-            <iron-grid id="grid1">
+            <template is="dom-bind" id="t">
+            <iron-grid id="grid1" items="[[users]]">
               <grid-column name="First Name">
                 <template>
                   <div class="custom">[[item.user.name.first]]</div>
@@ -54,6 +54,7 @@
               </grid-column>
             </iron-grid>
           </template>
+        </template>
         </demo-snippet>
 
         <h4>Variable Row Height
@@ -99,14 +100,10 @@
             <h3>Column Resizing (using display:flex, not sure how the CSS width affects the actual width :-))</h3>
             <demo-snippet>
               <template>
-                <paper-input id="resize" label="1st Column Width" value="100%"></paper-input>
-                <script>
-                  document.querySelector('#resize').addEventListener('bind-value-changed', function(e) {
-                    document.querySelector('#grid3').set('columns.0.width', e.detail.value);
-                  });
-                </script>
+                <template is="dom-bind" id="t2">
+                <paper-input id="resize" label="1st Column Width" value="{{width}}"></paper-input>
                 <iron-grid id="grid3">
-                  <grid-column name="First Name">
+                  <grid-column name="First Name" width="[[width]]">
                     <template>[[item.user.name.first]]</template>
                   </grid-column>
                   <grid-column name="Last Name">
@@ -117,6 +114,7 @@
                   </grid-column>
                 </iron-grid>
               </template>
+            </template>
             </demo-snippet>
 
             <h3>Lazy Loading (work in progess)</h3>
@@ -236,7 +234,7 @@
     xhr.send();
 
     document.addEventListener('WebComponentsReady', function() {
-      document.querySelector('#grid1').items = users;
+      document.querySelector('#t').users = users;
       document.querySelector('#grid2').items = users;
       document.querySelector('#grid3').items = users;
       document.querySelector('#grid5').items = users;

@@ -101,7 +101,7 @@
 
     <div id="header">
       <template is="dom-repeat" items="[[columns]]" as="column">
-        <grid-cell template="[[column.headerTemplate]]" bind="[[column.name]]" width="[[column.width]]" hidden="[[column.hidden]]" order="[[column.order]]"></grid-cell>
+        <grid-cell column="[[column]]" template="[[column.headerTemplate]]" bind="[[column]]" hidden="[[column.hidden]]" order="[[column.order]]"></grid-cell>
       </template>
     </div>
 
@@ -109,7 +109,7 @@
       <template>
         <div class="item" selected$=[[selected]]>
           <template is="dom-repeat" items="[[columns]]" as="column">
-            <grid-cell template="[[column.template]]" bind="[[item]]" width="[[column.width]]" hidden="[[column.hidden]]" order="[[column.order]]"></grid-cell>
+            <grid-cell column="[[column]]" template="[[column.template]]" bind="[[item]]" hidden="[[column.hidden]]" order="[[column.order]]"></grid-cell>
           </template>
         </div>
       </template>
