@@ -27,23 +27,11 @@
           observer: '_columnChanged'
         },
 
-        order: {
-          type: Number,
-          observer: '_orderChanged'
-        },
+        order: Number,
+        width: String,
 
-        width: {
-          type: String,
-          observer: '_widthChanged'
-        },
-
-        _contentElement: {
-          type: Object
-        },
-
-        _content: {
-          type: Object
-        }
+        _contentElement: Object,
+        _content: Object
       },
 
       attached: function() {
@@ -71,12 +59,8 @@
         Polymer.dom.flush();
       },
 
-      _orderChanged: function(order) {
-        this.style.order = order;
-      },
-
-      _onOrderChanged: function(e) {
-        this.order = e.detail.value;
+      _orderChanged: function(e) {
+        this.style.order = e.detail.value;
       },
 
       _widthChanged: function(e) {
@@ -105,18 +89,32 @@
         }
       },
 
-      _columnChanged: function(column) {
-        this.order = column.order;
+      _columnChanged: function(column, oldColumn) {
+        this.style.width = column.width;
+        this._addListener(column, oldColumn, 'width');
+
+        this.style.order = column.order;
+        this._addListener(column, oldColumn, 'order');
+
+        this.hidden = column.hidden;
+        this._addListener(column, oldColumn, 'hidden');
 
         if (this.template) {
           this._templateChanged(this.template);
         }
+      },
 
-        this.listen(column, 'width-changed', '_widthChanged');
-        this.listen(column, 'hidden-changed', '_hiddenChanged');
-        this.listen(column, 'order-changed', '_onOrderChanged');
+      // Adding listeners manually *seems* to work better with forwarded parent props
+      // than normal data-binding. Something to do with notifying the paths correctly.
+      _addListener: function(column, oldColumn, prop) {
+        var eventName = prop + '-changed';
+        var observerName = '_' + prop + 'Changed';
 
-        //TODO: remember to unlisten
+        if (oldColumn) {
+          this.unlisten(oldColumn, eventName);
+        }
+
+        this.listen(column, eventName, observerName);
       },
 
       _templateChanged: function(template) {
