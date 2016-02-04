@@ -152,11 +152,11 @@
     <demo-snippet>
       <template>
         <script>
-          document.addEventListener('WebComponentsReady', function() {
-            document.querySelector('#grid4').lazyItems = function(index, count) {
-              return users.slice(index, index + count);
-            };
-          });
+        /**
+         * function(index, count) {
+         *  return users.slice(index, index + count);
+         * };
+         */
         </script>
         <iron-grid id="grid4" size="200">
           <grid-column name="First Name">
@@ -243,27 +243,32 @@
 
   <script>
     var users;
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState == XMLHttpRequest.DONE) {
-        if (xhr.status == 200) {
-          var json = JSON.parse(xhr.responseText);
-          users = json.results;
-        }
-      }
-    };
-
-    xhr.open("GET", 'users.json', true);
-    xhr.send();
-
     document.addEventListener('WebComponentsReady', function() {
-      document.querySelector('#t').users = users;
-      document.querySelector('#grid1').items = users;
-      document.querySelector('#grid2').items = users;
-      document.querySelector('#grid3').items = users;
-      document.querySelector('#grid5').items = users;
-      document.querySelector('#grid6').items = users;
-      document.querySelector('#grid7').items = users;
+
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState == XMLHttpRequest.DONE) {
+          if (xhr.status == 200) {
+            var json = JSON.parse(xhr.responseText);
+            users = json.results;
+
+            document.querySelector('#t').users = users;
+            document.querySelector('#grid1').items = users;
+            document.querySelector('#grid2').items = users;
+            document.querySelector('#grid3').items = users;
+            document.querySelector('#grid5').items = users;
+            document.querySelector('#grid6').items = users;
+            document.querySelector('#grid7').items = users;
+
+            document.querySelector('#grid4').lazyItems = function(index, count) {
+              return users.slice(index, index + count);
+            };
+          }
+        }
+      };
+
+      xhr.open("GET", 'users.json', true);
+      xhr.send();
     });
   </script>
 </body>
