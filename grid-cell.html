@@ -123,12 +123,7 @@
         if (this.column) {
           this.column.templatize(template);
           this._instance = this.column.stamp({});
-          this.column._templateInstances.push(this._instance);
-
-          // move this to grid-column template instance observer.
-          for (var prop in this.column._parentProps) {
-            this._instance[prop] = this.column._parentProps[prop];
-          }
+          this.column.push('_templateInstances', this._instance);
 
           this._render();
 

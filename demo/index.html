@@ -30,7 +30,7 @@
       }
     </style>
 
-    <h4>Template Support - Shady + Native Shadow DOM support, templates can be fully styled while having default styles on the table hidden.</h4>
+    <h4>Basic Template Support</h4>
     <demo-snippet>
       <template>
         <style>
@@ -55,7 +55,7 @@
       </template>
     </demo-snippet>
 
-    <h4>Template Support - Two-Way Binding Support (lacking grid.set('items.0.user.name.first', 'foo'); still).</h4>
+    <h4>Two-Way Binding Support</h4>
     <demo-snippet>
       <template>
 
@@ -90,46 +90,48 @@
     <h4>Variable Row Height</h4>
     <demo-snippet>
       <template>
-        <style is="custom-style">
-          #grid2 {
-            --iron-grid-row-height: auto;
-          }
-        </style>
+        <template is="dom-bind">
+          <style is="custom-style">
+            #grid2 {
+              --iron-grid-row-height: auto;
+            }
+          </style>
 
-        <style>
-          #grid2 .hawaii {
-            display: flex;
-            align-items: center;
-            height: 40px;
-          }
+          <style>
+            #grid2 .hawaii {
+              display: flex;
+              align-items: center;
+              height: 40px;
+            }
 
-          #grid2 .iowa {
-            display: flex;
-            align-items: center;
-            height: 80px;
-          }
-        </style>
+            #grid2 .iowa {
+              display: flex;
+              align-items: center;
+              height: 80px;
+            }
+          </style>
 
-        <iron-grid id="grid2">
-          <grid-column name="First Name">
-            <template>[[item.user.name.first]]</template>
-          </grid-column>
-          <grid-column name="Last Name">
-            <template>[[item.user.name.last]]</template>
-          </grid-column>
-          <grid-column name="State">
-            <template>
-              <div class$="[[item.user.location.state]]">[[item.user.location.state]]</div>
-            </template>
-          </grid-column>
-        </iron-grid>
+          <iron-grid id="grid2">
+            <grid-column name="First Name">
+              <template>[[item.user.name.first]]</template>
+            </grid-column>
+            <grid-column name="Last Name">
+              <template>[[item.user.name.last]]</template>
+            </grid-column>
+            <grid-column name="State">
+              <template>
+                <div class$="[[item.user.location.state]]">[[item.user.location.state]]</div>
+              </template>
+            </grid-column>
+          </iron-grid>
+        </template>
       </template>
     </demo-snippet>
 
     <h3>Column Resizing (using display:flex, not sure how the CSS width affects the actual width :-))</h3>
     <demo-snippet>
       <template>
-        <template is="dom-bind" id="t2">
+        <template is="dom-bind">
           <paper-input id="resize" label="1st Column Width" value="{{width}}"></paper-input>
           <iron-grid id="grid3">
             <grid-column name="First Name" width="[[width]]">
@@ -146,7 +148,7 @@
       </template>
     </demo-snippet>
 
-    <h3>Lazy Loading (work in progess)</h3>
+    <h3>Lazy Loading (experimental, work in progress)</h3>
     <demo-snippet>
       <template>
         <script>
@@ -157,11 +159,6 @@
           });
         </script>
         <iron-grid id="grid4" size="200">
-          <grid-column>
-            <template>
-              <img src="[[item.user.picture.medium]]" />
-            </template>
-          </grid-column>
           <grid-column name="First Name">
             <template>[[item.user.name.first]]</template>
           </grid-column>

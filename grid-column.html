@@ -74,44 +74,50 @@
           value: []
         },
 
-        _parentProps: {
+        _forwardedParentProps: {
           type: Object,
           value: {}
         }
       },
 
-      observer: ['_parentPropsChanged(_parentProps.*)'],
+      observers: ['_forwardedParentPropsChanged(_forwardedParentProps.*)',
+        '_templateInstancesChanged(_templateInstances.splices)'
+      ],
 
       _forwardParentProp: function(prop, value) {
-        // Store parent properties so that new templateInstances can be initialized from them. (should use an observer for that)
-        //this._parentProps[prop] = value;
-        this.set('_parentProps.' + prop, value);
-        //console.log(prop, value);
-
-        this._templateInstances.forEach(function(t) {
-          t[prop] = value;
-        });
+        this.set('_forwardedParentProps.' + prop, value);
       },
 
-/*      _forwardParentPath: function(path, value) {
-        console.log(path, value);
-      },
-*/
-      _templateInstancesChanged: function() {
-        // TODO: send parent props here for new instances.
+      _forwardedParentPropsChanged: function(changeRecord) {
+        // TODO: need to make sure this works with nested paths also. [[foo.bar]] etc.
+        for (var prop in changeRecord.base) {
+          this._templateInstances.forEach(function(t) {
+            t[prop] = changeRecord.base[prop];
+          });
+        }
       },
 
-      //TODO: fix this..
-      _parentPropsChanged: function(changeRecord) {
-        // TODO: update templateInstances here.
-        console.log(changeRecord);
+      _templateInstancesChanged: function(changeRecord) {
+        // TODO: (Saulis) make sure _templateInstances length is correct. Earlier testing seems producing weird results.
+        if (changeRecord && changeRecord.indexSplices) {
+
+          changeRecord.indexSplices.forEach(function(s) {
+            var addedInstance = s.object[s.index];
+
+            for (var prop in this._forwardedParentProps) {
+              addedInstance[prop] = this._forwardedParentProps[prop];
+            }
+          });
+        }
       },
 
       ready: function() {
         // we need to templatize all user-provided templates asap to prevent [[item...]] from being
         // bound to a parent dom-bind template or a parent web component.
         // Note (Saulis): if the internal templates have something else than [[item..]] they will get screwed when setting properi
-        this._instanceProps = { item: true };
+        this._instanceProps = {
+          item: true
+        };
         this.templatize(Polymer.dom(this).querySelector('template'));
       },
 
