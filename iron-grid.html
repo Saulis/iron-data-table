@@ -2,6 +2,7 @@
 <link rel="import" href="grid-column.html">
 <link rel="import" href="grid-cell.html">
 <link rel="import" href="../iron-list/iron-list.html">
+<link rel="import" href="../../paper-checkbox/paper-checkbox.html">
 
 <dom-module id="iron-grid">
   <template>
@@ -105,17 +106,31 @@
         display: flex;
         align-items: center;
       }
+
+      .checkbox {
+        padding: 0 24px 0 24px;
+        display: flex;
+        align-items: center;
+        height: var(--iron-grid-row-height, 48px);
+        width: var(--iron-grid-row-height, 48px);
+      }
     </style>
 
     <div id="header">
+      <div class="checkbox" on-tap="_selectAll">
+        <paper-checkbox checked="[[selected]]"></paper-checkbox>
+      </div>
       <template is="dom-repeat" items="[[columns]]" as="column">
         <grid-cell column="[[column]]" template="[[column.headerTemplate]]" bind="[[column]]"></grid-cell>
       </template>
     </div>
 
-    <iron-list id="list" as="item" items="[[items]]" on-scroll="_onScroll" selection-enabled>
+    <iron-list id="list" as="item" items="[[items]]" on-scroll="_onScroll" selection-enabled multi-selection>
       <template>
-        <div class="item" selected$=[[selected]]>
+        <div class="item">
+          <div class="checkbox">
+            <paper-checkbox checked="[[selected]]"></paper-checkbox>
+          </div>
           <template is="dom-repeat" items="[[columns]]" as="column">
             <grid-cell column="[[column]]" template="[[column.template]]" bind="[[item]]"></grid-cell>
           </template>
@@ -166,7 +181,37 @@
           value: function() {
             return Polymer.dom(this).querySelectorAll('grid-column');
           }
+        },
+
+        selectionMode: {
+          type: String,
+          notify: true,
+          observer: '_selectionModeChanged',
+          value: 'multi'
         }
+      },
+
+      /**
+       * Selection related functions
+       */
+      _isSelected: function(mode, selected) {
+        if (mode === 'all') {
+          return !selected;
+        } else {
+          return selected;
+        }
+      },
+
+      _selectAll: function() {
+        if (this.selectionMode === 'multi') {
+          this.selectionMode = 'all';
+        } else {
+          this.selectionMode = 'multi';
+        }
+      },
+
+      _selectionModeChanged: function(mode) {
+        this.$.list.clearSelection();
       },
 
       _filterChanged: function() {
