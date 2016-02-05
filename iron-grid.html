@@ -20,7 +20,15 @@
         justify-content: space-between;
         color: rgba(0, 0, 0, 0.54);
         font-size: 12px;
+        font-weight: 600;
         height: 56px;
+        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+        transition: box-shadow 200ms;
+        position: relative;
+        z-index: 1;
+      }
+
+      #header.scrolled {
         box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 2px 0 rgba(0, 0, 0, 0.075), 0 3px 0 rgba(0, 0, 0, 0.05), 0 4px 0 rgba(0, 0, 0, 0.015);
       }
 
@@ -218,6 +226,9 @@
             }
           }
         }
+
+        // Toggle shadow when at the top
+        this.toggleClass("scrolled", this.$.list.scrollTop !== 0, this.$.header);
       },
 
       _loadItems: function(index) {
