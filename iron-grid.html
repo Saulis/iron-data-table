@@ -3,6 +3,7 @@
 <link rel="import" href="grid-cell.html">
 <link rel="import" href="../iron-list/iron-list.html">
 <link rel="import" href="../../paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../iron-resizable-behavior/iron-resizable-behavior.html">
 
 <dom-module id="iron-grid">
   <template>
@@ -14,9 +15,11 @@
         font-weight: 400;
         line-height: 1.1;
         color: rgba(0, 0, 0, 0.87);
+        height: 100%;
       }
 
       #header {
+        background-color: #fafafa;
         display: flex;
         justify-content: space-between;
         color: rgba(0, 0, 0, 0.54);
@@ -33,14 +36,21 @@
         box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 2px 0 rgba(0, 0, 0, 0.075), 0 3px 0 rgba(0, 0, 0, 0.05), 0 4px 0 rgba(0, 0, 0, 0.015);
       }
 
-      #header > grid-cell {
-        width: 100%;
+      #header > grid-cell, .item > grid-cell:not([hidden]) {
+        flex: 1 0 100px;
         padding: 0 24px 0 24px;
-        align-self: center;
+        height: var(--iron-grid-row-height, 48px);
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+      }
+
+      #scroller {
+        overflow: auto;
+        height: inherit;
       }
 
       #list {
-        height: 400px;
       }
 
       .item {
@@ -52,6 +62,10 @@
       }
 
       .item:hover {
+        background-color: #eee;
+      }
+
+      .item:hover div.frozen {
         background-color: #eee;
       }
 
@@ -98,53 +112,55 @@
         }
       }
 
-      .item > grid-cell:not([hidden]) {
-        width: 100%;
-        overflow: hidden;
-        padding: 0 24px 0 24px;
-        height: var(--iron-grid-row-height, 48px);
-        display: flex;
-        align-items: center;
+      .frozen {
+        border-right: 1px solid #e3e3e3;
       }
 
       .checkbox {
+        background-color: #fafafa;
         padding: 0 24px 0 24px;
         display: flex;
         align-items: center;
-        height: var(--iron-grid-row-height, 48px);
         width: var(--iron-grid-row-height, 48px);
       }
     </style>
+    <div id="scroller" on-scroll="_onScroll">
+      <div id="header">
+        <!--div class="checkbox frozen">
+          <paper-checkbox checked="[[selected]]"></paper-checkbox>
+        </div-->
 
-    <div id="header">
-      <div class="checkbox" on-tap="_selectAll">
-        <paper-checkbox checked="[[selected]]"></paper-checkbox>
+        <template is="dom-repeat" items="[[columns]]" as="column">
+          <grid-cell column="[[column]]" template="[[column.headerTemplate]]" bind="[[column]]"></grid-cell>
+        </template>
       </div>
-      <template is="dom-repeat" items="[[columns]]" as="column">
-        <grid-cell column="[[column]]" template="[[column.headerTemplate]]" bind="[[column]]"></grid-cell>
-      </template>
-    </div>
 
-    <iron-list id="list" as="item" items="[[items]]" on-scroll="_onScroll" selection-enabled multi-selection>
-      <template>
-        <div class="item">
-          <div class="checkbox">
-            <paper-checkbox checked="[[selected]]"></paper-checkbox>
+      <iron-list id="list" as="item" items="[[items]]" selection-enabled multi-selection>
+        <template>
+          <div class="item">
+            <!--div class="checkbox frozen">
+              <paper-checkbox checked="[[selected]]"></paper-checkbox>
+            </div-->
+            <template is="dom-repeat" items="[[columns]]" as="column">
+              <grid-cell column="[[column]]" template="[[column.template]]" bind="[[item]]"></grid-cell>
+            </template>
           </div>
-          <template is="dom-repeat" items="[[columns]]" as="column">
-            <grid-cell column="[[column]]" template="[[column.template]]" bind="[[item]]"></grid-cell>
-          </template>
-        </div>
-      </template>
-    </iron-list>
+        </template>
+      </iron-list>
+    </div>
   </template>
 
   <script>
     Polymer({
       is: 'iron-grid',
 
+      behaviors: [
+        Polymer.IronResizableBehavior
+      ],
+
       listeners: {
-        'column-filter-changed': '_onColumnFilterChanged'
+        'column-filter-changed': '_onColumnFilterChanged',
+        'iron-resize': '_resizeCellContainers',
       },
 
       observers: ['_filterChanged(filter.*)'],
@@ -191,6 +207,10 @@
         }
       },
 
+      ready: function() {
+        this.$.scroller.scroller = this.$.scroller;
+      },
+
       /**
        * Selection related functions
        */
@@ -217,7 +237,7 @@
       _filterChanged: function() {
         if (this.items) {
           this.$.list.items = Array.prototype.filter.call(this.items, function(item, index) {
-            for (var i=0;i<this.filter.length;i++) {
+            for (var i = 0; i < this.filter.length; i++) {
               var value = this._deepFind(item, this.filter[i].path);
 
               if (value.indexOf(this.filter[i].filter) === -1) {
@@ -231,7 +251,7 @@
       },
 
       _onColumnFilterChanged: function(e) {
-        for (var i=0;i<this.filter.length;i++) {
+        for (var i = 0; i < this.filter.length; i++) {
           if (this.filter[i].path === e.detail.path) {
             this.set('filter.' + i + '.filter', e.detail.filter);
             return;
@@ -257,7 +277,27 @@
         return current;
       },
 
+      _resizeCellContainers: function() {
+        // reset header width first to make the cells and scroll width to reset their widths.
+        this.$.header.style.width = '';
+        this.$.list.style.width = '';
+
+        this.async(function() {
+          this.$.header.style.width = this.$.scroller.scrollWidth;
+          this.$.list.style.width = this.$.scroller.scrollWidth;
+        }.bind(this));
+      },
+
       _onScroll: function(e) {
+
+        this.$.header.style.transform = 'translateY(' + this.$.scroller.scrollTop + 'px)';
+
+        var checkboxes = Polymer.dom(this.root).querySelectorAll('.frozen');
+        for (var i = 0;i < checkboxes.length; i++) {
+          checkboxes[i].style.transform = 'translateX(' + this.$.scroller.scrollLeft + 'px)';
+        }
+
+/*
         if (this.lazyItems !== undefined) {
           var first = Math.max(this.$.list.firstVisibleIndex - 30, 0);
           for (var i = first; i < Math.min(first + 30, this.size); i++) {
@@ -270,10 +310,10 @@
               return;
             }
           }
-        }
+        }*/
 
         // Toggle shadow when at the top
-        this.toggleClass("scrolled", this.$.list.scrollTop !== 0, this.$.header);
+        this.toggleClass("scrolled", this.$.scroller.scrollTop !== 0, this.$.header);
       },
 
       _loadItems: function(index) {

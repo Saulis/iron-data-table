@@ -64,7 +64,13 @@
       },
 
       _widthChanged: function(e) {
-        this.style.width = e.detail.value;
+        this.style.flexBasis = e.detail.value;
+
+        this.domHost.notifyResize();
+      },
+
+      _flexChanged: function(e) {
+        this.style.flexGrow = e.detail.value;
       },
 
       _hiddenChanged: function(e) {
@@ -90,8 +96,11 @@
       },
 
       _columnChanged: function(column, oldColumn) {
-        this.style.width = column.width;
+        this.style.flexBasis = column.width;
         this._addListener(column, oldColumn, 'width');
+
+        this.style.flexGrow = column.flex;
+        this._addListener(column, oldColumn, 'flex');
 
         this.style.order = column.order;
         this._addListener(column, oldColumn, 'order');

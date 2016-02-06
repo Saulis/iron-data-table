@@ -30,7 +30,7 @@
       _bindValueChanged: function(event) {
         this.debounce('filter', function() {
           this.fire('column-filter-changed', { path: this.path, filter: event.detail.value });
-        }, 250);
+        }.bind(this), 250);
       }
     });
   </script>
