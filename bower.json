@@ -17,7 +17,7 @@
   ],
   "dependencies": {
     "polymer": "^1.2.4",
-    "iron-list": "polymerelements/iron-list#~1.0.0",
+    "iron-list": "polymerelements/iron-list#~1.1.0",
     "paper-checkbox": "polymerelements/paper-checkbox#^1.1.1",
     "iron-resizable-behavior": "polymerelements/iron-resizable-behavior#^1.0.2"
   },
