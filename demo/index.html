@@ -132,19 +132,21 @@
       </template>
     </demo-snippet>
 
-    <h3>Column Resizing (adding flex property is in progress)</h3>
+    <h3>Column Resizing</h3>
     <demo-snippet>
       <template>
         <template is="dom-bind">
           <paper-input id="resize" label="1st Column Width" value="{{width}}"></paper-input>
+          <paper-input id="resize" label="2nd Column Width" value="{{width2}}"></paper-input>
+          <paper-input label="3rd Column Flex" value="{{flex}}"></paper-input>
           <iron-grid id="grid3">
             <grid-column name="First Name" width="[[width]]">
               <template>[[item.user.name.first]]</template>
             </grid-column>
-            <grid-column name="Last Name">
+            <grid-column name="Last Name" width="[[width2]]">
               <template>[[item.user.name.last]]</template>
             </grid-column>
-            <grid-column name="Email">
+            <grid-column name="Email" flex="[[flex]]">
               <template>[[item.user.email]]</template>
             </grid-column>
           </iron-grid>
