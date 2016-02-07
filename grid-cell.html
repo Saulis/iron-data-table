@@ -73,6 +73,10 @@
         this.style.flexGrow = e.detail.value;
       },
 
+      _frozenChanged: function(e) {
+        this.toggleClass('frozen', e.detail.value);
+      },
+
       _hiddenChanged: function(e) {
         this.hidden = e.detail.value;
       },
@@ -101,6 +105,9 @@
 
         this.style.flexGrow = column.flex;
         this._addListener(column, oldColumn, 'flex');
+
+        this.toggleClass('frozen', column.frozen);
+        this._addListener(column, oldColumn, 'frozen');
 
         this.style.order = column.order;
         this._addListener(column, oldColumn, 'order');

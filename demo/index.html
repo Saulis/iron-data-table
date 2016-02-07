@@ -245,6 +245,23 @@
         </iron-grid>
       </template>
     </demo-snippet>
+
+    <h3>Frozen Columns (work in progress, jerkiness with header cells)</h3>
+    <demo-snippet>
+      <template>
+        <iron-grid id="grid8">
+          <grid-column name="First Name" frozen width="100px">
+            <template>[[item.user.name.first]]</template>
+          </grid-column>
+          <grid-column name="Last Name">
+            <template>[[item.user.name.last]]</template>
+          </grid-column>
+          <grid-column name="Email" width="200px">
+            <template>[[item.user.email]]</template>
+          </grid-column>
+        </iron-grid>
+      </template>
+    </demo-snippet>
   </div>
 
   <script>
@@ -265,6 +282,7 @@
             document.querySelector('#grid5').items = users;
             document.querySelector('#grid6').items = users;
             document.querySelector('#grid7').items = users;
+            document.querySelector('#grid8').items = users;
 
             document.querySelector('#grid4').lazyItems = function(index, count) {
               return users.slice(index, index + count);
