@@ -292,6 +292,11 @@
 
       _onScroll: function(e) {
 
+        // TODO: this resize call is to make sure cell containers have correct widths
+        // in case there hasn't been any resize events fire yet. Running this on every scroll
+        // event is an overkill, so need to find a better place for this.
+        this._resizeCellContainers();
+
         this.translate3d(-this.$.list.scrollLeft + 'px', '0px', '0px', this.$.header);
 
         var checkboxes = Polymer.dom(this.root).querySelectorAll('.frozen');
