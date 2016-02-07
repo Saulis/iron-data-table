@@ -16,7 +16,7 @@
         line-height: 1.1;
         color: rgba(0, 0, 0, 0.87);
         height: 100%;
-        overflow: auto;
+        overflow: hidden;
         position: relative;
 
         /* Header height */
@@ -53,9 +53,13 @@
         overflow: hidden;
       }
 
-      #list {
+      #scroller {
+        overflow: auto;
         height: 100%;
+        width: 100%;
       }
+
+      #list {}
 
       .item {
         cursor: pointer;
@@ -134,19 +138,20 @@
         <grid-cell column="[[column]]" template="[[column.headerTemplate]]" bind="[[column]]"></grid-cell>
       </template>
     </div>
-
-    <iron-list id="list" as="item" items="[[items]]" on-scroll="_onVerticalScroll" selection-enabled multi-selection>
-      <template>
-        <div class="item">
-          <!--div class="checkbox frozen">
+    <div id="scroller" on-scroll="_onVerticalScroll">
+      <iron-list id="list" as="item" items="[[items]]" selection-enabled multi-selection>
+        <template>
+          <div class="item">
+            <!--div class="checkbox frozen">
             <paper-checkbox checked="[[selected]]"></paper-checkbox>
           </div-->
-          <template is="dom-repeat" items="[[columns]]" as="column">
-            <grid-cell column="[[column]]" template="[[column.template]]" bind="[[item]]"></grid-cell>
-          </template>
-        </div>
-      </template>
-    </iron-list>
+            <template is="dom-repeat" items="[[columns]]" as="column">
+              <grid-cell column="[[column]]" template="[[column.template]]" bind="[[item]]"></grid-cell>
+            </template>
+          </div>
+        </template>
+      </iron-list>
+    </div>
   </template>
 
   <script>
@@ -205,6 +210,10 @@
           observer: '_selectionModeChanged',
           value: 'multi'
         }
+      },
+
+      ready: function() {
+        this.$.scroller.scroller = this.$.scroller;
       },
 
       /**
@@ -279,25 +288,28 @@
         this.$.list.style.width = '';
 
         this.async(function() {
-          this.$.header.style.width = this.$.list.scrollWidth;
-          this.$.list.style.width = this.$.list.scrollWidth;
+          this.$.header.style.width = this.$.scroller.scrollWidth;
+          this.$.list.style.width = this.$.scroller.scrollWidth;
         }.bind(this));
       },
 
-      _onHorizontalScroll: function() {
-        // TODO: might be more performant to change the .frozen style directly in the stylesheet?
-        var checkboxes = Polymer.dom(this.root).querySelectorAll('.frozen');
-        for (var i = 0; i < checkboxes.length; i++) {
-          //this.translate3d(this.scrollLeft, 0, 0, checkboxes[i]);
-          checkboxes[i].style.transform = 'translateX(' + this.scrollLeft + 'px)';
-        }
-      },
+      _onHorizontalScroll: function() {},
 
       _onVerticalScroll: function(e) {
         // TODO: this resize call is to make sure cell containers have correct widths
         // in case there hasn't been any resize events fire yet. Running this on every scroll
         // event is an overkill, so need to find a better place for this.
         this._resizeCellContainers();
+
+        this.translate3d(-this.$.scroller.scrollLeft + 'px', '0px', '0px', this.$.header);
+
+        // TODO: might be more performant to change the .frozen style directly in the stylesheet?
+        var checkboxes = Polymer.dom(this.root).querySelectorAll('.frozen');
+        for (var i = 0; i < checkboxes.length; i++) {
+          //this.translate3d(this.scrollLeft, 0, 0, checkboxes[i]);
+          checkboxes[i].style.transform = 'translateX(' + this.$.scroller.scrollLeft + 'px)';
+        }
+
 
         if (this.lazyItems !== undefined) {
           var first = Math.max(this.$.list.firstVisibleIndex - 30, 0);
@@ -314,7 +326,7 @@
         }
 
         // Toggle shadow when at the top
-        this.toggleClass("scrolled", this.$.list.scrollTop !== 0, this.$.header);
+        this.toggleClass("scrolled", this.$.scroller.scrollTop !== 0, this.$.header);
       },
 
       _loadItems: function(index) {
