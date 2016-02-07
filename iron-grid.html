@@ -16,7 +16,6 @@
         line-height: 1.1;
         color: rgba(0, 0, 0, 0.87);
         height: 100%;
-
         overflow: auto;
         position: relative;
         padding-top: var(--iron-grid-row-height, 48px);
@@ -304,20 +303,19 @@
           checkboxes[i].style.transform = 'translateX(' + this.$.scroller.scrollLeft + 'px)';
         }
 
-        /*
-                if (this.lazyItems !== undefined) {
-                  var first = Math.max(this.$.list.firstVisibleIndex - 30, 0);
-                  for (var i = first; i < Math.min(first + 30, this.size); i++) {
-                    if (Object.keys(this.$.list.items[i]).length === 0) {
-                      this._loadItems(i);
+        if (this.lazyItems !== undefined) {
+          var first = Math.max(this.$.list.firstVisibleIndex - 30, 0);
+          for (var i = first; i < Math.min(first + 30, this.size); i++) {
+            if (Object.keys(this.$.list.items[i]).length === 0) {
+              this._loadItems(i);
 
-                      // force render.
-                      this.$.list.notifyResize();
+              // force render.
+              this.$.list.notifyResize();
 
-                      return;
-                    }
-                  }
-                }*/
+              return;
+            }
+          }
+        }
 
         // Toggle shadow when at the top
         this.toggleClass("scrolled", this.$.list.scrollTop !== 0, this.$.header);
