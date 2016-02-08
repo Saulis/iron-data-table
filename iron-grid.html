@@ -57,6 +57,8 @@
         overflow: auto;
         height: 100%;
         width: 100%;
+        -webkit-perspective: 1000;
+        perspective: 1000;
       }
 
       #list {}
@@ -120,6 +122,10 @@
       .frozen {
         background-color: #fafafa;
         border-right: 1px solid #e3e3e3;
+
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+
       }
 
       .checkbox {
@@ -164,8 +170,7 @@
 
       listeners: {
         'column-filter-changed': '_onColumnFilterChanged',
-        'iron-resize': '_resizeCellContainers',
-        'scroll': '_onHorizontalScroll'
+        'iron-resize': '_resizeCellContainers'
       },
 
       observers: ['_filterChanged(filter.*)'],
@@ -296,21 +301,23 @@
       _onHorizontalScroll: function() {},
 
       _onVerticalScroll: function(e) {
+        var scrollLeft = this.$.scroller.scrollLeft;
+
         // TODO: this resize call is to make sure cell containers have correct widths
         // in case there hasn't been any resize events fire yet. Running this on every scroll
         // event is an overkill, so need to find a better place for this.
-        this._resizeCellContainers();
+        //this._resizeCellContainers();
 
-        this.translate3d(-this.$.scroller.scrollLeft + 'px', '0px', '0px', this.$.header);
+        this.translate3d(-scrollLeft + 'px', '0px', '0px', this.$.header);
 
         // TODO: might be more performant to change the .frozen style directly in the stylesheet?
         var checkboxes = Polymer.dom(this.root).querySelectorAll('.frozen');
         for (var i = 0; i < checkboxes.length; i++) {
           //this.translate3d(this.scrollLeft, 0, 0, checkboxes[i]);
-          checkboxes[i].style.transform = 'translateX(' + this.$.scroller.scrollLeft + 'px)';
+          checkboxes[i].style.transform = 'translate3d(' + scrollLeft + 'px, 0px, 0px)';
         }
 
-
+/*
         if (this.lazyItems !== undefined) {
           var first = Math.max(this.$.list.firstVisibleIndex - 30, 0);
           for (var i = first; i < Math.min(first + 30, this.size); i++) {
@@ -323,7 +330,7 @@
               return;
             }
           }
-        }
+        }*/
 
         // Toggle shadow when at the top
         this.toggleClass("scrolled", this.$.scroller.scrollTop !== 0, this.$.header);
