@@ -18,7 +18,6 @@
         height: 100%;
         overflow: hidden;
         position: relative;
-
         /* Header height */
         padding-top: var(--iron-grid-row-height, 56px);
       }
@@ -53,20 +52,15 @@
         overflow: hidden;
       }
 
-      #scroller {
+      #container {
         display: flex;
-        overflow-y: auto;
-        overflow-x: hidden;
-        height: 100%;
-        width: 100%;
-        -webkit-perspective: 1000;
-        perspective: 1000;
       }
 
-      #list {
-        will-change: height;
-        overflow-y: hidden;
-        overflow-x: scroll;
+      #list,
+      #frozenList {
+        overflow: auto;
+        height: 100%;
+        width: 100%;
       }
 
       .item {
@@ -128,12 +122,9 @@
       .frozen {
         background-color: #fafafa;
         border-right: 1px solid #e3e3e3;
-
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
-
         will-change: transform;
-
       }
 
       .checkbox {
@@ -152,17 +143,19 @@
         <grid-cell column="[[column]]" template="[[column.headerTemplate]]" bind="[[column]]"></grid-cell>
       </template>
     </div>
-    <div id="scroller" on-scroll="_onVerticalScroll">
-      <iron-list id="frozen" items="[[items]]" style="width:100px;z-index:2">
+    <div id="container">
+      <div style="overflow:hidden;border-right: 1px solid #eaeaea">
+      <iron-list id="frozenList" on-scroll="_frozenListScrolled" items="[[items]]" style="width:100px;z-index:2">
         <template>
           <div class="item" style="height: 57px;">
             <div class="checkbox frozen">
-            <paper-checkbox checked="[[selected]]"></paper-checkbox>
-          </div>
+              <paper-checkbox checked="[[selected]]"></paper-checkbox>
+            </div>
           </div>
         </template>
       </iron-list>
-      <iron-list id="list" as="item" items="[[items]]" on-scroll="_onHorizontalScroll" selection-enabled multi-selection>
+    </div>
+      <iron-list id="list" as="item" items="[[items]]" on-scroll="_mainListScrolled" selection-enabled multi-selection>
         <template>
           <div class="item">
             <template is="dom-repeat" items="[[columns]]" as="column">
@@ -171,6 +164,7 @@
           </div>
         </template>
       </iron-list>
+    </div>
     </div>
   </template>
 
@@ -232,7 +226,7 @@
       },
 
       ready: function() {
-        this.$.scroller.scroller = this.$.scroller;
+        //this.$.scroller.scroller = this.$.scroller;
       },
 
       /**
@@ -307,9 +301,22 @@
         this.$.list.style.width = '';
 
         this.async(function() {
-          this.$.header.style.width = this.$.scroller.scrollWidth;
-          this.$.list.style.width = this.$.scroller.scrollWidth;
+          //this.$.header.style.width = this.$.scroller.scrollWidth;
+          //this.$.list.style.width = this.$.scroller.scrollWidth;
         }.bind(this));
+      },
+
+      _frozenListScrolled: function() {
+        this.$.list.scrollTop = this.$.frozenList.scrollTop;
+      },
+
+      _mainListScrolled: function() {
+        var scrollLeft = this.$.list.scrollLeft;
+        var scrollTop = this.$.list.scrollTop;
+
+        this.$.frozenList.scrollTop = scrollTop;
+        this.translate3d(-scrollLeft + 'px', '0px', '0px', this.$.header);
+        this.translate3d(scrollLeft + 'px', '0px', '0px', this.$.header.querySelector('.frozen'));
       },
 
       _onHorizontalScroll: function() {
@@ -367,20 +374,20 @@
             checkboxes[i].style.transform = 'translate3d(' + scrollLeft + 'px, 0px, 0px)';
         }
 */
-/*
-        if (this.lazyItems !== undefined) {
-          var first = Math.max(this.$.list.firstVisibleIndex - 30, 0);
-          for (var i = first; i < Math.min(first + 30, this.size); i++) {
-            if (Object.keys(this.$.list.items[i]).length === 0) {
-              this._loadItems(i);
+        /*
+                if (this.lazyItems !== undefined) {
+                  var first = Math.max(this.$.list.firstVisibleIndex - 30, 0);
+                  for (var i = first; i < Math.min(first + 30, this.size); i++) {
+                    if (Object.keys(this.$.list.items[i]).length === 0) {
+                      this._loadItems(i);
 
-              // force render.
-              this.$.list.notifyResize();
+                      // force render.
+                      this.$.list.notifyResize();
 
-              return;
-            }
-          }
-        }*/
+                      return;
+                    }
+                  }
+                }*/
 
         // Toggle shadow when at the top
         //this.toggleClass("scrolled", this.$.scroller.scrollTop !== 0, this.$.header);
