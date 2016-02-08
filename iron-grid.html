@@ -54,14 +54,20 @@
       }
 
       #scroller {
-        overflow: auto;
+        display: flex;
+        overflow-y: auto;
+        overflow-x: hidden;
         height: 100%;
         width: 100%;
         -webkit-perspective: 1000;
         perspective: 1000;
       }
 
-      #list {}
+      #list {
+        will-change: height;
+        overflow-y: hidden;
+        overflow-x: scroll;
+      }
 
       .item {
         cursor: pointer;
@@ -126,6 +132,8 @@
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
 
+        will-change: transform;
+
       }
 
       .checkbox {
@@ -136,21 +144,27 @@
       }
     </style>
     <div id="header">
-      <!--div class="checkbox frozen">
+      <div class="checkbox frozen">
         <paper-checkbox checked="[[selected]]"></paper-checkbox>
-      </div-->
+      </div>
 
       <template is="dom-repeat" items="[[columns]]" as="column">
         <grid-cell column="[[column]]" template="[[column.headerTemplate]]" bind="[[column]]"></grid-cell>
       </template>
     </div>
     <div id="scroller" on-scroll="_onVerticalScroll">
-      <iron-list id="list" as="item" items="[[items]]" selection-enabled multi-selection>
+      <iron-list id="frozen" items="[[items]]" style="width:100px;z-index:2">
+        <template>
+          <div class="item" style="height: 57px;">
+            <div class="checkbox frozen">
+            <paper-checkbox checked="[[selected]]"></paper-checkbox>
+          </div>
+          </div>
+        </template>
+      </iron-list>
+      <iron-list id="list" as="item" items="[[items]]" on-scroll="_onHorizontalScroll" selection-enabled multi-selection>
         <template>
           <div class="item">
-            <!--div class="checkbox frozen">
-            <paper-checkbox checked="[[selected]]"></paper-checkbox>
-          </div-->
             <template is="dom-repeat" items="[[columns]]" as="column">
               <grid-cell column="[[column]]" template="[[column.template]]" bind="[[item]]"></grid-cell>
             </template>
@@ -298,9 +312,40 @@
         }.bind(this));
       },
 
-      _onHorizontalScroll: function() {},
+      _onHorizontalScroll: function() {
+        var scrollLeft = this.$.list.scrollLeft;
+
+
+        // TODO: this resize call is to make sure cell containers have correct widths
+        // in case there hasn't been any resize events fire yet. Running this on every scroll
+        // event is an overkill, so need to find a better place for this.
+        //this._resizeCellContainers();
+
+        this.translate3d(-scrollLeft + 'px', '0px', '0px', this.$.header);
+        //this.translate3d(-scrollLeft + 'px', '0px', '0px', this.$.list);
+        this.translate3d(scrollLeft + 'px', '0px', '0px', this.$.header.querySelector('.frozen'));
+
+        //e.stopImmediatePropagation();
+        //document.styleSheets[14].rules[12].transform = 'translate3d(' + scrollLeft + 'px, 0px, 0px)';
+
+        // TODO: might be more performant to change the .frozen style directly in the stylesheet?
+        /*var checkboxes = Polymer.dom(this.root).querySelectorAll('.frozen');
+        for (var i = 0; i < checkboxes.length; i++) {
+          this.translate3d(this.scrollLeft, 0, 0, checkboxes[i]);
+            checkboxes[i].style.transform = 'translate3d(' + scrollLeft + 'px, 0px, 0px)';
+        }*/
+      },
+
+
 
       _onVerticalScroll: function(e) {
+        var scrollTop = this.$.scroller.scrollTop;
+        this.$.list.style.height = this.$.scroller.clientHeight + scrollTop;
+
+        //e.stopImmediatePropagation();
+        //e.preventDefault();
+
+        /*
         var scrollLeft = this.$.scroller.scrollLeft;
 
         // TODO: this resize call is to make sure cell containers have correct widths
@@ -309,14 +354,19 @@
         //this._resizeCellContainers();
 
         this.translate3d(-scrollLeft + 'px', '0px', '0px', this.$.header);
+        //this.translate3d(-scrollLeft + 'px', '0px', '0px', this.$.list);
+        //this.translate3d(scrollLeft + 'px', '0px', '0px', this.$.frozen);
+
+        //e.stopImmediatePropagation();
+        //document.styleSheets[14].rules[12].transform = 'translate3d(' + scrollLeft + 'px, 0px, 0px)';
 
         // TODO: might be more performant to change the .frozen style directly in the stylesheet?
         var checkboxes = Polymer.dom(this.root).querySelectorAll('.frozen');
         for (var i = 0; i < checkboxes.length; i++) {
-          //this.translate3d(this.scrollLeft, 0, 0, checkboxes[i]);
-          checkboxes[i].style.transform = 'translate3d(' + scrollLeft + 'px, 0px, 0px)';
+          this.translate3d(this.scrollLeft, 0, 0, checkboxes[i]);
+            checkboxes[i].style.transform = 'translate3d(' + scrollLeft + 'px, 0px, 0px)';
         }
-
+*/
 /*
         if (this.lazyItems !== undefined) {
           var first = Math.max(this.$.list.firstVisibleIndex - 30, 0);
@@ -333,7 +383,7 @@
         }*/
 
         // Toggle shadow when at the top
-        this.toggleClass("scrolled", this.$.scroller.scrollTop !== 0, this.$.header);
+        //this.toggleClass("scrolled", this.$.scroller.scrollTop !== 0, this.$.header);
       },
 
       _loadItems: function(index) {
