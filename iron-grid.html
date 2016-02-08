@@ -18,7 +18,6 @@
         height: 100%;
         overflow: hidden;
         position: relative;
-
         /* Header height */
         padding-top: var(--iron-grid-row-height, 56px);
       }
@@ -36,7 +35,7 @@
         position: absolute;
         top: 0px;
         left: 0px;
-        z-index: 1;
+        z-index: 103;
       }
 
       #header.scrolled {
@@ -59,14 +58,20 @@
         overflow-x: hidden;
         height: 100%;
         width: 100%;
-        -webkit-perspective: 1000;
-        perspective: 1000;
+        z-index: 0;
+      }
+
+      #frozenList {
+        width: 100px;
+        z-index: 101;
       }
 
       #list {
         will-change: height;
         overflow-y: hidden;
         overflow-x: scroll;
+        z-index: 100;
+        /* make sure it's higher than #scroller */
       }
 
       .item {
@@ -128,12 +133,6 @@
       .frozen {
         background-color: #fafafa;
         border-right: 1px solid #e3e3e3;
-
-        -webkit-backface-visibility: hidden;
-        backface-visibility: hidden;
-
-        will-change: transform;
-
       }
 
       .checkbox {
@@ -153,12 +152,12 @@
       </template>
     </div>
     <div id="scroller" on-scroll="_onVerticalScroll">
-      <iron-list id="frozen" items="[[items]]" style="width:100px;z-index:2">
+      <iron-list id="frozenList" items="[[items]]">
         <template>
           <div class="item" style="height: 57px;">
             <div class="checkbox frozen">
-            <paper-checkbox checked="[[selected]]"></paper-checkbox>
-          </div>
+              <paper-checkbox checked="[[selected]]"></paper-checkbox>
+            </div>
           </div>
         </template>
       </iron-list>
@@ -304,22 +303,22 @@
       _resizeCellContainers: function() {
         // reset header width first to make the cells and scroll width to reset their widths.
         this.$.header.style.width = '';
-        this.$.list.style.width = '';
+        this.$.list.style.width = '100%';
 
         this.async(function() {
-          this.$.header.style.width = this.$.scroller.scrollWidth;
-          this.$.list.style.width = this.$.scroller.scrollWidth;
+          var width = this.$.list.scrollWidth;
+          this.$.header.style.width = width + this.$.frozenList.clientWidth;
+          this.$.list.$.items.style.width = width;
         }.bind(this));
       },
 
       _onHorizontalScroll: function() {
         var scrollLeft = this.$.list.scrollLeft;
 
-
         // TODO: this resize call is to make sure cell containers have correct widths
         // in case there hasn't been any resize events fire yet. Running this on every scroll
         // event is an overkill, so need to find a better place for this.
-        //this._resizeCellContainers();
+        this._resizeCellContainers();
 
         this.translate3d(-scrollLeft + 'px', '0px', '0px', this.$.header);
         //this.translate3d(-scrollLeft + 'px', '0px', '0px', this.$.list);
@@ -340,7 +339,11 @@
 
       _onVerticalScroll: function(e) {
         var scrollTop = this.$.scroller.scrollTop;
-        this.$.list.style.height = this.$.scroller.clientHeight + scrollTop;
+        this.$.list.style.height = Math.min(this.$.scroller.clientHeight + scrollTop + 10000, this.$.scroller.scrollHeight) + 'px';
+
+        this.debounce('scroll', function() {
+          this.$.list.style.height = this.$.scroller.clientHeight + scrollTop + 'px';
+        }.bind(this), 100);
 
         //e.stopImmediatePropagation();
         //e.preventDefault();
@@ -367,23 +370,23 @@
             checkboxes[i].style.transform = 'translate3d(' + scrollLeft + 'px, 0px, 0px)';
         }
 */
-/*
-        if (this.lazyItems !== undefined) {
-          var first = Math.max(this.$.list.firstVisibleIndex - 30, 0);
-          for (var i = first; i < Math.min(first + 30, this.size); i++) {
-            if (Object.keys(this.$.list.items[i]).length === 0) {
-              this._loadItems(i);
+        /*
+                if (this.lazyItems !== undefined) {
+                  var first = Math.max(this.$.list.firstVisibleIndex - 30, 0);
+                  for (var i = first; i < Math.min(first + 30, this.size); i++) {
+                    if (Object.keys(this.$.list.items[i]).length === 0) {
+                      this._loadItems(i);
 
-              // force render.
-              this.$.list.notifyResize();
+                      // force render.
+                      this.$.list.notifyResize();
 
-              return;
-            }
-          }
-        }*/
+                      return;
+                    }
+                  }
+                }*/
 
         // Toggle shadow when at the top
-        //this.toggleClass("scrolled", this.$.scroller.scrollTop !== 0, this.$.header);
+        this.toggleClass("scrolled", this.$.scroller.scrollTop !== 0, this.$.header);
       },
 
       _loadItems: function(index) {
