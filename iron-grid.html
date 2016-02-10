@@ -2,7 +2,6 @@
 <link rel="import" href="grid-column.html">
 <link rel="import" href="grid-cell.html">
 <link rel="import" href="../iron-list/iron-list.html">
-<link rel="import" href="../../paper-checkbox/paper-checkbox.html">
 <link rel="import" href="../iron-resizable-behavior/iron-resizable-behavior.html">
 
 <dom-module id="iron-grid">
@@ -157,62 +156,17 @@
           value: []
         },
 
-        lazyItems: {
-          type: Function,
-          observer: '_lazyItemsChanged'
-        },
-
-        size: {
-          type: Number,
-          value: 0
-        },
-
-        _loadedSize: {
-          type: Number,
-          value: 0
-        },
-
         columns: {
           type: Array,
           notify: true,
           value: function() {
             return Polymer.dom(this).querySelectorAll('grid-column');
           }
-        },
-
-        selectionMode: {
-          type: String,
-          notify: true,
-          observer: '_selectionModeChanged',
-          value: 'multi'
         }
       },
 
       ready: function() {
         this.$.scroller.scroller = this.$.scroller;
-      },
-
-      /**
-       * Selection related functions
-       */
-      _isSelected: function(mode, selected) {
-        if (mode === 'all') {
-          return !selected;
-        } else {
-          return selected;
-        }
-      },
-
-      _selectAll: function() {
-        if (this.selectionMode === 'multi') {
-          this.selectionMode = 'all';
-        } else {
-          this.selectionMode = 'multi';
-        }
-      },
-
-      _selectionModeChanged: function(mode) {
-        this.$.list.clearSelection();
       },
 
       _filterChanged: function() {
@@ -264,8 +218,8 @@
         this.$.list.style.width = '';
 
         this.async(function() {
-          this.$.header.style.width = this.$.list.scrollWidth;
-          this.$.list.style.width = this.$.list.scrollWidth;
+          this.$.header.style.width = this.$.scroller.scrollWidth;
+          this.$.list.style.width = this.$.scroller.scrollWidth;
         }.bind(this));
       },
 
@@ -283,42 +237,8 @@
           checkboxes[i].style.transform = 'translateX(' + this.$.scroller.scrollLeft + 'px)';
         }
 
-        if (this.lazyItems !== undefined) {
-          var first = Math.max(this.$.list.firstVisibleIndex - 30, 0);
-          for (var i = first; i < Math.min(first + 30, this.size); i++) {
-            if (Object.keys(this.$.list.items[i]).length === 0) {
-              this._loadItems(i);
-
-              // force render.
-              this.$.list.notifyResize();
-
-              return;
-            }
-          }
-        }
-
         // Toggle shadow when at the top
         this.toggleClass("scrolled", this.$.scroller.scrollTop !== 0, this.$.header);
-      },
-
-      _loadItems: function(index) {
-        var items = this.lazyItems(index, 60);
-
-        for (var i = 0; i < items.length; i++) {
-          this.$.list.items[index + i] = items[i];
-        }
-      },
-
-      _lazyItemsChanged: function(fn) {
-        var items = fn(this._loadedSize, 10);
-
-        this._loadedSize = items.length;
-
-        for (var i = items.length; i < this.size; i++) {
-          items.push({});
-        }
-
-        this.$.list.items = items;
       }
     });
   </script>

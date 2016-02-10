@@ -5,7 +5,6 @@
   <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
   <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
   <link rel="import" href="../../paper-input/paper-input.html">
-  <link rel="import" href="../../paper-checkbox/paper-checkbox.html">
   <link rel="import" href="../../paper-button/paper-button.html">
 
   <link rel="import" href="../iron-grid.html">
@@ -154,30 +153,6 @@
       </template>
     </demo-snippet>
 
-    <h3>Lazy Loading (experimental, work in progress)</h3>
-    <demo-snippet>
-      <template>
-        <script>
-        /**
-         * function(index, count) {
-         *  return users.slice(index, index + count);
-         * };
-         */
-        </script>
-        <iron-grid id="grid4" size="200">
-          <grid-column name="First Name">
-            <template>[[item.user.name.first]]</template>
-          </grid-column>
-          <grid-column name="Last Name">
-            <template>[[item.user.name.last]]</template>
-          </grid-column>
-          <grid-column name="Email">
-            <template>[[item.user.email]]</template>
-          </grid-column>
-        </iron-grid>
-      </template>
-    </demo-snippet>
-
     <h3>Column Hiding</h3>
     <demo-snippet>
       <template>
@@ -208,11 +183,6 @@
             var grid = document.querySelector('#grid6');
 
             grid.columns[0].order = grid.columns[0].order ? 0 : 1;
-
-            // Modifying columns array order doesn't work nicely. See https://github.com/Polymer/polymer/issues/2752
-            //var col = grid.shift('columns');
-            //grid.push('columns', col);
-            //this requires doing grid.columns = undefined; grid.columns = columns;
           });
         </script>
         <iron-grid id="grid6">
@@ -265,10 +235,6 @@
             document.querySelector('#grid5').items = users;
             document.querySelector('#grid6').items = users;
             document.querySelector('#grid7').items = users;
-
-            document.querySelector('#grid4').lazyItems = function(index, count) {
-              return users.slice(index, index + count);
-            };
           }
         }
       };
