@@ -16,8 +16,8 @@
         line-height: 1.1;
         color: rgba(0, 0, 0, 0.87);
         height: 100%;
-        overflow: auto;
         position: relative;
+        overflow: hidden;
         padding-top: var(--iron-grid-row-height, 48px);
       }
 
@@ -56,10 +56,6 @@
         height: inherit;
       }
 
-      #list {
-        height: 100%;
-      }
-
       .item {
         cursor: pointer;
         display: flex;
@@ -69,10 +65,6 @@
       }
 
       .item:hover {
-        background-color: #eee;
-      }
-
-      .item:hover div.frozen {
         background-color: #eee;
       }
 
@@ -119,40 +111,24 @@
         }
       }
 
-      .frozen {
-        border-right: 1px solid #e3e3e3;
-      }
-
-      .checkbox {
-        background-color: #fafafa;
-        padding: 0 24px 0 24px;
-        display: flex;
-        align-items: center;
-        width: var(--iron-grid-row-height, 48px);
-      }
     </style>
     <div id="header">
-      <!--div class="checkbox frozen">
-          <paper-checkbox checked="[[selected]]"></paper-checkbox>
-        </div-->
-
       <template is="dom-repeat" items="[[columns]]" as="column">
         <grid-cell column="[[column]]" template="[[column.headerTemplate]]" bind="[[column]]"></grid-cell>
       </template>
     </div>
 
-    <iron-list id="list" as="item" items="[[items]]" on-scroll="_onScroll" selection-enabled multi-selection>
-      <template>
-        <div class="item">
-          <!--div class="checkbox frozen">
-              <paper-checkbox checked="[[selected]]"></paper-checkbox>
-            </div-->
-          <template is="dom-repeat" items="[[columns]]" as="column">
-            <grid-cell column="[[column]]" template="[[column.template]]" bind="[[item]]"></grid-cell>
-          </template>
-        </div>
-      </template>
-    </iron-list>
+    <div id="scroller" on-scroll="_onScroll">
+      <iron-list id="list" as="item" items="[[items]]" selection-enabled>
+        <template>
+          <div class="item" selected$="[[selected]]">
+            <template is="dom-repeat" items="[[columns]]" as="column">
+              <grid-cell column="[[column]]" template="[[column.template]]" bind="[[item]]"></grid-cell>
+            </template>
+          </div>
+        </template>
+      </iron-list>
+    </div>
   </template>
 
   <script>
@@ -210,6 +186,10 @@
           observer: '_selectionModeChanged',
           value: 'multi'
         }
+      },
+
+      ready: function() {
+        this.$.scroller.scroller = this.$.scroller;
       },
 
       /**
@@ -296,7 +276,7 @@
         // event is an overkill, so need to find a better place for this.
         this._resizeCellContainers();
 
-        this.translate3d(-this.$.list.scrollLeft + 'px', '0px', '0px', this.$.header);
+        this.translate3d(-this.$.scroller.scrollLeft + 'px', '0px', '0px', this.$.header);
 
         var checkboxes = Polymer.dom(this.root).querySelectorAll('.frozen');
         for (var i = 0; i < checkboxes.length; i++) {
@@ -318,7 +298,7 @@
         }
 
         // Toggle shadow when at the top
-        this.toggleClass("scrolled", this.$.list.scrollTop !== 0, this.$.header);
+        this.toggleClass("scrolled", this.$.scroller.scrollTop !== 0, this.$.header);
       },
 
       _loadItems: function(index) {
