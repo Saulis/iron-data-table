@@ -16,8 +16,18 @@
         color: rgba(0, 0, 0, 0.87);
         height: 400px;
         position: relative;
-        overflow: hidden;
-        padding-top: 56px; /*header height*/
+        overflow-x: scroll;
+        overflow-y: hidden;
+
+        -webkit-overflow-scrolling: touch;
+      }
+
+      #container {
+        /*header height*/
+        padding-bottom: 56px;
+        height: inherit;
+        display: flex;
+        flex-direction: column;
       }
 
       #header {
@@ -30,10 +40,6 @@
         height: 56px;
         box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
         transition: box-shadow 200ms;
-        position: absolute;
-        top: 0px;
-        left: 0px;
-        z-index: 1;
       }
 
       #header.scrolled {
@@ -50,9 +56,13 @@
         overflow: hidden;
       }
 
-      #scroller {
-        overflow: auto;
-        height: inherit;
+      #list {
+        overflow-x: hidden;
+        overflow-y: scroll;
+        flex-basis: 100%;
+        flex-shrink: 1;
+        flex-grow: 0;
+        height: 100%;
       }
 
       .item {
@@ -109,16 +119,15 @@
           color: inherit;
         }
       }
-
     </style>
-    <div id="header">
-      <template is="dom-repeat" items="[[columns]]" as="column">
-        <grid-cell column="[[column]]" template="[[column.headerTemplate]]" bind="[[_bind(column)]]"></grid-cell>
-      </template>
-    </div>
+    <div id="container">
+      <div id="header">
+        <template is="dom-repeat" items="[[columns]]" as="column">
+          <grid-cell column="[[column]]" template="[[column.headerTemplate]]" bind="[[_bind(column)]]"></grid-cell>
+        </template>
+      </div>
 
-    <div id="scroller" on-scroll="_onScroll">
-      <iron-list id="list" as="item" items="[[items]]" selection-enabled>
+      <iron-list id="list" as="item" items="[[items]]" on-scroll="_onVerticalScroll" selection-enabled>
         <template>
           <div class="item" selected$="[[selected]]">
             <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
@@ -141,6 +150,7 @@
       listeners: {
         'column-filter-changed': '_onColumnFilterChanged',
         'iron-resize': '_resizeCellContainers',
+        'scroll': '_onHorizontalScroll'
       },
 
       observers: ['_filterChanged(filter.*)'],
@@ -165,12 +175,12 @@
         }
       },
 
-      ready: function() {
-        this.$.scroller.scroller = this.$.scroller;
-      },
-
       _bind: function(item, index, selected) {
-        return { item: item, index: index, selected: selected };
+        return {
+          item: item,
+          index: index,
+          selected: selected
+        };
       },
 
       _filterChanged: function() {
@@ -218,33 +228,25 @@
 
       _resizeCellContainers: function() {
         // reset header width first to make the cells and scroll width to reset their widths.
-        this.$.header.style.width = '';
-        this.$.list.style.width = '';
+        this.$.container.style.width = '';
 
         this.async(function() {
-          var scrollBarWidth = this.$.scroller.offsetWidth - this.$.scroller.clientWidth;
+          this.$.container.style.width = this.scrollWidth + 'px';
 
-          this.$.header.style.width = this.$.scroller.scrollWidth + scrollBarWidth;
-          this.$.list.style.width = this.$.scroller.scrollWidth;
+          this.debounce('scroller', function() {
+            // TODO: this is unnecessary if scroll bars are invisible.
+            this.$.container.style.width = Math.min(this.scrollWidth, this.clientWidth + this.scrollLeft) + 'px';
+          }, 100);
         }.bind(this));
       },
 
-      _onScroll: function(e) {
-
-        // TODO: this resize call is to make sure cell containers have correct widths
-        // in case there hasn't been any resize events fire yet. Running this on every scroll
-        // event is an overkill, so need to find a better place for this.
+      _onHorizontalScroll: function() {
         this._resizeCellContainers();
+      },
 
-        this.translate3d(-this.$.scroller.scrollLeft + 'px', '0px', '0px', this.$.header);
-
-        var checkboxes = Polymer.dom(this.root).querySelectorAll('.frozen');
-        for (var i = 0; i < checkboxes.length; i++) {
-          checkboxes[i].style.transform = 'translateX(' + this.$.scroller.scrollLeft + 'px)';
-        }
-
+      _onVerticalScroll: function(e) {
         // Toggle shadow when at the top
-        this.toggleClass("scrolled", this.$.scroller.scrollTop !== 0, this.$.header);
+        this.toggleClass("scrolled", this.$.list.scrollTop !== 0, this.$.header);
       }
     });
   </script>
