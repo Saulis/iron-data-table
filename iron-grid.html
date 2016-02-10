@@ -113,7 +113,7 @@
     </style>
     <div id="header">
       <template is="dom-repeat" items="[[columns]]" as="column">
-        <grid-cell column="[[column]]" template="[[column.headerTemplate]]" bind="[[column]]"></grid-cell>
+        <grid-cell column="[[column]]" template="[[column.headerTemplate]]" bind="[[_bind(column)]]"></grid-cell>
       </template>
     </div>
 
@@ -121,8 +121,8 @@
       <iron-list id="list" as="item" items="[[items]]" selection-enabled>
         <template>
           <div class="item" selected$="[[selected]]">
-            <template is="dom-repeat" items="[[columns]]" as="column">
-              <grid-cell column="[[column]]" template="[[column.template]]" bind="[[item]]"></grid-cell>
+            <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
+              <grid-cell column="[[column]]" template="[[column.template]]" bind="[[_bind(item, index, selected)]]"></grid-cell>
             </template>
           </div>
         </template>
@@ -167,6 +167,10 @@
 
       ready: function() {
         this.$.scroller.scroller = this.$.scroller;
+      },
+
+      _bind: function(item, index, selected) {
+        return { item: item, index: index, selected: selected };
       },
 
       _filterChanged: function() {

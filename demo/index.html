@@ -6,6 +6,7 @@
   <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
   <link rel="import" href="../../paper-input/paper-input.html">
   <link rel="import" href="../../paper-button/paper-button.html">
+  <link rel="import" href="../../paper-checkbox/paper-checkbox.html">
 
   <link rel="import" href="../iron-grid.html">
 
@@ -33,25 +34,37 @@
       }
     </style>
 
-    <h4>Basic Template Support</h4>
+    <h4>Template Support</h4>
     <demo-snippet>
       <template>
-        <style>
-          #grid1 .custom {
-            color: red;
+        <style is="custom-style">
+          #grid1 .index {
+            height: 10px;
+            width: 10px;
+            border-radius: 20px;
+            padding: 10px;
+            margin-left: -10px;
+          }
+
+          #grid1 .index[selected] {
+            color: #fff;
+            background-color: var(--default-primary-color);
           }
         </style>
 
         <iron-grid id="grid1">
-          <grid-column name="First Name">
+          <grid-column name="#" width="20px" flex="0">
             <template>
-              <div class="custom">[[item.user.name.first]]</div>
+              <div class="index" selected$="[[selected]]">[[index]]</div>
             </template>
+          </grid-column>
+          <grid-column name="First Name">
+            <template>[[item.user.name.first]]</template>
           </grid-column>
           <grid-column name="Last Name">
             <template>[[item.user.name.last]]</template>
           </grid-column>
-          <grid-column name="Email">
+          <grid-column name="Email" width="200px">
             <template>[[item.user.email]]</template>
           </grid-column>
         </iron-grid>
@@ -62,7 +75,7 @@
     <demo-snippet>
       <template>
 
-        <template is="dom-bind" id="t" foo="bar">
+        <template is="dom-bind" id="t" foo="">
           <style is="custom-style">
             paper-input {
               margin-bottom: 20px;
@@ -157,8 +170,7 @@
     <demo-snippet>
       <template>
         <template is="dom-bind">
-          nicely placed checkbox (show/hide 1st column)
-          <paper-checkbox id="hide" checked="{{checked}}"></paper-checkbox>
+          <paper-checkbox id="hide" checked="{{checked}}">Show/Hide 1st Column</paper-checkbox>
           <iron-grid id="grid5">
             <grid-column name="First Name" hidden="[[!checked]]">
               <template>[[item.user.name.first]]</template>
@@ -174,10 +186,10 @@
       </template>
     </demo-snippet>
 
-    <h3>Column Reordering (using flexbox order)</h3>
+    <h3>Column Reordering</h3>
     <demo-snippet>
       <template>
-        <paper-button id="reorder">Move 1st Column to 2nd</paper-button>
+        <paper-button id="reorder" raised>Move 1st Column to 2nd</paper-button>
         <script>
           document.querySelector('#reorder').addEventListener('tap', function(e) {
             var grid = document.querySelector('#grid6');

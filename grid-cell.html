@@ -85,11 +85,14 @@
             this._templateChanged(this.template);
           } else {
             if (!this._instance) {
-              this._instance = this.column.stamp({item: data});
+              this._instance = this.column.stamp(data);
               this.column._templateInstances.push(this._instance);
               this._render();
             } else {
-              this._instance.item = data;
+              // TODO: could iterate properties instead.
+              this._instance.item = data.item;
+              this._instance.index = data.index;
+              this._instance.selected = data.selected;
             }
           }
         }
@@ -135,7 +138,9 @@
           this._render();
 
           if (this.bind) {
-            this._instance.item = this.bind;
+            this._instance.item = this.bind.item;
+            this._instance.index = this.bind.index;
+            this._instance.selected = this.bind.selected;
           }
         }
       },

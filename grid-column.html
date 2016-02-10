@@ -122,7 +122,9 @@
         // bound to a parent dom-bind template or a parent web component.
         // Note (Saulis): if the internal templates have something else than [[item..]] they will get screwed when setting properi
         this._instanceProps = {
-          item: true
+          item: true,
+          index: true,
+          selected: true
         };
         this.templatize(Polymer.dom(this).querySelector('template'));
       },
