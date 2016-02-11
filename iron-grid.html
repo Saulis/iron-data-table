@@ -1,5 +1,6 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="grid-column.html">
+<link rel="import" href="grid-column-sort.html">
 <link rel="import" href="grid-cell.html">
 <link rel="import" href="../iron-list/iron-list.html">
 <link rel="import" href="../iron-resizable-behavior/iron-resizable-behavior.html">
@@ -18,7 +19,6 @@
         position: relative;
         overflow-x: scroll;
         overflow-y: hidden;
-
         -webkit-overflow-scrolling: touch;
       }
 
@@ -123,7 +123,9 @@
     <div id="container">
       <div id="header">
         <template is="dom-repeat" items="[[columns]]" as="column">
-          <grid-cell column="[[column]]" template="[[column.headerTemplate]]" bind="[[_bind(column)]]"></grid-cell>
+          <grid-cell column="[[column]]" template="[[column.headerTemplate]]" bind="[[_bind(column)]]">
+            <grid-column-sort sort-order="[[sortOrder]]" path="[[column.sort]]" on-sort-direction-changed="_sortDirectionChanged" hidden="[[!column.sort]]"></grid-column-sort>
+          </grid-cell>
         </template>
       </div>
 
@@ -166,6 +168,13 @@
           value: []
         },
 
+        sortOrder: {
+          type: Object,
+          notify: true,
+          observer: '_sortOrderChanged',
+          value: {}
+        },
+
         columns: {
           type: Array,
           notify: true,
@@ -185,18 +194,50 @@
 
       _filterChanged: function() {
         if (this.items) {
-          this.$.list.items = Array.prototype.filter.call(this.items, function(item, index) {
-            for (var i = 0; i < this.filter.length; i++) {
-              var value = this._deepFind(item, this.filter[i].path);
+          this.$.list.items = this._filter(this.items);
+        }
+      },
 
-              if (value.indexOf(this.filter[i].filter) === -1) {
-                return false;
-              }
+      _filter: function(items) {
+        return Array.prototype.filter.call(items, function(item, index) {
+          for (var i = 0; i < this.filter.length; i++) {
+            var value = this._deepFind(item, this.filter[i].path);
+
+            if (value.indexOf(this.filter[i].filter) === -1) {
+              return false;
             }
+          }
 
-            return true;
+          return true;
+        }.bind(this));
+      },
+
+      _sortOrderChanged: function(sortOrder) {
+        if (this.items) {
+          // filtering creates a new array, which is nice since sorting happens in place.
+          var filteredItems = this._filter(this.items);
+          this.$.list.items = Array.prototype.sort.call(filteredItems, function(a, b) {
+            if (sortOrder.direction === 'asc') {
+              return this._compare(this._deepFind(a, sortOrder.path), this._deepFind(b, sortOrder.path));
+            } else {
+              return this._compare(this._deepFind(b, sortOrder.path), this._deepFind(a, sortOrder.path));
+            }
           }.bind(this));
         }
+      },
+
+      _sortDirectionChanged: function(e) {
+        this.set('sortOrder', e.detail);
+      },
+
+      _compare: function(a, b) {
+        if (a < b) {
+          return -1;
+        }
+        if (a > b) {
+          return 1;
+        }
+        return 0;
       },
 
       _onColumnFilterChanged: function(e) {
@@ -213,6 +254,10 @@
       // we need to find values from deep properties like user.name.first
       // snatched from http://stackoverflow.com/questions/8817394/javascript-get-deep-value-from-object-by-passing-path-to-it-as-string
       _deepFind: function(obj, path) {
+        if (path === undefined) {
+          return '';
+        }
+
         var paths = path.split('.');
         var current = obj;
 

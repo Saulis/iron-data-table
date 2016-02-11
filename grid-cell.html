@@ -45,7 +45,7 @@
 
         this._render();
 
-        Polymer.dom(this).appendChild(this._contentElement);
+        Polymer.dom(this).insertBefore(this._contentElement, Polymer.dom(this).firstChild);
         Polymer.dom(this.domHost).appendChild(this._content);
         Polymer.dom.flush();
       },

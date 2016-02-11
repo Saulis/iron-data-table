@@ -233,6 +233,23 @@
         </iron-grid>
       </template>
     </demo-snippet>
+
+    <h3>Sorting</h3>
+    <demo-snippet>
+      <template>
+        <iron-grid id="grid8">
+          <grid-column name="First Name" sort="user.name.first">
+            <template>[[item.user.name.first]]</template>
+          </grid-column>
+          <grid-column name="Last Name" sort="user.name.last">
+            <template>[[item.user.name.last]]</template>
+          </grid-column>
+          <grid-column name="Email">
+            <template>[[item.user.email]]</template>
+          </grid-column>
+        </iron-grid>
+      </template>
+    </demo-snippet>
   </div>
 
   <script>
@@ -253,6 +270,7 @@
             document.querySelector('#grid5').items = users;
             document.querySelector('#grid6').items = users;
             document.querySelector('#grid7').items = users;
+            document.querySelector('#grid8').items = users;
 
             document.querySelector('#grid2').$.list.addEventListener('selected-item-changed', function() {
               document.querySelector('#grid2').$.list.notifyResize();
