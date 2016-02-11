@@ -9,13 +9,9 @@
     </style>
 
     <template id="header">
-      <div>[[item.name]]</div>
+      <grid-column-filter name="[[item.name]]" path="[[item.filter]]" hidden="[[!item.filter]]"></grid-column-filter>
+      <div hidden="[[item.filter]]">[[item.name]]</div>
     </template>
-
-    <template id="filter">
-      <grid-column-filter name="[[item.name]]" path="[[item.filter]]"></grid-column-filter>
-    </template>
-
 
   </template>
   <script>
@@ -34,8 +30,7 @@
         },
 
         filter: {
-          type: String,
-          observer: '_filterChanged'
+          type: String
         },
 
         width: {
@@ -127,12 +122,6 @@
           selected: true
         };
         this.templatize(Polymer.dom(this).querySelector('template'));
-      },
-
-      _filterChanged: function(filter) {
-        if (filter !== undefined) {
-          this.headerTemplate = Polymer.dom(this.root).querySelector('#filter');
-        }
       }
     });
   </script>
