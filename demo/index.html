@@ -125,6 +125,12 @@
               align-items: center;
               height: 80px;
             }
+
+            #grid2 div[selected] {
+              display: flex;
+              align-items: center;
+              height: 100px;
+            }
           </style>
 
           <iron-grid id="grid2">
@@ -136,7 +142,7 @@
             </grid-column>
             <grid-column name="State">
               <template>
-                <div class$="[[item.user.location.state]]">[[item.user.location.state]]</div>
+                <div class$="[[item.user.location.state]]" selected$="[[selected]]">[[item.user.location.state]]</div>
               </template>
             </grid-column>
           </iron-grid>
@@ -247,6 +253,10 @@
             document.querySelector('#grid5').items = users;
             document.querySelector('#grid6').items = users;
             document.querySelector('#grid7').items = users;
+
+            document.querySelector('#grid2').$.list.addEventListener('selected-item-changed', function() {
+              document.querySelector('#grid2').$.list.notifyResize();
+            });
           }
         }
       };
