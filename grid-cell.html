@@ -99,6 +99,8 @@
       },
 
       _columnChanged: function(column, oldColumn) {
+        this.style.flexDirection = column.alignRight ? 'row-reverse' : 'row';
+
         this.style.flexBasis = column.width;
         this._addListener(column, oldColumn, 'width');
 
