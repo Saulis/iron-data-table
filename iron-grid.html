@@ -194,7 +194,7 @@
 
       _filterChanged: function() {
         if (this.items) {
-          this.$.list.items = this._filter(this.items);
+          this.$.list.items = this._filteredAndSortedItems(this.items, this.sortOrder);
         }
       },
 
@@ -212,17 +212,29 @@
         }.bind(this));
       },
 
+      _filteredAndSortedItems: function(items, sortOrder) {
+        // filtering creates a new array, which is nice since sorting happens in place.
+        var filteredItems = this._filter(this.items);
+        return this._sort(filteredItems, sortOrder);
+      },
+
       _sortOrderChanged: function(sortOrder) {
         if (this.items) {
-          // filtering creates a new array, which is nice since sorting happens in place.
-          var filteredItems = this._filter(this.items);
-          this.$.list.items = Array.prototype.sort.call(filteredItems, function(a, b) {
+          this.$.list.items = this._filteredAndSortedItems(this.items, sortOrder);
+        }
+      },
+
+      _sort: function(items, sortOrder) {
+        if (sortOrder && sortOrder.path) {
+          return Array.prototype.sort.call(items, function(a, b) {
             if (sortOrder.direction === 'asc') {
               return this._compare(this._deepFind(a, sortOrder.path), this._deepFind(b, sortOrder.path));
             } else {
               return this._compare(this._deepFind(b, sortOrder.path), this._deepFind(a, sortOrder.path));
             }
           }.bind(this));
+        } else {
+          return items;
         }
       },
 
