@@ -78,12 +78,16 @@
 
         _templateInstances: {
           type: Array,
-          value: []
+          value: function() {
+            return [];
+          }
         },
 
         _forwardedParentProps: {
           type: Object,
-          value: {}
+          value: function() {
+            return {};
+          }
         }
       },
 

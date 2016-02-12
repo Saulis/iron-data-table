@@ -165,14 +165,18 @@
         filter: {
           type: Array,
           notify: true,
-          value: []
+          value: function() {
+              return [];
+          }
         },
 
         sortOrder: {
           type: Object,
           notify: true,
           observer: '_sortOrderChanged',
-          value: {}
+          value: function() {
+            return  {};
+          }
         },
 
         columns: {
