@@ -10,7 +10,7 @@
         margin: 4px;
       }
 
-      div[icon] {
+      #sortIcon {
         position: relative;
         width: 24px;
         height: 24px;
@@ -33,12 +33,12 @@
         color: rgba(0, 0, 0, .54);
       }
 
-      div[direction='desc'] iron-icon[active] {
+      #sortIcon[direction='desc'] iron-icon[active] {
         transform: rotate(-180deg);
       }
     </style>
 
-    <div icon on-tap="_sort" hidden="[[hidden]]" direction$="[[direction]]">
+    <div id="sortIcon" on-tap="_sort" hidden="[[hidden]]" direction$="[[direction]]">
       <iron-icon active$="[[_isActive(path, sortOrder)]]" icon="arrow-upward"></iron-icon>
       <paper-ripple class="circle" center></paper-ripple>
     </div>
@@ -52,11 +52,20 @@
         direction: String,
         hidden: Boolean,
         path: String,
-        sortOrder: Object
+        sortOrder: {
+          type: Object,
+          observer: '_sortOrderChanged'
+        }
       },
 
       _isActive: function(path, sortOrder) {
         return path === sortOrder.path;
+      },
+
+      _sortOrderChanged: function(sortOrder) {
+        if (sortOrder.path === this.path) {
+          this.direction = sortOrder.direction;
+        }
       },
 
       _sort: function() {

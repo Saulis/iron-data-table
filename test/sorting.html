@@ -1,0 +1,128 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../test-fixture/test-fixture-mocha.js"></script>
+  <link rel="import" href="../../iron-test-helpers/iron-test-helpers.html">
+  <link rel="import" href="../iron-grid.html">
+</head>
+
+<body>
+  <test-fixture id="grid">
+    <template>
+      <iron-grid>
+        <grid-column name="First" sort="value">
+          <template>[[item.value]]</template>
+        </grid-column>
+        <grid-column name="Second" sort="value2">
+          <template>[[item.value2]]</template>
+        </grid-column>
+        <grid-column name="Third">
+          <template>[[item.value]]</template>
+        </grid-column>
+      </iron-grid>
+    </template>
+  </test-fixture>
+
+  <script>
+    describe('Sorting', function() {
+      var grid;
+      beforeEach(function(done) {
+        grid = fixture('grid');
+        grid.items = [{
+          value: 'foo',
+          value2: 'fooz'
+        }, {
+          value: 'bar',
+          value2: 'bah'
+        }, {
+          value: 'qux',
+          value2: 'baz'
+        }];
+
+        Polymer.Base.async(done);
+      });
+
+      function columnSortElement(index) {
+        var headerCells = grid.$.header.querySelectorAll('grid-cell');
+
+        return headerCells[index].querySelector('grid-column-sort');
+      }
+
+      describe('using sorting icon', function() {
+        it('should show sorting icon only for columns with sort property', function() {
+          expect(columnSortElement(0).hidden).to.be.false;
+          expect(columnSortElement(1).hidden).to.be.false;
+          expect(columnSortElement(2).hidden).to.be.true;
+        });
+
+        it('should activate sorting on tap', function() {
+          var sortIcon = columnSortElement(0).$.sortIcon;
+
+          fireEvent('tap', {}, sortIcon);
+
+          expect(sortIcon.querySelector('iron-icon').hasAttribute('active')).to.be.true;
+        });
+
+        it('should change sorting direction on tap', function() {
+          var columnSort = columnSortElement(0);
+
+          fireEvent('tap', {}, columnSort.$.sortIcon);
+
+          expect(columnSort.direction).to.eql('asc');
+        });
+
+        it('should sort items ascending on tap', function() {
+          var columnSort = columnSortElement(0);
+
+          fireEvent('tap', {}, columnSort.$.sortIcon);
+
+          expect(grid.sortOrder).to.eql({
+            path: 'value',
+            direction: 'asc'
+          });
+        });
+
+        it('should sort items descending on double tap', function() {
+          var columnSort = columnSortElement(0);
+
+          fireEvent('tap', {}, columnSort.$.sortIcon);
+          fireEvent('tap', {}, columnSort.$.sortIcon);
+
+          expect(grid.sortOrder).to.eql({
+            path: 'value',
+            direction: 'desc'
+          });
+        });
+      });
+
+      describe('using sortOrder property', function() {
+        it('should sort items ascending', function() {
+          grid.set('sortOrder', {path: 'value', direction: 'asc'});
+
+          expect(grid.$.list.items[0]).to.eql({value: 'bar', value2: 'bah'});
+        });
+
+        it('should sort items descending', function() {
+          grid.set('sortOrder', {path: 'value', direction: 'desc'});
+
+          expect(grid.$.list.items[0]).to.eql({value: 'qux', value2: 'baz'});
+        });
+
+        it('should update sorting icon', function() {
+          grid.set('sortOrder', {path: 'value2', direction: 'desc'});
+
+          var columnSort = columnSortElement(1);
+
+          expect(columnSort.direction).to.eql('desc');
+        });
+      });
+    });
+  </script>
+
+</body>
+
+</html>
