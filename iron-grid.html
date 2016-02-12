@@ -165,7 +165,7 @@
           type: Array,
           notify: true,
           value: function() {
-              return [];
+            return [];
           }
         },
 
@@ -174,7 +174,7 @@
           notify: true,
           observer: '_sortOrderChanged',
           value: function() {
-            return  {};
+            return {};
           }
         },
 
@@ -291,17 +291,18 @@
         this.$.container.style.width = '';
 
         this.async(function() {
-          this.$.container.style.width = this.scrollWidth + 'px';
-
-          this.debounce('scroller', function() {
-            // TODO: this is unnecessary if scroll bars are invisible.
-            this.$.container.style.width = Math.min(this.scrollWidth, this.clientWidth + this.scrollLeft) + 'px';
-          }, 100);
+          this.$.container.style.width = Math.min(this.scrollWidth, this.clientWidth + this.scrollLeft) + 'px';
         }.bind(this));
       },
 
       _onHorizontalScroll: function() {
-        this._resizeCellContainers();
+        if (!this.isDebouncerActive('scrolling')) {
+          this.$.container.style.width = this.scrollWidth + 'px';
+          this.debounce('scrolling', function() {
+            this.$.container.style.width = Math.min(this.scrollWidth, this.clientWidth + this.scrollLeft) + 'px';
+            // long timeout here to prevent jerkiness with the rubberband effect on iOS especially.
+          }, 1000);
+        }
       },
 
       _onVerticalScroll: function(e) {
