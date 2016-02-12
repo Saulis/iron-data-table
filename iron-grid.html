@@ -7,19 +7,16 @@
 
 <dom-module id="iron-grid">
   <template>
-    <style>
+    <style is="custom-style">
       :host {
         display: block;
-        font: 400 100%/1.5 Roboto, sans-serif;
-        font-size: 13px;
-        font-weight: 400;
-        line-height: 1.1;
-        color: rgba(0, 0, 0, 0.87);
         height: 400px;
         position: relative;
         overflow-x: auto;
         overflow-y: hidden;
         -webkit-overflow-scrolling: touch;
+
+        @apply(--iron-data-table-font);
       }
 
       #container {
@@ -29,17 +26,12 @@
       }
 
       #header {
-        background-color: #fafafa;
         display: flex;
         justify-content: space-between;
-        color: rgba(0, 0, 0, 0.54);
-        font-size: 12px;
-        font-weight: 600;
-        height: 56px;
         flex-grow: 0;
         flex-shrink: 0;
-        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
-        transition: box-shadow 200ms;
+
+        @apply(--iron-data-table-header);
       }
 
       #header.scrolled {
@@ -68,12 +60,13 @@
         cursor: pointer;
         display: flex;
         justify-content: space-between;
-        border-bottom: 1px solid #e3e3e3;
         opacity: 1;
+
+        @apply(--iron-data-table-row);
       }
 
       .item:hover {
-        background-color: #eee;
+        @apply(--iron-data-table-row-hover);
       }
 
       .item:after {
