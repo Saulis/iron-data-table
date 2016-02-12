@@ -21,7 +21,8 @@
     "iron-resizable-behavior": "polymerelements/iron-resizable-behavior#^1.0.2",
     "iron-icons": "polymerelements/iron-icons#^1.1.3",
     "iron-icon": "polymerelements/iron-icon#^1.0.7",
-    "paper-ripple": "polymerelements/paper-ripple#^1.0.5"
+    "paper-ripple": "polymerelements/paper-ripple#^1.0.5",
+    "iron-flex-layout": "polymerelements/iron-flex-layout#^1.2.3"
   },
   "devDependencies": {
     "webcomponentsjs": "^0.7.20",
