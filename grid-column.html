@@ -108,6 +108,21 @@
         }
       },
 
+      _forwardInstancePath: function(inst, path, value) {
+        var columns = Polymer.dom(this).parentNode.columns;
+
+        for(var c = 0; c < columns.length; c++) {
+          var instances = columns[c]._templateInstances;
+
+          for (var i = 0; i < instances.length; i++) {
+            var instance = instances[i];
+            if (instance.index == inst.index) {
+              instance.notifyPath(path, value);
+            }
+          }
+        }
+      },
+
       _templateInstancesChanged: function(changeRecord) {
         // TODO: (Saulis) make sure _templateInstances length is correct. Earlier testing seems producing weird results.
         if (changeRecord && changeRecord.indexSplices) {

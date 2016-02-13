@@ -53,13 +53,15 @@
               }
             }
           </style>
-          <paper-input value="{{foo}}" ></paper-input>
+          <paper-input value="{{foo}}"></paper-input>
           <iron-grid id="grid" items="[[users]]">
-            <grid-column name="First Name">
-              <template>[[item.user.name.first]]</template>
+            <grid-column name="Write">
+              <template>
+                <paper-input value="{{item.user.name.first}}"></paper-input>
+              </template>
             </grid-column>
-            <grid-column name="Last Name">
-              <template>[[item.user.name.last]]</template>
+            <grid-column name="Read">
+              <template>[[item.user.name.first]]</template>
             </grid-column>
             <grid-column name="Foo">
               <template>
