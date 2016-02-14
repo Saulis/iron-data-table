@@ -3,10 +3,9 @@
     <content></content>
   </template>
   <script>
-    window.vaadin = window.vaadin || {};
-    vaadin.elements = vaadin.elements || {};
-    vaadin.elements.grid = vaadin.elements.grid || {};
-    vaadin.elements.grid.cell = vaadin.elements.grid.cell || 0;
+    window.Polymer = window.Polymer || {};
+    Polymer.IronDataTable = Polymer.IronDataTable || {};
+    Polymer.IronDataTable.cell = Polymer.IronDataTable.cell || 0;
 
     Polymer({
       is: 'data-table-cell',
@@ -35,7 +34,7 @@
       },
 
       attached: function() {
-        var id = vaadin.elements.grid.cell++;
+        var id = Polymer.IronDataTable.cell++;
 
         this._contentElement = document.createElement('content');
         this._contentElement.setAttribute('select', '#cell' + id);
