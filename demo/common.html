@@ -1,0 +1,92 @@
+<link rel="import" href="../bower_components/iron-demo-helpers/demo-snippet.html">
+<link rel="import" href="../bower_components/iron-demo-helpers/demo-pages-shared-styles.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../bower_components/iron-flex-layout/classes/iron-flex-layout.html">
+
+<link rel="import" href="../default-styles.html">
+<link rel="import" href="../bower_components/iron-data-table/iron-data-table.html">
+
+<style is="custom-style" include="demo-pages-shared-styles">
+  .vertical-section-container {
+    max-width: 800px;
+  }
+
+  .centered {
+    max-width: 800px;
+  }
+
+  nav {
+    display: block;
+  }
+
+  nav.vertical-section {
+    margin-left: 0;
+    margin-right: 0;
+    padding-top: 8px;
+    padding-bottom: 0;
+  }
+
+  nav > ul {
+    padding: 0;
+  }
+
+  nav > ul > li {
+    padding: 0 24px 8px 0;
+    list-style: none;
+  }
+
+  nav a,
+  nav b {
+    @apply(--paper-font-button);
+  }
+
+  nav a {
+    color: var(--primary-color);
+    text-decoration: none;
+  }
+
+  nav b {
+    color: var(--secondary-text-color);
+  }
+
+  paper-button {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  iron-data-table {
+    height: 400px;
+  }
+</style>
+<script>
+  var users;
+  document.addEventListener('WebComponentsReady', function() {
+
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState == XMLHttpRequest.DONE) {
+        if (xhr.status == 200) {
+          var json = JSON.parse(xhr.responseText);
+          users = json.results;
+
+          var grids = document.querySelectorAll('iron-data-table');
+
+          for (var i = 0; i < grids.length; i++) {
+            grids[i].items = users;
+          }
+
+          var templates = document.querySelectorAll('#t');
+
+          for (var i = 0; i < templates.length; i++) {
+            templates[i].users = users;
+          }
+        }
+      }
+    };
+
+    xhr.open("GET", 'users.json', true);
+    xhr.send();
+  });
+</script>
