@@ -1,0 +1,37 @@
+<link rel="import" href="../paper-input/paper-input.html">
+
+<dom-module id="data-table-column-filter">
+  <style is="custom-style">
+    paper-input {
+      margin-bottom: 20px;
+      --paper-input-container-label: {
+        font-size: inherit;
+      }
+    }
+  </style>
+
+  <template>
+    <paper-input label="[[name]]" on-bind-value-changed="_bindValueChanged"></paper-input>
+  </template>
+  <script>
+    Polymer({
+      is: 'data-table-column-filter',
+
+      properties: {
+        name: {
+          type: String
+        },
+
+        path: {
+          type: String
+        }
+      },
+
+      _bindValueChanged: function(event) {
+        this.debounce('filter', function() {
+          this.fire('column-filter-changed', { path: this.path, filter: event.detail.value });
+        }.bind(this), 250);
+      }
+    });
+  </script>
+</dom-module>
