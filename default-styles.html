@@ -27,7 +27,19 @@
     };
 
     --iron-data-table-row-selected: {
-
+      color: var(--default-primary-color, #03A9FA);
     };
+
+    --iron-data-table-row-underline: {
+      background-color: var(--default-primary-color, #03A9F4);
+      bottom: 0;
+      content: "";
+      height: 2px;
+      left: 0;
+      pointer-events: none;
+      position: absolute;
+      right: 0;
+      transition: all 0.16s ease-in-out;
+    }
   }
 </style>

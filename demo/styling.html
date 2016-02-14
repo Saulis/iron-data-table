@@ -7,45 +7,63 @@
 
 <body>
   <div class="vertical-section-container centered">
-    <style>
-      .centered {
-        max-width: 800px;
-      }
-    </style>
-
     <nav class="vertical-section">
       <ul class="layout horizontal wrap">
-        <li><b>Data Binding</b></li>
+        <li><a href="index.html">Data Binding</a></li>
         <li><a href="columns.html">Column Properties</a></li>
-        <li><a href="styling.html">Styling</a></li>
+        <li><b>Styling</b></li>
         <li><a href="filtering.html">Filtering and Sorting</a></li>
       </ul>
     </nav>
 
-    <h4>Template Support</h4>
+    <h3>Style Mixins</h3>
     <demo-snippet>
       <template>
         <style is="custom-style">
-          #grid1 .index {
-            height: 10px;
-            width: 10px;
-            border-radius: 20px;
-            padding: 10px;
-            margin-left: -10px;
-          }
-
-          #grid1 .index[selected] {
-            color: #fff;
-            background-color: var(--default-primary-color);
+          #grid1 {
+            --default-primary-color: red;
+            --iron-data-table-font: {
+              font-family: 'Roboto', 'Noto', sans-serif;
+            }
+            --iron-data-table-header: {
+              background-color: #37474F;
+              color: #ccc;
+              font-size: 1.2em;
+              font-weight: 400;
+            }
+            --iron-data-table-row: {
+              height: 60px;
+              align-items: center;
+            }
+            --iron-data-table-row-odd: {
+              background-color: #fff;
+            }
+            --iron-data-table-row-even: {
+              background-color: #fafafa;
+            }
+            --iron-data-table-row-hover: {
+              background-color: #eee !important;
+            }
+            --iron-data-table-row-selected: {
+              background-color: var(--default-primary-color) !important;
+              color: #fff;
+            }
+            ;
+            --iron-data-table-row-underline: {
+              background-color: #fff;
+              bottom: 16px;
+              content: "";
+              height: 2px;
+              left: 13px;
+              pointer-events: none;
+              position: absolute;
+              right: 0px;
+              transition: all 1s ease-in-out;
+            }
           }
         </style>
 
         <iron-grid id="grid1">
-          <grid-column name="#" width="20px" flex="0">
-            <template>
-              <div class="index" selected$="[[selected]]">[[index]]</div>
-            </template>
-          </grid-column>
           <grid-column name="First Name">
             <template>[[item.user.name.first]]</template>
           </grid-column>
@@ -59,69 +77,65 @@
       </template>
     </demo-snippet>
 
-    <h4>Two-Way Binding Support</h4>
+    <h4>Custom Classes</h4>
     <demo-snippet>
       <template>
-
-        <template is="dom-bind" id="t" foo="">
-          <style is="custom-style">
-            paper-input {
-              margin-bottom: 20px;
-              --paper-input-container-label: {
-                font-size: inherit;
-              }
-            }
-          </style>
-          <iron-grid items="[[users]]">
+        <style is="custom-style">
+          #grid2 .index {
+            color: red;
+          }
+        </style>
+        <template is="dom-bind" id="t1">
+          <iron-grid id="grid2">
+            <grid-column name="#" width="20px" flex="0">
+              <template>
+                <div class="index">[[index]]</div>
+              </template>
+            </grid-column>
             <grid-column name="First Name">
               <template>
-                <paper-input value="{{foo}}"></paper-input>
+                <div>[[item.user.name.first]]</div>
               </template>
             </grid-column>
             <grid-column name="Last Name">
-              <template>
-                <paper-input value="{{item.user.name.last}}"></paper-input>
-              </template>
-            </grid-column>
-            <grid-column name="Email">
-              <template>[[item.user.email]]</template>
+              <template>[[item.user.name.last]]</template>
             </grid-column>
           </iron-grid>
         </template>
       </template>
     </demo-snippet>
 
-    <h4>Variable Row Height</h4>
+    <h3>Variable Row Height</h3>
     <demo-snippet>
       <template>
         <template is="dom-bind">
           <style is="custom-style">
-            #grid2 {
+            #grid3 {
               --iron-grid-row-height: auto;
             }
           </style>
 
           <style>
-            #grid2 .hawaii {
+            #grid3 .hawaii {
               display: flex;
               align-items: center;
               height: 40px;
             }
 
-            #grid2 .iowa {
+            #grid3 .iowa {
               display: flex;
               align-items: center;
               height: 80px;
             }
 
-            #grid2 div[selected] {
+            #grid3 div[selected] {
               display: flex;
               align-items: center;
               height: 100px;
             }
           </style>
 
-          <iron-grid id="grid2">
+          <iron-grid id="grid3">
             <grid-column name="First Name">
               <template>[[item.user.name.first]]</template>
             </grid-column>
@@ -138,111 +152,10 @@
       </template>
     </demo-snippet>
 
-    <h3>Column Resizing</h3>
-    <demo-snippet>
-      <template>
-        <template is="dom-bind">
-          <paper-input id="resize" label="1st Column Width" value="{{width}}"></paper-input>
-          <paper-input id="resize" label="2nd Column Width" value="{{width2}}"></paper-input>
-          <paper-input label="3rd Column Flex" value="{{flex}}"></paper-input>
-          <iron-grid id="grid3">
-            <grid-column name="First Name" width="[[width]]">
-              <template>[[item.user.name.first]]</template>
-            </grid-column>
-            <grid-column name="Last Name" width="[[width2]]">
-              <template>[[item.user.name.last]]</template>
-            </grid-column>
-            <grid-column name="Email" flex="[[flex]]">
-              <template>[[item.user.email]]</template>
-            </grid-column>
-          </iron-grid>
-        </template>
-      </template>
-    </demo-snippet>
-
-    <h3>Column Hiding</h3>
-    <demo-snippet>
-      <template>
-        <template is="dom-bind">
-          <paper-checkbox id="hide" checked="{{checked}}">Show/Hide 1st Column</paper-checkbox>
-          <iron-grid id="grid5">
-            <grid-column name="First Name" hidden="[[!checked]]">
-              <template>[[item.user.name.first]]</template>
-            </grid-column>
-            <grid-column name="Last Name">
-              <template>[[item.user.name.last]]</template>
-            </grid-column>
-            <grid-column name="Email">
-              <template>[[item.user.email]]</template>
-            </grid-column>
-          </iron-grid>
-        </template>
-      </template>
-    </demo-snippet>
-
-    <h3>Column Reordering</h3>
-    <demo-snippet>
-      <template>
-        <paper-button id="reorder" raised>Move 1st Column to 2nd</paper-button>
-        <script>
-          document.querySelector('#reorder').addEventListener('tap', function(e) {
-            var grid = document.querySelector('#grid6');
-
-            grid.columns[0].order = grid.columns[0].order ? 0 : 1;
-          });
-        </script>
-        <iron-grid id="grid6">
-          <grid-column name="First Name">
-            <template>[[item.user.name.first]]</template>
-          </grid-column>
-          <grid-column name="Last Name">
-            <template>[[item.user.name.last]]</template>
-          </grid-column>
-          <grid-column name="Email" order="2">
-            <template>[[item.user.email]]</template>
-          </grid-column>
-        </iron-grid>
-      </template>
-    </demo-snippet>
-
-    <h3>Filtering (work in progress, iron-list rendering issues in Shadow DOM)</h3>
-    <demo-snippet>
-      <template>
-        <iron-grid id="grid7">
-          <grid-column name="First Name" filter="user.name.first">
-            <template>[[item.user.name.first]]</template>
-          </grid-column>
-          <grid-column name="Last Name" filter="user.name.last">
-            <template>[[item.user.name.last]]</template>
-          </grid-column>
-          <grid-column name="Email">
-            <template>[[item.user.email]]</template>
-          </grid-column>
-        </iron-grid>
-      </template>
-    </demo-snippet>
-
-    <h3>Sorting</h3>
-    <demo-snippet>
-      <template>
-        <iron-grid id="grid8">
-          <grid-column name="First Name" filter="user.name.first" sort="user.name.first">
-            <template>[[item.user.name.first]]</template>
-          </grid-column>
-          <grid-column name="Last Name" sort="user.name.last">
-            <template>[[item.user.name.last]]</template>
-          </grid-column>
-          <grid-column name="Email">
-            <template>[[item.user.email]]</template>
-          </grid-column>
-        </iron-grid>
-      </template>
-    </demo-snippet>
-
     <h3>Alternative Alignment</h3>
     <demo-snippet>
       <template>
-        <iron-grid id="grid9">
+        <iron-grid>
           <grid-column name="First Name" align-right sort="user.name.first">
             <template>[[item.user.name.first]]</template>
           </grid-column>
@@ -253,38 +166,12 @@
       </template>
     </demo-snippet>
   </div>
-
   <script>
-    var users;
-    document.addEventListener('WebComponentsReady', function() {
-
-      var xhr = new XMLHttpRequest();
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState == XMLHttpRequest.DONE) {
-          if (xhr.status == 200) {
-            var json = JSON.parse(xhr.responseText);
-            users = json.results;
-
-            document.querySelector('#t').users = users;
-            document.querySelector('#grid1').items = users;
-            document.querySelector('#grid2').items = users;
-            document.querySelector('#grid3').items = users;
-            document.querySelector('#grid5').items = users;
-            document.querySelector('#grid6').items = users;
-            document.querySelector('#grid7').items = users;
-            document.querySelector('#grid8').items = users;
-            document.querySelector('#grid9').items = users;
-
-            document.querySelector('#grid2').$.list.addEventListener('selected-item-changed', function() {
-              document.querySelector('#grid2').$.list.notifyResize();
-            });
-          }
-        }
-      };
-
-      xhr.open("GET", 'users.json', true);
-      xhr.send();
+  document.addEventListener('WebComponentsReady', function() {
+    document.querySelector('#grid3').$.list.addEventListener('selected-item-changed', function(e) {
+      document.querySelector('#grid3').$.list.notifyResize();
     });
+  });
   </script>
 </body>
 

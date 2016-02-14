@@ -15,7 +15,6 @@
         overflow-x: auto;
         overflow-y: hidden;
         -webkit-overflow-scrolling: touch;
-
         @apply(--iron-data-table-font);
       }
 
@@ -30,7 +29,6 @@
         justify-content: space-between;
         flex-grow: 0;
         flex-shrink: 0;
-
         @apply(--iron-data-table-header);
       }
 
@@ -61,7 +59,6 @@
         display: flex;
         justify-content: space-between;
         opacity: 1;
-
         @apply(--iron-data-table-row);
       }
 
@@ -69,47 +66,29 @@
         @apply(--iron-data-table-row-hover);
       }
 
+      .item[selected] {
+        @apply(--iron-data-table-row-selected);
+      }
+
+      .item[even] {
+        @apply(--iron-data-table-row-even);
+      }
+
+      .item:not([even]) {
+        @apply(--iron-data-table-row-odd);
+      }
+
       .item:after {
-        background-color: var(--default-primary-color, #03A9F4);
-        bottom: 0;
-        content: "";
-        height: 2px;
-        left: 0;
-        pointer-events: none;
-        position: absolute;
-        right: 0;
-        transition: all 0.16s ease-in-out;
         -webkit-transform: scaleX(0.0);
         transform: scaleX(0.0);
         z-index: 1;
+
+        @apply(--iron-data-table-row-underline);
       }
 
       .item[selected]:after {
         -webkit-transform: scaleX(1.0);
         transform: scaleX(1.0);
-      }
-
-      .item[selected] {
-        -webkit-animation: item-focused 820ms ease-in-out;
-        animation: item-focused 820ms ease-in-out;
-      }
-
-      @-webkit-keyframes item-focused {
-        50% {
-          color: #03A9F4;
-        }
-        100% {
-          color: inherit;
-        }
-      }
-
-      @keyframes item-focused {
-        50% {
-          color: #03A9F4;
-        }
-        100% {
-          color: inherit;
-        }
       }
     </style>
     <div id="container">
@@ -123,7 +102,7 @@
 
       <iron-list id="list" as="item" items="[[items]]" on-scroll="_onVerticalScroll" selection-enabled>
         <template>
-          <div class="item" selected$="[[selected]]">
+          <div class="item" selected$="[[selected]]" even$="[[!_isEven(index)]]">
             <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
               <grid-cell column="[[column]]" template="[[column.template]]" bind="[[_bind(item, index, selected)]]"></grid-cell>
             </template>
@@ -186,6 +165,10 @@
           index: index,
           selected: selected
         };
+      },
+
+      _isEven: function(index) {
+        return index % 2 === 0;
       },
 
       _filterChanged: function() {
