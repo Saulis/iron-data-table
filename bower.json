@@ -3,7 +3,23 @@
   "authors": [
     "Sauli Tähkäpää <sauli@vaadin.com>"
   ],
-  "description": "",
+  "description": "iron-data-table is a Web Component for displaying data as a table or grid. Built on top of iron-list using Polymer.",
+  "keywords": [
+    "web-components",
+    "web components",
+    "webcomponents",
+    "web-component",
+    "web component",
+    "webcomponent",
+    "polymer",
+    "list",
+    "table",
+    "datatable",
+    "data-table",
+    "datagrid",
+    "data-grid",
+    "grid"
+  ],
   "main": "iron-data-table.html",
   "moduleType": [],
   "license": "Apache 2.0",
