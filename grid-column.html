@@ -23,45 +23,78 @@
       ],
 
       properties: {
-        alignRight: Boolean,
+        /**
+         * If `true`, cell contents will be aligned on the right
+         */
+        alignRight: {
+          type: Boolean,
+          value: false
+        },
 
+        /**
+         * Name of the column. This value is displayed in the header cell of the column
+         */
         name: {
           type: String,
           notify: true,
           value: ''
         },
 
+        /**
+         * Path to a property that will be filtered by this column. If set, a filter input
+         * will be automaticelly placed on the header cell of the column.
+         */
         filter: {
           type: String
         },
 
+        /**
+         * Minimum width of the column
+         */
         width: {
           type: String,
           notify: true,
           value: "100px"
         },
 
+        /**
+         * Ratio of how the extra space between columns is distributed. If every cell
+         * has the same `flex` value, the space will be distributed evenly.
+         */
         flex: {
           type: Number,
           notify: true,
           value: 1
         },
 
+        /**
+         * If `true`, the cells of this column will be hidden.
+         */
         hidden: {
           type: Boolean,
           notify: true,
           value: false
         },
 
+        /**
+         * Display order of the column in relation with the other columns.
+         */
         order: {
           type: Number,
           notify: true
         },
 
+        /**
+         * Path to a property that will be sorted by this column. If set, a sorting
+         * indicator will be automatically placed in the header cell of this column.
+         */
         sort: {
           type: String
         },
 
+        /**
+         * Template for the header cell
+         */
         headerTemplate: {
           type: Object,
           value: function() {
@@ -69,6 +102,9 @@
           }
         },
 
+        /**
+         * Template for the row item cell
+         */
         template: {
           type: Object,
           value: function() {
