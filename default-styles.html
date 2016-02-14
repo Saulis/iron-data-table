@@ -1,12 +1,10 @@
 <style is="custom-style">
   iron-grid {
-    --iron-data-table-font: {
-      font: 400 100%/1.5 Roboto, sans-serif;
-      font-size: 13px;
-      font-weight: 400;
-      line-height: 1.1;
-      color: rgba(0, 0, 0, 0.87);
-    };
+    font: 400 100%/1.5 Roboto, sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.1;
+    color: rgba(0, 0, 0, 0.87);
 
     --iron-data-table-header: {
       background-color: #fafafa;
@@ -30,7 +28,7 @@
       color: var(--default-primary-color, #03A9FA);
     };
 
-    --iron-data-table-row-underline: {
+    --iron-data-table-row-after: {
       background-color: var(--default-primary-color, #03A9F4);
       bottom: 0;
       content: "";
@@ -40,6 +38,15 @@
       position: absolute;
       right: 0;
       transition: all 0.16s ease-in-out;
+
+      -webkit-transform: scaleX(0.0);
+      transform: scaleX(0.0);
+      z-index: 1;
+    }
+
+    --iron-data-table-row-selected-after: {
+      -webkit-transform: scaleX(1.0);
+      transform: scaleX(1.0);
     }
   }
 </style>
