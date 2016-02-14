@@ -67,15 +67,15 @@
         </style>
 
         <iron-data-table id="grid1">
-          <grid-column name="First Name">
+          <data-table-column name="First Name">
             <template>[[item.user.name.first]]</template>
-          </grid-column>
-          <grid-column name="Last Name">
+          </data-table-column>
+          <data-table-column name="Last Name">
             <template>[[item.user.name.last]]</template>
-          </grid-column>
-          <grid-column name="Email" width="200px">
+          </data-table-column>
+          <data-table-column name="Email" width="200px">
             <template>[[item.user.email]]</template>
-          </grid-column>
+          </data-table-column>
         </iron-data-table>
       </template>
     </demo-snippet>
@@ -90,19 +90,19 @@
         </style>
         <template is="dom-bind" id="t1">
           <iron-data-table id="grid2">
-            <grid-column name="#" width="20px" flex="0">
+            <data-table-column name="#" width="20px" flex="0">
               <template>
                 <div class="index">[[index]]</div>
               </template>
-            </grid-column>
-            <grid-column name="First Name">
+            </data-table-column>
+            <data-table-column name="First Name">
               <template>
                 <div>[[item.user.name.first]]</div>
               </template>
-            </grid-column>
-            <grid-column name="Last Name">
+            </data-table-column>
+            <data-table-column name="Last Name">
               <template>[[item.user.name.last]]</template>
-            </grid-column>
+            </data-table-column>
           </iron-data-table>
         </template>
       </template>
@@ -139,17 +139,17 @@
           </style>
 
           <iron-data-table id="grid3">
-            <grid-column name="First Name">
+            <data-table-column name="First Name">
               <template>[[item.user.name.first]]</template>
-            </grid-column>
-            <grid-column name="Last Name">
+            </data-table-column>
+            <data-table-column name="Last Name">
               <template>[[item.user.name.last]]</template>
-            </grid-column>
-            <grid-column name="State">
+            </data-table-column>
+            <data-table-column name="State">
               <template>
                 <div class$="[[item.user.location.state]]" selected$="[[selected]]">[[item.user.location.state]]</div>
               </template>
-            </grid-column>
+            </data-table-column>
           </iron-data-table>
         </template>
       </template>
@@ -159,12 +159,12 @@
     <demo-snippet>
       <template>
         <iron-data-table>
-          <grid-column name="First Name" align-right sort="user.name.first">
+          <data-table-column name="First Name" align-right sort="user.name.first">
             <template>[[item.user.name.first]]</template>
-          </grid-column>
-          <grid-column name="Last Name" sort="user.name.last">
+          </data-table-column>
+          <data-table-column name="Last Name" sort="user.name.last">
             <template>[[item.user.name.last]]</template>
-          </grid-column>
+          </data-table-column>
         </iron-data-table>
       </template>
     </demo-snippet>

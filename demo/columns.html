@@ -24,15 +24,15 @@
           <paper-input label="2nd Column Width" value="{{width2}}"></paper-input>
           <paper-input label="3rd Column Flex" value="{{flex}}"></paper-input>
           <iron-data-table>
-            <grid-column name="First Name" width="[[width]]">
+            <data-table-column name="First Name" width="[[width]]">
               <template>[[item.user.name.first]]</template>
-            </grid-column>
-            <grid-column name="Last Name" width="[[width2]]">
+            </data-table-column>
+            <data-table-column name="Last Name" width="[[width2]]">
               <template>[[item.user.name.last]]</template>
-            </grid-column>
-            <grid-column name="Email" flex="[[flex]]">
+            </data-table-column>
+            <data-table-column name="Email" flex="[[flex]]">
               <template>[[item.user.email]]</template>
-            </grid-column>
+            </data-table-column>
           </iron-data-table>
         </template>
       </template>
@@ -44,15 +44,15 @@
         <template is="dom-bind">
           <paper-checkbox style="margin: 20px" checked="{{checked}}">Show 1st Column</paper-checkbox>
           <iron-data-table>
-            <grid-column name="First Name" hidden="[[!checked]]">
+            <data-table-column name="First Name" hidden="[[!checked]]">
               <template>[[item.user.name.first]]</template>
-            </grid-column>
-            <grid-column name="Last Name">
+            </data-table-column>
+            <data-table-column name="Last Name">
               <template>[[item.user.name.last]]</template>
-            </grid-column>
-            <grid-column name="Email">
+            </data-table-column>
+            <data-table-column name="Email">
               <template>[[item.user.email]]</template>
-            </grid-column>
+            </data-table-column>
           </iron-data-table>
         </template>
       </template>
@@ -66,15 +66,15 @@
           <paper-input label="2nd Column Order" value="{{order2}}"></paper-input>
           <paper-input label="3rd Column Order" value="{{order3}}"></paper-input>
           <iron-data-table>
-            <grid-column name="First Name" order="[[order1]]">
+            <data-table-column name="First Name" order="[[order1]]">
               <template>[[item.user.name.first]]</template>
-            </grid-column>
-            <grid-column name="Last Name" order="[[order2]]">
+            </data-table-column>
+            <data-table-column name="Last Name" order="[[order2]]">
               <template>[[item.user.name.last]]</template>
-            </grid-column>
-            <grid-column name="Email" order="[[order3]]">
+            </data-table-column>
+            <data-table-column name="Email" order="[[order3]]">
               <template>[[item.user.email]]</template>
-            </grid-column>
+            </data-table-column>
           </iron-data-table>
         </template>
       </template>

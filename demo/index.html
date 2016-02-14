@@ -20,25 +20,25 @@
     <demo-snippet>
       <template>
         <iron-data-table>
-          <grid-column name="#" width="20px" flex="0">
+          <data-table-column name="#" width="20px" flex="0">
             <template>[[index]]</template>
-          </grid-column>
-          <grid-column name="Selected" width="40px" flex="0">
+          </data-table-column>
+          <data-table-column name="Selected" width="40px" flex="0">
             <template>
               <div hidden="[[!selected]]">Yes</div>
             </template>
-          </grid-column>
-          <grid-column name="Picture" width="50px" flex="0">
+          </data-table-column>
+          <data-table-column name="Picture" width="50px" flex="0">
             <template>
               <img src="[[item.user.picture.thumbnail]]" />
             </template>
-          </grid-column>
-          <grid-column name="First Name">
+          </data-table-column>
+          <data-table-column name="First Name">
             <template>[[item.user.name.first]]</template>
-          </grid-column>
-          <grid-column name="Last Name">
+          </data-table-column>
+          <data-table-column name="Last Name">
             <template>[[item.user.name.last]]</template>
-          </grid-column>
+          </data-table-column>
         </iron-data-table>
       </template>
     </demo-snippet>
@@ -57,19 +57,19 @@
           </style>
           <paper-input label="Foo" value="{{foo}}"></paper-input>
           <iron-data-table items="[[users]]">
-            <grid-column name="First Name">
+            <data-table-column name="First Name">
               <template>
                 <paper-input value="{{item.user.name.first}}"></paper-input>
               </template>
-            </grid-column>
-            <grid-column name="First Name Also">
+            </data-table-column>
+            <data-table-column name="First Name Also">
               <template>[[item.user.name.first]]</template>
-            </grid-column>
-            <grid-column name="Foo">
+            </data-table-column>
+            <data-table-column name="Foo">
               <template>
                 <paper-input value="{{foo}}"></paper-input>
               </template>
-            </grid-column>
+            </data-table-column>
           </iron-data-table>
         </template>
       </template>
