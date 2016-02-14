@@ -200,10 +200,17 @@ inspired styles to your `iron-data-table`.
       observers: ['_filterChanged(filter.*)'],
 
       properties: {
+        /**
+         * An array containing the items which will be stamped to the column template
+         * instances.
+         */
         items: {
           type: Array
         },
 
+        /**
+         * An array containing path/filter value pairs that are used to filter the items
+         */
         filter: {
           type: Array,
           notify: true,
@@ -212,6 +219,9 @@ inspired styles to your `iron-data-table`.
           }
         },
 
+        /**
+         * An object with a path/sortorder ('asc' or 'desc') that is used to sort the items
+         */
         sortOrder: {
           type: Object,
           notify: true,
@@ -221,6 +231,10 @@ inspired styles to your `iron-data-table`.
           }
         },
 
+        /**
+         * An array of `data-table-column` elements which contain the templates
+         * to be stamped with items.
+         */
         columns: {
           type: Array,
           notify: true,
