@@ -16,11 +16,12 @@ limitations under the License.
 -->
 
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-list/iron-list.html">
+<link rel="import" href="../iron-resizable-behavior/iron-resizable-behavior.html">
+
 <link rel="import" href="grid-column.html">
 <link rel="import" href="grid-column-sort.html">
 <link rel="import" href="grid-cell.html">
-<link rel="import" href="../iron-list/iron-list.html">
-<link rel="import" href="../iron-resizable-behavior/iron-resizable-behavior.html">
 
 <!--
 `iron-data-table` displays a table or a grid of data.
@@ -86,6 +87,7 @@ There are several custom properties and mixins you can use to style the componen
 
 Custom property | Description
 ----------------|-------------
+`--iron-data-table-cell-height` | Property that determines the height of the cells
 `--iron-data-table-header` | Mixin applied to the header element
 `--iron-data-table-row` | Mixin applied to the row item element
 `--iron-data-table-row-hover` | Mixin applied to the row item element when hovered on
@@ -99,7 +101,7 @@ inspired styles to your `iron-data-table`.
 @demo demo/index.html
 -->
 
-<dom-module id="iron-grid">
+<dom-module id="iron-data-table">
   <template>
     <style is="custom-style">
       :host {
@@ -133,7 +135,7 @@ inspired styles to your `iron-data-table`.
       .item > grid-cell:not([hidden]) {
         flex: 1 0 100px;
         padding: 0 24px 0 24px;
-        height: var(--iron-grid-row-height, 48px);
+        height: var(--iron-data-table-cell-height, 48px);
         display: flex;
         align-items: center;
         overflow: hidden;
@@ -202,7 +204,7 @@ inspired styles to your `iron-data-table`.
 
   <script>
     Polymer({
-      is: 'iron-grid',
+      is: 'iron-data-table',
 
       behaviors: [
         Polymer.IronResizableBehavior

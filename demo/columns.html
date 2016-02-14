@@ -23,7 +23,7 @@
           <paper-input label="1st Column Width" value="{{width}}"></paper-input>
           <paper-input label="2nd Column Width" value="{{width2}}"></paper-input>
           <paper-input label="3rd Column Flex" value="{{flex}}"></paper-input>
-          <iron-grid>
+          <iron-data-table>
             <grid-column name="First Name" width="[[width]]">
               <template>[[item.user.name.first]]</template>
             </grid-column>
@@ -33,7 +33,7 @@
             <grid-column name="Email" flex="[[flex]]">
               <template>[[item.user.email]]</template>
             </grid-column>
-          </iron-grid>
+          </iron-data-table>
         </template>
       </template>
     </demo-snippet>
@@ -43,7 +43,7 @@
       <template>
         <template is="dom-bind">
           <paper-checkbox style="margin: 20px" checked="{{checked}}">Show 1st Column</paper-checkbox>
-          <iron-grid>
+          <iron-data-table>
             <grid-column name="First Name" hidden="[[!checked]]">
               <template>[[item.user.name.first]]</template>
             </grid-column>
@@ -53,7 +53,7 @@
             <grid-column name="Email">
               <template>[[item.user.email]]</template>
             </grid-column>
-          </iron-grid>
+          </iron-data-table>
         </template>
       </template>
     </demo-snippet>
@@ -65,7 +65,7 @@
           <paper-input label="1st Column Order" value="{{order1}}"></paper-input>
           <paper-input label="2nd Column Order" value="{{order2}}"></paper-input>
           <paper-input label="3rd Column Order" value="{{order3}}"></paper-input>
-          <iron-grid>
+          <iron-data-table>
             <grid-column name="First Name" order="[[order1]]">
               <template>[[item.user.name.first]]</template>
             </grid-column>
@@ -75,7 +75,7 @@
             <grid-column name="Email" order="[[order3]]">
               <template>[[item.user.email]]</template>
             </grid-column>
-          </iron-grid>
+          </iron-data-table>
         </template>
       </template>
     </demo-snippet>

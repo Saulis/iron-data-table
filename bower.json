@@ -1,10 +1,10 @@
 {
-  "name": "iron-grid",
+  "name": "iron-data-table",
   "authors": [
     "Sauli Tähkäpää <sauli@vaadin.com>"
   ],
   "description": "",
-  "main": "iron-grid.html",
+  "main": "iron-data-table.html",
   "moduleType": [],
   "license": "Apache 2.0",
   "homepage": "",

@@ -19,7 +19,7 @@
     <h3>Filtering</h3>
     <demo-snippet>
       <template>
-        <iron-grid>
+        <iron-data-table>
           <grid-column name="First Name" filter="user.name.first">
             <template>[[item.user.name.first]]</template>
           </grid-column>
@@ -29,14 +29,14 @@
           <grid-column name="Email">
             <template>[[item.user.email]]</template>
           </grid-column>
-        </iron-grid>
+        </iron-data-table>
       </template>
     </demo-snippet>
 
     <h3>Sorting</h3>
     <demo-snippet>
       <template>
-        <iron-grid>
+        <iron-data-table>
           <grid-column name="First Name" filter="user.name.first" sort="user.name.first">
             <template>[[item.user.name.first]]</template>
           </grid-column>
@@ -46,7 +46,7 @@
           <grid-column name="Email">
             <template>[[item.user.email]]</template>
           </grid-column>
-        </iron-grid>
+        </iron-data-table>
       </template>
     </demo-snippet>
   </div>

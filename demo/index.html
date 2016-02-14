@@ -19,7 +19,7 @@
     <h3>Template Support</h3>
     <demo-snippet>
       <template>
-        <iron-grid>
+        <iron-data-table>
           <grid-column name="#" width="20px" flex="0">
             <template>[[index]]</template>
           </grid-column>
@@ -39,7 +39,7 @@
           <grid-column name="Last Name">
             <template>[[item.user.name.last]]</template>
           </grid-column>
-        </iron-grid>
+        </iron-data-table>
       </template>
     </demo-snippet>
 
@@ -56,7 +56,7 @@
             }
           </style>
           <paper-input label="Foo" value="{{foo}}"></paper-input>
-          <iron-grid id="grid" items="[[users]]">
+          <iron-data-table items="[[users]]">
             <grid-column name="First Name">
               <template>
                 <paper-input value="{{item.user.name.first}}"></paper-input>
@@ -70,7 +70,7 @@
                 <paper-input value="{{foo}}"></paper-input>
               </template>
             </grid-column>
-          </iron-grid>
+          </iron-data-table>
         </template>
       </template>
     </demo-snippet>

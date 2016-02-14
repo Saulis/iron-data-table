@@ -6,7 +6,7 @@
 <link rel="import" href="../../iron-flex-layout/classes/iron-flex-layout.html">
 
 <link rel="import" href="../default-styles.html">
-<link rel="import" href="../iron-grid.html">
+<link rel="import" href="../iron-data-table.html">
 
 <style is="custom-style" include="demo-pages-shared-styles">
   .vertical-section-container {
@@ -56,7 +56,7 @@
     margin-right: 10px;
   }
 
-  iron-grid {
+  iron-data-table {
     height: 400px;
   }
 </style>
@@ -71,7 +71,7 @@
           var json = JSON.parse(xhr.responseText);
           users = json.results;
 
-          var grids = document.querySelectorAll('iron-grid');
+          var grids = document.querySelectorAll('iron-data-table');
 
           for (var i = 0; i < grids.length; i++) {
             grids[i].items = users;
