@@ -1,4 +1,4 @@
-<dom-module id="grid-cell">
+<dom-module id="data-table-cell">
   <template>
     <content></content>
   </template>
@@ -9,7 +9,7 @@
     vaadin.elements.grid.cell = vaadin.elements.grid.cell || 0;
 
     Polymer({
-      is: 'grid-cell',
+      is: 'data-table-cell',
 
       properties: {
         template: {
@@ -77,7 +77,7 @@
         this.hidden = e.detail.value;
       },
 
-      // data and template might be bound in different order, depending on how <grid-cell>
+      // data and template might be bound in different order, depending on how <data-table-cell>
       // is placed in the DOM. We need to call _render() after they've been both bound.
       _bindChanged: function(data) {
         if (this.column && this.template) {
