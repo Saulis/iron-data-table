@@ -1,4 +1,4 @@
-<link rel="import" href="grid-column-filter.html">
+<link rel="import" href="data-table-column-filter.html">
 
 <dom-module id="data-table-column">
   <template>
@@ -9,7 +9,7 @@
     </style>
 
     <template id="header">
-      <grid-column-filter name="[[item.name]]" path="[[item.filter]]" hidden="[[!item.filter]]"></grid-column-filter>
+      <data-table-column-filter name="[[item.name]]" path="[[item.filter]]" hidden="[[!item.filter]]"></data-table-column-filter>
       <div hidden="[[item.filter]]">[[item.name]]</div>
     </template>
 

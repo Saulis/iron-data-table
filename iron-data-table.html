@@ -20,7 +20,7 @@ limitations under the License.
 <link rel="import" href="../iron-resizable-behavior/iron-resizable-behavior.html">
 
 <link rel="import" href="data-table-column.html">
-<link rel="import" href="grid-column-sort.html">
+<link rel="import" href="data-table-column-sort.html">
 <link rel="import" href="grid-cell.html">
 
 <!--
@@ -185,7 +185,7 @@ inspired styles to your `iron-data-table`.
       <div id="header">
         <template is="dom-repeat" items="[[columns]]" as="column">
           <grid-cell column="[[column]]" template="[[column.headerTemplate]]" bind="[[_bind(column)]]">
-            <grid-column-sort sort-order="[[sortOrder]]" path="[[column.sort]]" on-sort-direction-changed="_sortDirectionChanged" hidden="[[!column.sort]]"></grid-column-sort>
+            <data-table-column-sort sort-order="[[sortOrder]]" path="[[column.sort]]" on-sort-direction-changed="_sortDirectionChanged" hidden="[[!column.sort]]"></data-table-column-sort>
           </grid-cell>
         </template>
       </div>
