@@ -1,5 +1,6 @@
-## `<iron-data-table>`
-![](https://travis-ci.org/Saulis/iron-data-table.svg?branch=master)
+![Bower version](https://img.shields.io/bower/i/iron-data-table.svg) [![Build Status](https://travis-ci.org/Saulis/iron-data-table.svg?branch=master)](https://travis-ci.org/Saulis/iron-data-table) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Saulis/iron-data-table?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+
+# &lt;iron-data-table&gt;
 
 [Demos and API Documentation](https://saulis.github.io/iron-data-table/)
 
