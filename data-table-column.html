@@ -97,6 +97,7 @@
          */
         headerTemplate: {
           type: Object,
+          readOnly: true,
           value: function() {
             return Polymer.dom(this.root).querySelector('#header');
           }
@@ -107,6 +108,7 @@
          */
         template: {
           type: Object,
+          readOnly: true,
           value: function() {
             return Polymer.dom(this).querySelector('template');
           }
