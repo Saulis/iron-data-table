@@ -1,5 +1,5 @@
-# `<iron-data-table>`
-![](iron-data-table.gif)
+## `<iron-data-table>`
+![](iron-data-table.png)
 
 `iron-data-table` displays a table or a grid of data.
 It builds on top of `iron-list`, which provides the foundation for features like
