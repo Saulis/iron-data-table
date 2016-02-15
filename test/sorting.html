@@ -7,23 +7,23 @@
   <script src="../../web-component-tester/browser.js"></script>
   <script src="../../test-fixture/test-fixture-mocha.js"></script>
   <link rel="import" href="../../iron-test-helpers/iron-test-helpers.html">
-  <link rel="import" href="../iron-grid.html">
+  <link rel="import" href="../iron-data-table.html">
 </head>
 
 <body>
   <test-fixture id="grid">
     <template>
-      <iron-grid>
-        <grid-column name="First" sort="value">
+      <iron-data-table>
+        <data-table-column name="First" sort="value">
           <template>[[item.value]]</template>
-        </grid-column>
-        <grid-column name="Second" sort="value2">
+        </data-table-column>
+        <data-table-column name="Second" sort="value2">
           <template>[[item.value2]]</template>
-        </grid-column>
-        <grid-column name="Third">
+        </data-table-column>
+        <data-table-column name="Third">
           <template>[[item.value]]</template>
-        </grid-column>
-      </iron-grid>
+        </data-table-column>
+      </iron-data-table>
     </template>
   </test-fixture>
 
@@ -47,9 +47,9 @@
       });
 
       function columnSortElement(index) {
-        var headerCells = grid.$.header.querySelectorAll('grid-cell');
+        var headerCells = grid.$.header.querySelectorAll('data-table-cell');
 
-        return headerCells[index].querySelector('grid-column-sort');
+        return headerCells[index].querySelector('data-table-column-sort');
       }
 
       describe('using sorting icon', function() {

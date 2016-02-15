@@ -193,7 +193,7 @@ inspired styles to your `iron-data-table`.
         </template>
       </div>
 
-      <iron-list id="list" as="item" items="[[items]]" on-scroll="_onVerticalScroll" selection-enabled>
+      <iron-list id="list" as="item" items="[[items]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]">
         <template>
           <div class="item" selected$="[[selected]]" even$="[[!_isEven(index)]]">
             <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
@@ -239,6 +239,14 @@ inspired styles to your `iron-data-table`.
           value: function() {
             return [];
           }
+        },
+
+        /**
+         * If `true`, tapping a row will select the item.
+         */
+        selectionEnabled: {
+          type: Boolean,
+          value: false
         },
 
         /**

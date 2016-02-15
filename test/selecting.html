@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../test-fixture/test-fixture-mocha.js"></script>
+  <link rel="import" href="../../iron-test-helpers/iron-test-helpers.html">
+  <link rel="import" href="../iron-data-table.html">
+</head>
+
+<body>
+  <test-fixture id="grid">
+    <template>
+      <iron-data-table>
+        <data-table-column name="First" sort="value">
+          <template>[[item.value]]</template>
+        </data-table-column>
+        <data-table-column name="Second" sort="value2">
+          <template>[[item.value2]]</template>
+        </data-table-column>
+        <data-table-column name="Third">
+          <template>[[item.value]]</template>
+        </data-table-column>
+      </iron-data-table>
+    </template>
+  </test-fixture>
+
+  <script>
+    describe('Selecting', function() {
+      var grid;
+      beforeEach(function(done) {
+        grid = fixture('grid');
+        grid.items = [{
+          value: 'foo',
+          value2: 'fooz'
+        }, {
+          value: 'bar',
+          value2: 'bah'
+        }, {
+          value: 'qux',
+          value2: 'baz'
+        }];
+
+        Polymer.Base.async(done);
+      });
+
+      function columnSortElement(index) {
+        var headerCells = grid.$.header.querySelectorAll('grid-cell');
+
+        return headerCells[index].querySelector('data-table-column-sort');
+      }
+
+      it('should bind selection enabled property', function() {
+        grid.selectionEnabled = true;
+
+        expect(grid.$.list.selectionEnabled).to.be.true;
+      });
+    });
+  </script>
+
+</body>
+
+</html>
