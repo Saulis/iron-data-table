@@ -74,6 +74,9 @@ bound from the model object provided to the template scope):
 - Native Shadow DOM support
 - Column manipulation, resizing, hiding, reordering
 
+#### Notable Known Issues
+- `<iron-list>` 1.2.x doesn't render all rows. (#4)
+
 ## Roadmap (1.x)
 In random order: (please let me know if something is missing or misplaced)
 - Multi-select
