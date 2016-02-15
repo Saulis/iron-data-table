@@ -3,7 +3,23 @@
   "authors": [
     "Sauli Tähkäpää <sauli@vaadin.com>"
   ],
-  "description": "",
+  "description": "iron-data-table is a Web Component for displaying data as a table or grid. Built on top of iron-list using Polymer.",
+  "keywords": [
+    "web-components",
+    "web components",
+    "webcomponents",
+    "web-component",
+    "web component",
+    "webcomponent",
+    "polymer",
+    "list",
+    "table",
+    "datatable",
+    "data-table",
+    "datagrid",
+    "data-grid",
+    "grid"
+  ],
   "main": "iron-data-table.html",
   "moduleType": [],
   "license": "Apache 2.0",
@@ -21,12 +37,12 @@
     "iron-resizable-behavior": "polymerelements/iron-resizable-behavior#^1.0.2",
     "iron-icons": "polymerelements/iron-icons#^1.1.3",
     "iron-icon": "polymerelements/iron-icon#^1.0.7",
+    "paper-input": "polymerelements/paper-input#^1.1.5",
     "paper-ripple": "polymerelements/paper-ripple#^1.0.5"
   },
   "devDependencies": {
     "webcomponentsjs": "^0.7.20",
     "iron-demo-helpers": "polymerelements/iron-demo-helpers#^1.0.3",
-    "paper-input": "polymerelements/paper-input#^1.1.5",
     "paper-checkbox": "polymerelements/paper-checkbox#^1.1.0",
     "paper-button": "polymerelements/paper-button#^1.0.11",
     "web-component-tester": "^4.2.0",
@@ -35,11 +51,11 @@
     "iron-flex-layout": "polymerelements/iron-flex-layout#^1.2.3",
     "iron-component-page": "polymerelements/iron-component-page#^1.1.4"
   },
-  "_release": "841fc5cd43",
+  "_release": "ae5d4d6311",
   "_resolution": {
     "type": "branch",
     "branch": "master",
-    "commit": "841fc5cd43f0f0a96327b71dbe4a61d7e772464d"
+    "commit": "ae5d4d6311d5c8a486de6a820f7bb7d7debcbaf3"
   },
   "_source": "git://github.com/Saulis/iron-data-table.git",
   "_target": "*",
