@@ -46,16 +46,33 @@
         Polymer.Base.async(done);
       });
 
-      function columnSortElement(index) {
-        var headerCells = grid.$.header.querySelectorAll('grid-cell');
-
-        return headerCells[index].querySelector('data-table-column-sort');
-      }
-
       it('should bind selection enabled property', function() {
         grid.selectionEnabled = true;
 
         expect(grid.$.list.selectionEnabled).to.be.true;
+      });
+
+      it('should select item', function() {
+        grid.selectItem(0);
+
+        expect(grid.selectedItem).to.eql(grid.items[0]);
+      });
+
+      it('should fire `selected-item-changed` event', function() {
+        var spy = sinon.spy();
+        grid.addEventListener('selected-item-changed', spy);
+
+        grid.selectItem(0);
+
+        expect(spy.callCount).to.eql(1);
+      });
+
+      it('should deselect item', function() {
+        grid.selectItem(0);
+
+        grid.deselectItem(0);
+
+        expect(grid.selectedItem).to.be.null;
       });
     });
   </script>

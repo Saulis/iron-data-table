@@ -193,7 +193,7 @@ inspired styles to your `iron-data-table`.
         </template>
       </div>
 
-      <iron-list id="list" as="item" items="[[items]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]">
+      <iron-list id="list" as="item" items="[[items]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" selected-item="{{selectedItem}}">
         <template>
           <div class="item" selected$="[[selected]]" even$="[[!_isEven(index)]]">
             <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
@@ -250,6 +250,15 @@ inspired styles to your `iron-data-table`.
         },
 
         /**
+         * This is the currently selected item, or `null`
+         * if no item is selected.
+         */
+        selectedItem: {
+          type: Object,
+          notify: true
+        },
+
+        /**
          * An object with a path/sortorder ('asc' or 'desc') that is used to sort the items
          */
         sortOrder: {
@@ -272,6 +281,26 @@ inspired styles to your `iron-data-table`.
             return Polymer.dom(this).querySelectorAll('data-table-column');
           }
         }
+      },
+
+      /**
+       * Select the list item at the given index.
+       *
+       * @method selectItem
+       * @param {(Object|number)} item The item object or its index
+       */
+      selectItem: function(item) {
+        this.$.list.selectItem(item);
+      },
+
+      /**
+       * Deselects the given item list if it is already selected.
+       *
+       * @method deselect
+       * @param {(Object|number)} item The item object or its index
+       */
+      deselectItem: function(item) {
+        this.$.list.deselectItem(item);
       },
 
       _bind: function(item, index, selected) {
