@@ -6,6 +6,8 @@
 
 [Demos and API Documentation](https://saulis.github.io/iron-data-table/)
 
+To install, run: `bower install iron-data-table`
+
 ![](iron-data-table.png)
 
 `iron-data-table` displays a table or a grid of data.
