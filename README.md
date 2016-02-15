@@ -1,4 +1,8 @@
 ## `<iron-data-table>`
+![](https://travis-ci.org/Saulis/iron-data-table.svg?branch=master)
+
+[Demos and API Documentation](https://saulis.github.io/iron-data-table/)
+
 ![](iron-data-table.png)
 
 `iron-data-table` displays a table or a grid of data.
