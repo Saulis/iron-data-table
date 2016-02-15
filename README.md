@@ -1,5 +1,5 @@
-[![Bower version](https://badge.fury.io/bo/iron-data-table.svg)](https://badge.fury.io/bo/iron-data-table) 
-[![Build Status](https://travis-ci.org/Saulis/iron-data-table.svg?branch=master)](https://travis-ci.org/Saulis/iron-data-table) 
+[![Bower version](https://badge.fury.io/bo/iron-data-table.svg)](https://badge.fury.io/bo/iron-data-table)
+[![Build Status](https://travis-ci.org/Saulis/iron-data-table.svg?branch=master)](https://travis-ci.org/Saulis/iron-data-table)
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Saulis/iron-data-table?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 # &lt;iron-data-table&gt;
@@ -8,7 +8,7 @@
 
 To install, run: `bower install iron-data-table`
 
-![](iron-data-table.png)
+![](https://github.com/Saulis/iron-data-table/raw/master/iron-data-table.png)
 
 `iron-data-table` displays a table or a grid of data.
 It builds on top of `iron-list`, which provides the foundation for features like
