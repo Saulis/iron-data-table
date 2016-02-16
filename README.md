@@ -1,4 +1,4 @@
-[![Bower version](https://badge.fury.io/bo/iron-data-table.svg)](https://badge.fury.io/bo/iron-data-table)
+![Bower version](https://img.shields.io/bower/v/iron-data-table.svg)
 [![Build Status](https://travis-ci.org/Saulis/iron-data-table.svg?branch=master)](https://travis-ci.org/Saulis/iron-data-table)
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Saulis/iron-data-table?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
