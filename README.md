@@ -87,6 +87,8 @@ In random order: (please let me know if something is missing or misplaced)
 - Multi-select
 - Lazy Loading
 - Custom Header / Footer templates
+- Row Grouping
+- Row Details
 - Frozen Columns
 - Drag and Drop Column Resizing
 - Drag and Drop Column Reordering
