@@ -1,0 +1,16 @@
+<script>
+  var users;
+
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState == XMLHttpRequest.DONE) {
+      if (xhr.status == 200) {
+        var json = JSON.parse(xhr.responseText);
+        users = json.results;
+      }
+    }
+  };
+
+  xhr.open("GET", 'users.json', true);
+  xhr.send();
+</script>
