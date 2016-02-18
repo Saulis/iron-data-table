@@ -89,6 +89,7 @@ Custom property | Description
 ----------------|-------------
 `--iron-data-table-cell-height` | Property that determines the height of the cells
 `--iron-data-table-header` | Mixin applied to the header element
+`--iron-data-table-row-group` | Mixin applied to the row group element
 `--iron-data-table-row` | Mixin applied to the row item element
 `--iron-data-table-row-hover` | Mixin applied to the row item element when hovered on
 `--iron-data-table-row-selected` | Mixin applied to the selected row item elements
@@ -145,16 +146,12 @@ inspired styles to your `iron-data-table`.
       }
 
       .group {
-        background-color: #eee;
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: 0 24px 0 24px;
-        border-bottom: 1px solid #e3e3e3;
-        border-top: 1px solid #e3e3e3;
-        font-size: 16px;
-        font-weight: 600;
-        height: 56px;
+
+        @apply(--iron-data-table-row-group);
       }
 
       #list {

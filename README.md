@@ -78,6 +78,7 @@ bound from the model object provided to the template scope):
 - Custom styling support for templates
 - Native Shadow DOM support
 - Column manipulation, resizing, hiding, reordering
+- Row Grouping (1.0.0-alpha2)
 
 #### Notable Known Issues
 - `<iron-list>` 1.2.x doesn't render all rows. (#4)
@@ -87,7 +88,6 @@ In random order: (please let me know if something is missing or misplaced)
 - Multi-select
 - Lazy Loading
 - Custom Header / Footer templates
-- Row Grouping
 - Row Details
 - Frozen Columns
 - Drag and Drop Column Resizing
