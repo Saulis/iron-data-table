@@ -89,6 +89,7 @@ Custom property | Description
 ----------------|-------------
 `--iron-data-table-cell-height` | Property that determines the height of the cells
 `--iron-data-table-header` | Mixin applied to the header element
+`--iron-data-table-row-group` | Mixin applied to the row group element
 `--iron-data-table-row` | Mixin applied to the row item element
 `--iron-data-table-row-hover` | Mixin applied to the row item element when hovered on
 `--iron-data-table-row-selected` | Mixin applied to the selected row item elements
@@ -127,7 +128,6 @@ inspired styles to your `iron-data-table`.
         flex-shrink: 0;
         box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
         transition: box-shadow 200ms;
-
         @apply(--iron-data-table-header);
       }
 
@@ -143,6 +143,15 @@ inspired styles to your `iron-data-table`.
         display: flex;
         align-items: center;
         overflow: hidden;
+      }
+
+      .group {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 24px 0 24px;
+
+        @apply(--iron-data-table-row-group);
       }
 
       #list {
@@ -196,10 +205,15 @@ inspired styles to your `iron-data-table`.
 
       <iron-list id="list" as="item" items="[[items]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" selected-item="{{selectedItem}}">
         <template>
-          <div class="item" selected$="[[selected]]" even$="[[!_isEven(index)]]">
-            <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
-              <data-table-cell column="[[column]]" template="[[column.template]]" bind="[[_bind(item, index, selected)]]"></data-table-cell>
-            </template>
+          <div>
+            <div class="group" hidden$="[[!_getGroup(index, item)]]" on-mousedown="_stopPropagation" on-touchstart="_stopPropagation">
+              <div>[[_getGroup(index, item)]]</div>
+            </div>
+            <div class="item" selected$="[[selected]]" even$="[[!_isEven(index)]]">
+              <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
+                <data-table-cell column="[[column]]" template="[[column.template]]" bind="[[_bind(item, index, selected)]]"></data-table-cell>
+              </template>
+            </div>
           </div>
         </template>
       </iron-list>
@@ -220,7 +234,7 @@ inspired styles to your `iron-data-table`.
         'scroll': '_onHorizontalScroll'
       },
 
-      observers: ['_filterChanged(filter.*)'],
+      observers: ['_filterChanged(filter.*, items)'],
 
       properties: {
         /**
@@ -230,6 +244,11 @@ inspired styles to your `iron-data-table`.
         items: {
           type: Array
         },
+
+        /**
+         * Path to an item property that is used to group the items.
+         */
+        groupBy: String,
 
         /**
          * An array containing path/filter value pairs that are used to filter the items
@@ -284,6 +303,10 @@ inspired styles to your `iron-data-table`.
         }
       },
 
+      _stopPropagation: function(e) {
+        e.stopImmediatePropagation();
+      },
+
       /**
        * Select the list item at the given index.
        *
@@ -316,16 +339,42 @@ inspired styles to your `iron-data-table`.
         return index % 2 === 0;
       },
 
-      _filterChanged: function() {
-        if (this.items) {
-          this.$.list.items = this._filteredAndSortedItems(this.items, this.sortOrder);
+
+      _getGroup: function(index) {
+        for (var prop in this._groups) {
+          if (this._groups[prop] === index) {
+            return prop;
+          }
         }
+      },
+
+      _getGroups: function(items) {
+        var groups = {};
+
+        if (this.groupBy) {
+          for (var i = 0; i < items.length; i++) {
+            var group = this.get(this.groupBy, items[i]);
+            if (groups[group] === undefined) {
+              groups[group] = i;
+            }
+          }
+        }
+
+        return groups;
+      },
+
+      _filterChanged: function(filter, items) {
+        var filteredItems = this._filteredAndSortedItems(items, this.sortOrder);
+
+        this._groups = this._getGroups(filteredItems);
+
+        this.$.list.items = filteredItems;
       },
 
       _filter: function(items) {
         return Array.prototype.filter.call(items, function(item, index) {
           for (var i = 0; i < this.filter.length; i++) {
-            var value = this._deepFind(item, this.filter[i].path);
+            var value = this.get(this.filter[i].path, item);
 
             if (value.indexOf(this.filter[i].filter) === -1) {
               return false;
@@ -349,12 +398,18 @@ inspired styles to your `iron-data-table`.
       },
 
       _sort: function(items, sortOrder) {
-        if (sortOrder && sortOrder.path) {
+        if (this.groupBy || sortOrder) {
           return Array.prototype.sort.call(items, function(a, b) {
-            if (sortOrder.direction === 'asc') {
-              return this._compare(this._deepFind(a, sortOrder.path), this._deepFind(b, sortOrder.path));
+            var groupOrder = this.groupBy ? this._compare(this.get(this.groupBy, a), this.get(this.groupBy, b)) : 0;
+
+            if (groupOrder === 0 && sortOrder && sortOrder.path) {
+              if (sortOrder.direction === 'asc') {
+                return this._compare(this.get(sortOrder.path, a), this.get(sortOrder.path, b));
+              } else {
+                return this._compare(this.get(sortOrder.path, b), this.get(sortOrder.path, a));
+              }
             } else {
-              return this._compare(this._deepFind(b, sortOrder.path), this._deepFind(a, sortOrder.path));
+              return groupOrder;
             }
           }.bind(this));
         } else {
@@ -385,26 +440,6 @@ inspired styles to your `iron-data-table`.
         }
 
         this.push('filter', e.detail);
-      },
-
-      // we need to find values from deep properties like user.name.first
-      // snatched from http://stackoverflow.com/questions/8817394/javascript-get-deep-value-from-object-by-passing-path-to-it-as-string
-      _deepFind: function(obj, path) {
-        if (path === undefined) {
-          return '';
-        }
-
-        var paths = path.split('.');
-        var current = obj;
-
-        for (var i = 0; i < paths.length; ++i) {
-          if (current[paths[i]] == undefined) {
-            return undefined;
-          } else {
-            current = current[paths[i]];
-          }
-        }
-        return current;
       },
 
       _resizeCellContainers: function() {

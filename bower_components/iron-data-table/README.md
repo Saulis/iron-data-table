@@ -1,9 +1,14 @@
-## `<iron-data-table>`
-![](https://travis-ci.org/Saulis/iron-data-table.svg?branch=master)
+![Bower version](https://img.shields.io/bower/v/iron-data-table.svg)
+[![Build Status](https://travis-ci.org/Saulis/iron-data-table.svg?branch=master)](https://travis-ci.org/Saulis/iron-data-table)
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Saulis/iron-data-table?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+
+# &lt;iron-data-table&gt;
 
 [Demos and API Documentation](https://saulis.github.io/iron-data-table/)
 
-![](iron-data-table.png)
+To install, run: `bower install iron-data-table`
+
+![](https://github.com/Saulis/iron-data-table/raw/master/iron-data-table.png)
 
 `iron-data-table` displays a table or a grid of data.
 It builds on top of `iron-list`, which provides the foundation for features like
@@ -73,12 +78,17 @@ bound from the model object provided to the template scope):
 - Custom styling support for templates
 - Native Shadow DOM support
 - Column manipulation, resizing, hiding, reordering
+- Row Grouping (1.0.0-alpha2)
+
+#### Notable Known Issues
+- `<iron-list>` 1.2.x doesn't render all rows. (#4)
 
 ## Roadmap (1.x)
 In random order: (please let me know if something is missing or misplaced)
 - Multi-select
 - Lazy Loading
 - Custom Header / Footer templates
+- Row Details
 - Frozen Columns
 - Drag and Drop Column Resizing
 - Drag and Drop Column Reordering

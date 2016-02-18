@@ -51,14 +51,14 @@
     "iron-flex-layout": "polymerelements/iron-flex-layout#^1.2.3",
     "iron-component-page": "polymerelements/iron-component-page#^1.1.4"
   },
-  "_release": "ae5d4d6311",
+  "_release": "2f156daba5",
   "_resolution": {
     "type": "branch",
     "branch": "master",
-    "commit": "ae5d4d6311d5c8a486de6a820f7bb7d7debcbaf3"
+    "commit": "2f156daba548d08f96eec036a3cd9d42b565263d"
   },
   "_source": "git://github.com/Saulis/iron-data-table.git",
-  "_target": "*",
+  "_target": "master",
   "_originalSource": "iron-data-table",
   "_direct": true
 }
