@@ -76,6 +76,7 @@ bound from the model object provided to the template scope):
 - Template support for each column
 - Two-way binding support
 - Custom styling support for templates
+- Flex support for Cells
 - Native Shadow DOM support
 - Column manipulation, resizing, hiding, reordering
 - Row Grouping (1.0.0-alpha2)
