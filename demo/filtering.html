@@ -20,10 +20,10 @@
     <demo-snippet>
       <template>
         <iron-data-table>
-          <data-table-column name="First Name" filter="user.name.first">
+          <data-table-column name="First Name" filter-by="user.name.first">
             <template>[[item.user.name.first]]</template>
           </data-table-column>
-          <data-table-column name="Last Name" filter="user.name.last">
+          <data-table-column name="Last Name" filter-by="user.name.last">
             <template>[[item.user.name.last]]</template>
           </data-table-column>
           <data-table-column name="Email">
@@ -37,10 +37,10 @@
     <demo-snippet>
       <template>
         <iron-data-table>
-          <data-table-column name="First Name" filter="user.name.first" sort="user.name.first">
+          <data-table-column name="First Name" filter-by="user.name.first" sort-by="user.name.first">
             <template>[[item.user.name.first]]</template>
           </data-table-column>
-          <data-table-column name="Last Name" sort="user.name.last">
+          <data-table-column name="Last Name" sort-by="user.name.last">
             <template>[[item.user.name.last]]</template>
           </data-table-column>
           <data-table-column name="Email">
@@ -54,7 +54,7 @@
     <demo-snippet>
       <template>
         <iron-data-table group-by="user.gender">
-          <data-table-column name="First Name" filter="user.name.first" sort="user.name.first">
+          <data-table-column name="First Name" filter-by="user.name.first" sort-by="user.name.first">
             <template>[[item.user.name.first]]</template>
           </data-table-column>
           <data-table-column name="Last Name">

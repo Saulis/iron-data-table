@@ -9,8 +9,8 @@
     </style>
 
     <template id="header">
-      <data-table-column-filter name="[[item.name]]" path="[[item.filter]]" hidden="[[!item.filter]]"></data-table-column-filter>
-      <div hidden="[[item.filter]]">[[item.name]]</div>
+      <data-table-column-filter name="[[item.name]]" path="[[item.filterBy]]" hidden="[[!item.filterBy]]"></data-table-column-filter>
+      <div hidden="[[item.filterBy]]">[[item.name]]</div>
     </template>
 
   </template>
@@ -44,7 +44,7 @@
          * Path to a property that will be filtered by this column. If set, a filter input
          * will be automaticelly placed on the header cell of the column.
          */
-        filter: {
+        filterBy: {
           type: String
         },
 
@@ -88,7 +88,7 @@
          * Path to a property that will be sorted by this column. If set, a sorting
          * indicator will be automatically placed in the header cell of this column.
          */
-        sort: {
+        sortBy: {
           type: String
         },
 
