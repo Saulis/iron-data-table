@@ -68,21 +68,19 @@ bound from the model object provided to the template scope):
 </template>
 ```
 
-## Features (1.0.0-alpha1)
+## Features (1.0)
 - Virtual, 'infinite' scrolling provided by `<iron-list>`
 - Data filtering
 - Data sorting
 - Item selection
+- Multi-Selection
+- Row Grouping
 - Template support for each column
 - Two-way binding support
 - Custom styling support for templates
 - Flex support for Cells
 - Native Shadow DOM support
 - Column manipulation, resizing, hiding, reordering
-
-## Upcoming Features (1.0.0-alpha2)
-- Row Grouping
-- Multi-select
 
 #### Notable Known Issues
 - `<iron-list>` 1.2.x doesn't render all rows. (#4)
