@@ -24,7 +24,8 @@
           <paper-input label="1st Column Width" value="{{width}}"></paper-input>
           <paper-input label="2nd Column Width" value="{{width2}}"></paper-input>
           <paper-input label="3rd Column Flex" value="{{flex}}"></paper-input>
-          <iron-data-table>
+          <iron-ajax url="users.json" last-response="{{users}}" auto></iron-ajax>
+          <iron-data-table items="[[users.results]]">
             <data-table-column name="First Name" width="[[width]]">
               <template>[[item.user.name.first]]</template>
             </data-table-column>
@@ -44,7 +45,8 @@
       <template>
         <template is="dom-bind">
           <paper-checkbox style="margin: 20px" checked="{{checked}}">Show 1st Column</paper-checkbox>
-          <iron-data-table>
+          <iron-ajax url="users.json" last-response="{{users}}" auto></iron-ajax>
+          <iron-data-table items="[[users.results]]">
             <data-table-column name="First Name" hidden="[[!checked]]">
               <template>[[item.user.name.first]]</template>
             </data-table-column>
@@ -66,7 +68,8 @@
           <paper-input label="1st Column Order" value="{{order1}}"></paper-input>
           <paper-input label="2nd Column Order" value="{{order2}}"></paper-input>
           <paper-input label="3rd Column Order" value="{{order3}}"></paper-input>
-          <iron-data-table>
+          <iron-ajax url="users.json" last-response="{{users}}" auto></iron-ajax>
+          <iron-data-table items="[[users.results]]">
             <data-table-column name="First Name" order="[[order1]]">
               <template>[[item.user.name.first]]</template>
             </data-table-column>
