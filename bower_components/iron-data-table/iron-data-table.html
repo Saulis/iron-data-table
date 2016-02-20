@@ -22,6 +22,7 @@ limitations under the License.
 <link rel="import" href="data-table-column.html">
 <link rel="import" href="data-table-column-sort.html">
 <link rel="import" href="data-table-cell.html">
+<link rel="import" href="data-table-checkbox.html">
 
 <!--
 `iron-data-table` displays a table or a grid of data.
@@ -145,13 +146,28 @@ inspired styles to your `iron-data-table`.
         overflow: hidden;
       }
 
+      #header > data-table-cell, #header .checkbox {
+        height: 56px;
+      }
+
       .group {
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: 0 24px 0 24px;
-
         @apply(--iron-data-table-row-group);
+      }
+
+      .checkbox {
+        height: var(--iron-data-table-cell-height, 48px);
+        flex-basis: var(--iron-data-table-cell-height, 48px);
+        flex-grow: 0;
+        flex-shrink: 0;
+        padding: 0 8px 0 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-right: 1px solid #e3e3e3;
       }
 
       #list {
@@ -174,7 +190,7 @@ inspired styles to your `iron-data-table`.
         @apply(--iron-data-table-row-hover);
       }
 
-      .item[selected] {
+      :host:not([multi-selection]) .item[selected] {
         @apply(--iron-data-table-row-selected);
       }
 
@@ -190,26 +206,32 @@ inspired styles to your `iron-data-table`.
         @apply(--iron-data-table-row-after);
       }
 
-      .item[selected]:after {
+      :host:not([multi-selection]) .item[selected]:after {
         @apply(--iron-data-table-row-selected-after);
       }
     </style>
     <div id="container">
       <div id="header">
+        <div class="checkbox" hidden$="[[!multiSelection]]" on-tap="_toggleSelectAll">
+          <data-table-checkbox checked="[[_isSelectAllChecked(selectedItems.length, _filteredItems)]]" indeterminate="[[_isSelectAllIndeterminate(selectedItems.length, _filteredItems)]]"></data-table-checkbox>
+        </div>
         <template is="dom-repeat" items="[[columns]]" as="column">
           <data-table-cell column="[[column]]" template="[[column.headerTemplate]]" bind="[[_bind(column)]]">
-            <data-table-column-sort sort-order="[[sortOrder]]" path="[[column.sort]]" on-sort-direction-changed="_sortDirectionChanged" hidden="[[!column.sort]]"></data-table-column-sort>
+            <data-table-column-sort sort-order="[[sortOrder]]" path="[[column.sortBy]]" on-sort-direction-changed="_sortDirectionChanged" hidden="[[!column.sortBy]]"></data-table-column-sort>
           </data-table-cell>
         </template>
       </div>
 
-      <iron-list id="list" as="item" items="[[items]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" selected-item="{{selectedItem}}">
+      <iron-list id="list" as="item" items="[[_sortedItems]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" multi-selection="[[multiSelection]]" selected-item="{{selectedItem}}" selected-items="{{selectedItems}}">
         <template>
           <div>
-            <div class="group" hidden$="[[!_getGroup(index, item)]]" on-mousedown="_stopPropagation" on-touchstart="_stopPropagation">
-              <div>[[_getGroup(index, item)]]</div>
+            <div class="group" hidden$="[[!_getGrouping(index, _groupings)]]" on-mousedown="_stopPropagation" on-touchstart="_stopPropagation">
+              <div>[[_getGrouping(index, _groupings)]]</div>
             </div>
             <div class="item" selected$="[[selected]]" even$="[[!_isEven(index)]]">
+              <div class="checkbox" hidden$="[[!multiSelection]]">
+                <data-table-checkbox checked="[[selected]]"></data-table-checkbox>
+              </div>
               <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
                 <data-table-cell column="[[column]]" template="[[column.template]]" bind="[[_bind(item, index, selected)]]"></data-table-cell>
               </template>
@@ -234,8 +256,6 @@ inspired styles to your `iron-data-table`.
         'scroll': '_onHorizontalScroll'
       },
 
-      observers: ['_filterChanged(filter.*, items)'],
-
       properties: {
         /**
          * An array containing the items which will be stamped to the column template
@@ -248,7 +268,15 @@ inspired styles to your `iron-data-table`.
         /**
          * Path to an item property that is used to group the items.
          */
-        groupBy: String,
+        groupBy: {
+          type: String,
+          value: ''
+        },
+
+        _groupings: {
+          type: Object,
+          computed: '_getGroupings(_sortedItems, groupBy)'
+        },
 
         /**
          * An array containing path/filter value pairs that are used to filter the items
@@ -259,6 +287,21 @@ inspired styles to your `iron-data-table`.
           value: function() {
             return [];
           }
+        },
+
+        _filteredItems: {
+          type: Array,
+          computed: '_filter(items, filter.*)'
+        },
+
+        /**
+         * When `true`, multiple items may be selected at once (in this case,
+         * `selected` is an array of currently selected items).  When `false`,
+         * only one item may be selected at a time.
+         */
+        multiSelection: {
+          type: Boolean,
+          value: false
         },
 
         /**
@@ -279,15 +322,27 @@ inspired styles to your `iron-data-table`.
         },
 
         /**
+         * When `multiSelection` is true, this is an array that contains the selected items.
+         */
+        selectedItems: {
+          type: Object,
+          notify: true
+        },
+
+        /**
          * An object with a path/sortorder ('asc' or 'desc') that is used to sort the items
          */
         sortOrder: {
           type: Object,
           notify: true,
-          observer: '_sortOrderChanged',
           value: function() {
             return {};
           }
+        },
+
+        _sortedItems: {
+          type: Array,
+          computed: '_sort(_filteredItems, sortOrder, groupBy)'
         },
 
         /**
@@ -317,6 +372,39 @@ inspired styles to your `iron-data-table`.
         this.$.list.selectItem(item);
       },
 
+      /*
+       * Selects all the items in the list.
+       */
+      selectAll: function() {
+        // TODO: https://github.com/PolymerElements/iron-list/issues/124
+        this.$.list.items.forEach(function(item) {
+          this.$.list.selectItem(item);
+        }.bind(this));
+      },
+
+      /**
+       * Clears the current selection state.
+       */
+      clearSelection: function() {
+        this.$.list.clearSelection();
+      },
+
+      _toggleSelectAll: function() {
+        if (this.$.list.items.length === this.$.list.selectedItems.length) {
+          this.clearSelection();
+        } else {
+          this.selectAll();
+        }
+      },
+
+      _isSelectAllChecked: function(selectedItemsLength, filteredItems) {
+        return selectedItemsLength > 0 && selectedItemsLength === filteredItems.length;
+      },
+
+      _isSelectAllIndeterminate: function(selectedItemsLength, filteredItems) {
+        return selectedItemsLength > 0 && selectedItemsLength !== filteredItems.length;
+      },
+
       /**
        * Deselects the given item list if it is already selected.
        *
@@ -340,15 +428,15 @@ inspired styles to your `iron-data-table`.
       },
 
 
-      _getGroup: function(index) {
-        for (var prop in this._groups) {
-          if (this._groups[prop] === index) {
+      _getGrouping: function(index, _groupings) {
+        for (var prop in _groupings) {
+          if (_groupings[prop] === index) {
             return prop;
           }
         }
       },
 
-      _getGroups: function(items) {
+      _getGroupings: function(items, groupBy) {
         var groups = {};
 
         if (this.groupBy) {
@@ -363,15 +451,7 @@ inspired styles to your `iron-data-table`.
         return groups;
       },
 
-      _filterChanged: function(filter, items) {
-        var filteredItems = this._filteredAndSortedItems(items, this.sortOrder);
-
-        this._groups = this._getGroups(filteredItems);
-
-        this.$.list.items = filteredItems;
-      },
-
-      _filter: function(items) {
+      _filter: function(items, filter) {
         return Array.prototype.filter.call(items, function(item, index) {
           for (var i = 0; i < this.filter.length; i++) {
             var value = this.get(this.filter[i].path, item);
@@ -385,36 +465,23 @@ inspired styles to your `iron-data-table`.
         }.bind(this));
       },
 
-      _filteredAndSortedItems: function(items, sortOrder) {
-        // filtering creates a new array, which is nice since sorting happens in place.
-        var filteredItems = this._filter(this.items);
-        return this._sort(filteredItems, sortOrder);
-      },
+      _sort: function(items, sortOrder, groupBy) {
+        // TODO: need to fire some notifications, because sorting happens in place.
+        this.notifyPath('_sortedItems', undefined);
 
-      _sortOrderChanged: function(sortOrder) {
-        if (this.items) {
-          this.$.list.items = this._filteredAndSortedItems(this.items, sortOrder);
-        }
-      },
+        return Array.prototype.sort.call(items, function(a, b) {
+          var groupOrder = groupBy ? this._compare(this.get(groupBy, a), this.get(groupBy, b)) : 0;
 
-      _sort: function(items, sortOrder) {
-        if (this.groupBy || sortOrder) {
-          return Array.prototype.sort.call(items, function(a, b) {
-            var groupOrder = this.groupBy ? this._compare(this.get(this.groupBy, a), this.get(this.groupBy, b)) : 0;
-
-            if (groupOrder === 0 && sortOrder && sortOrder.path) {
-              if (sortOrder.direction === 'asc') {
-                return this._compare(this.get(sortOrder.path, a), this.get(sortOrder.path, b));
-              } else {
-                return this._compare(this.get(sortOrder.path, b), this.get(sortOrder.path, a));
-              }
+          if (groupOrder === 0 && sortOrder && sortOrder.path) {
+            if (sortOrder.direction === 'asc') {
+              return this._compare(this.get(sortOrder.path, a), this.get(sortOrder.path, b));
             } else {
-              return groupOrder;
+              return this._compare(this.get(sortOrder.path, b), this.get(sortOrder.path, a));
             }
-          }.bind(this));
-        } else {
-          return items;
-        }
+          } else {
+            return groupOrder;
+          }
+        }.bind(this));
       },
 
       _sortDirectionChanged: function(e) {

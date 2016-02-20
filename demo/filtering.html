@@ -1,11 +1,12 @@
 <html>
 
 <head>
-  <script type="text/javascript" src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <script type="text/javascript" src="../../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
   <link rel="import" href="common.html">
 </head>
 
-<body>
+<body unresolved>
+  <span id="forkongithub"><a href="https://github.com/Saulis/iron-data-table/">Fork me on GitHub</a></span>
   <div class="vertical-section-container centered">
     <nav class="vertical-section">
       <ul class="layout horizontal wrap">
@@ -19,51 +20,60 @@
     <h3>Filtering</h3>
     <demo-snippet>
       <template>
-        <iron-data-table>
-          <data-table-column name="First Name" filter="user.name.first">
-            <template>[[item.user.name.first]]</template>
-          </data-table-column>
-          <data-table-column name="Last Name" filter="user.name.last">
-            <template>[[item.user.name.last]]</template>
-          </data-table-column>
-          <data-table-column name="Email">
-            <template>[[item.user.email]]</template>
-          </data-table-column>
-        </iron-data-table>
+        <template is="dom-bind">
+          <iron-ajax url="users.json" last-response="{{users}}" auto></iron-ajax>
+          <iron-data-table items="[[users.results]]">
+            <data-table-column name="First Name" filter-by="user.name.first">
+              <template>[[item.user.name.first]]</template>
+            </data-table-column>
+            <data-table-column name="Last Name" filter-by="user.name.last">
+              <template>[[item.user.name.last]]</template>
+            </data-table-column>
+            <data-table-column name="Email">
+              <template>[[item.user.email]]</template>
+            </data-table-column>
+          </iron-data-table>
+        </template>
       </template>
     </demo-snippet>
 
     <h3>Sorting</h3>
     <demo-snippet>
       <template>
-        <iron-data-table>
-          <data-table-column name="First Name" filter="user.name.first" sort="user.name.first">
-            <template>[[item.user.name.first]]</template>
-          </data-table-column>
-          <data-table-column name="Last Name" sort="user.name.last">
-            <template>[[item.user.name.last]]</template>
-          </data-table-column>
-          <data-table-column name="Email">
-            <template>[[item.user.email]]</template>
-          </data-table-column>
-        </iron-data-table>
+        <template is="dom-bind">
+          <iron-ajax url="users.json" last-response="{{users}}" auto></iron-ajax>
+          <iron-data-table items="[[users.results]]">
+            <data-table-column name="First Name" filter-by="user.name.first" sort-by="user.name.first">
+              <template>[[item.user.name.first]]</template>
+            </data-table-column>
+            <data-table-column name="Last Name" sort-by="user.name.last">
+              <template>[[item.user.name.last]]</template>
+            </data-table-column>
+            <data-table-column name="Email">
+              <template>[[item.user.email]]</template>
+            </data-table-column>
+          </iron-data-table>
+        </template>
       </template>
     </demo-snippet>
 
-    <h3>Grouping (1.0.0-alpha2)</h3>
+    <h3>Grouping</h3>
     <demo-snippet>
       <template>
-        <iron-data-table group-by="user.gender">
-          <data-table-column name="First Name" filter="user.name.first" sort="user.name.first">
-            <template>[[item.user.name.first]]</template>
-          </data-table-column>
-          <data-table-column name="Last Name">
-            <template>[[item.user.name.last]]</template>
-          </data-table-column>
-          <data-table-column name="Email">
-            <template>[[item.user.email]]</template>
-          </data-table-column>
-        </iron-data-table>
+        <template is="dom-bind">
+          <iron-ajax url="users.json" last-response="{{users}}" auto></iron-ajax>
+          <iron-data-table items="[[users.results]]" group-by="user.gender">
+            <data-table-column name="First Name" filter-by="user.name.first" sort-by="user.name.first">
+              <template>[[item.user.name.first]]</template>
+            </data-table-column>
+            <data-table-column name="Last Name">
+              <template>[[item.user.name.last]]</template>
+            </data-table-column>
+            <data-table-column name="Email">
+              <template>[[item.user.email]]</template>
+            </data-table-column>
+          </iron-data-table>
+        </template>
       </template>
     </demo-snippet>
   </div>

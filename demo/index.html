@@ -1,11 +1,12 @@
 <html>
 
 <head>
-  <script type="text/javascript" src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <script type="text/javascript" src="../../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
   <link rel="import" href="common.html">
 </head>
 
 <body unresolved>
+  <span id="forkongithub"><a href="https://github.com/Saulis/iron-data-table/">Fork me on GitHub</a></span>
   <div class="vertical-section-container centered">
     <nav class="vertical-section">
       <ul class="layout horizontal wrap">
@@ -19,27 +20,30 @@
     <h3>Template Support</h3>
     <demo-snippet>
       <template>
-        <iron-data-table selection-enabled>
-          <data-table-column name="#" width="20px" flex="0">
-            <template>[[index]]</template>
-          </data-table-column>
-          <data-table-column name="Selected" width="40px" flex="0">
-            <template>
-              <div hidden="[[!selected]]">Yes</div>
-            </template>
-          </data-table-column>
-          <data-table-column name="Picture" width="50px" flex="0">
-            <template>
-              <img src="[[item.user.picture.thumbnail]]" />
-            </template>
-          </data-table-column>
-          <data-table-column name="First Name">
-            <template>[[item.user.name.first]]</template>
-          </data-table-column>
-          <data-table-column name="Last Name">
-            <template>[[item.user.name.last]]</template>
-          </data-table-column>
-        </iron-data-table>
+        <template is="dom-bind">
+          <iron-ajax url="users.json" last-response="{{users}}" auto></iron-ajax>
+          <iron-data-table selection-enabled items="[[users.results]]">
+            <data-table-column name="#" width="20px" flex="0">
+              <template>[[index]]</template>
+            </data-table-column>
+            <data-table-column name="Selected" width="40px" flex="0">
+              <template>
+                <div hidden="[[!selected]]">Yes</div>
+              </template>
+            </data-table-column>
+            <data-table-column name="Picture" width="50px" flex="0">
+              <template>
+                <img src="[[item.user.picture.thumbnail]]" />
+              </template>
+            </data-table-column>
+            <data-table-column name="First Name">
+              <template>[[item.user.name.first]]</template>
+            </data-table-column>
+            <data-table-column name="Last Name">
+              <template>[[item.user.name.last]]</template>
+            </data-table-column>
+          </iron-data-table>
+        </template>
       </template>
     </demo-snippet>
 
@@ -56,7 +60,8 @@
             }
           </style>
           <paper-input label="Foo" value="{{foo}}"></paper-input>
-          <iron-data-table items="[[users]]">
+          <iron-ajax url="users.json" last-response="{{users}}" auto></iron-ajax>
+          <iron-data-table items="[[users.results]]">
             <data-table-column name="First Name">
               <template>
                 <paper-input value="{{item.user.name.first}}"></paper-input>
@@ -69,6 +74,26 @@
               <template>
                 <paper-input value="{{foo}}"></paper-input>
               </template>
+            </data-table-column>
+          </iron-data-table>
+        </template>
+      </template>
+    </demo-snippet>
+
+    <h3>Multi-Selection</h3>
+    <demo-snippet>
+      <template>
+        <template is="dom-bind">
+          <iron-ajax url="users.json" last-response="{{users}}" auto></iron-ajax>
+          <iron-data-table items="[[users.results]]" selection-enabled multi-selection>
+            <data-table-column name="First Name">
+              <template>[[item.user.name.first]]</template>
+            </data-table-column>
+            <data-table-column name="Last Name">
+              <template>[[item.user.name.first]]</template>
+            </data-table-column>
+            <data-table-column name="Email">
+              <template>[[item.user.email]]</template>
             </data-table-column>
           </iron-data-table>
         </template>
