@@ -68,7 +68,7 @@ bound from the model object provided to the template scope):
 </template>
 ```
 
-## Features (1.0)
+## Features (1.0.0-alpha1)
 - Virtual, 'infinite' scrolling provided by `<iron-list>`
 - Data filtering
 - Data sorting
@@ -79,20 +79,25 @@ bound from the model object provided to the template scope):
 - Flex support for Cells
 - Native Shadow DOM support
 - Column manipulation, resizing, hiding, reordering
-- Row Grouping (1.0.0-alpha2)
+
+## Upcoming Features (1.0.0-alpha2)
+- Row Grouping
+- Multi-select
 
 #### Notable Known Issues
 - `<iron-list>` 1.2.x doesn't render all rows. (#4)
 
-## Roadmap (1.x)
+## Roadmap (1.1)
 In random order: (please let me know if something is missing or misplaced)
-- Multi-select
-- Lazy Loading
-- Custom Header / Footer templates
-- Row Details
 - Frozen Columns
+- Row Details
 - Drag and Drop Column Resizing
 - Drag and Drop Column Reordering
+
+## Roadmap (1.x)
+In random order: (please let me know if something is missing or misplaced)
+- Lazy Loading
+- Custom Header / Footer templates
 
 # Contributing
 I'd appreciate any help and feedback on the component. If you have any ideas, opinions, nitpicks or anything at all about it, please don't hesitate to send an issue, PR or a message in the Gitter chat.

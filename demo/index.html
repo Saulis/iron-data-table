@@ -74,6 +74,23 @@
         </template>
       </template>
     </demo-snippet>
+
+    <h3>Multi-Selection (1.0.0-alpha2)</h3>
+    <demo-snippet>
+      <template>
+          <iron-data-table selection-enabled multi-selection>
+            <data-table-column name="First Name">
+              <template>[[item.user.name.first]]</template>
+            </data-table-column>
+            <data-table-column name="Last Name">
+              <template>[[item.user.name.first]]</template>
+            </data-table-column>
+            <data-table-column name="Email">
+              <template>[[item.user.email]]</template>
+            </data-table-column>
+          </iron-data-table>
+        </template>
+    </demo-snippet>
   </div>
 </body>
 
