@@ -146,6 +146,10 @@ inspired styles to your `iron-data-table`.
         overflow: hidden;
       }
 
+      #header > data-table-cell, #header .checkbox {
+        height: 56px;
+      }
+
       .group {
         display: flex;
         justify-content: space-between;
@@ -186,7 +190,7 @@ inspired styles to your `iron-data-table`.
         @apply(--iron-data-table-row-hover);
       }
 
-      .item[selected] {
+      :host:not([multi-selection]) .item[selected] {
         @apply(--iron-data-table-row-selected);
       }
 
@@ -202,7 +206,7 @@ inspired styles to your `iron-data-table`.
         @apply(--iron-data-table-row-after);
       }
 
-      .item[selected]:after {
+      :host:not([multi-selection]) .item[selected]:after {
         @apply(--iron-data-table-row-selected-after);
       }
     </style>
