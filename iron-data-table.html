@@ -22,6 +22,7 @@ limitations under the License.
 <link rel="import" href="data-table-column.html">
 <link rel="import" href="data-table-column-sort.html">
 <link rel="import" href="data-table-cell.html">
+<link rel="import" href="data-table-checkbox.html">
 
 <!--
 `iron-data-table` displays a table or a grid of data.
@@ -153,6 +154,18 @@ inspired styles to your `iron-data-table`.
         @apply(--iron-data-table-row-group);
       }
 
+      .checkbox {
+        height: var(--iron-data-table-cell-height, 48px);
+        flex-basis: var(--iron-data-table-cell-height, 48px);
+        flex-grow: 0;
+        flex-shrink: 0;
+        padding: 0 8px 0 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-right: 1px solid #e3e3e3;
+      }
+
       #list {
         overflow-x: hidden;
         overflow-y: auto;
@@ -195,6 +208,9 @@ inspired styles to your `iron-data-table`.
     </style>
     <div id="container">
       <div id="header">
+        <div class="checkbox" hidden$="[[!multiSelection]]" on-tap="_toggleSelectAll">
+          <data-table-checkbox checked="[[_isSelectAllChecked(selectedItems.length, _filteredItems)]]" indeterminate="[[_isSelectAllIndeterminate(selectedItems.length, _filteredItems)]]"></data-table-checkbox>
+        </div>
         <template is="dom-repeat" items="[[columns]]" as="column">
           <data-table-cell column="[[column]]" template="[[column.headerTemplate]]" bind="[[_bind(column)]]">
             <data-table-column-sort sort-order="[[sortOrder]]" path="[[column.sort]]" on-sort-direction-changed="_sortDirectionChanged" hidden="[[!column.sort]]"></data-table-column-sort>
@@ -202,13 +218,16 @@ inspired styles to your `iron-data-table`.
         </template>
       </div>
 
-      <iron-list id="list" as="item" items="[[_sortedItems]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" selected-item="{{selectedItem}}">
+      <iron-list id="list" as="item" items="[[_sortedItems]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" multi-selection="[[multiSelection]]" selected-item="{{selectedItem}}" selected-items="{{selectedItems}}">
         <template>
           <div>
             <div class="group" hidden$="[[!_getGrouping(index, _groupings)]]" on-mousedown="_stopPropagation" on-touchstart="_stopPropagation">
               <div>[[_getGrouping(index, _groupings)]]</div>
             </div>
             <div class="item" selected$="[[selected]]" even$="[[!_isEven(index)]]">
+              <div class="checkbox" hidden$="[[!multiSelection]]">
+                <data-table-checkbox checked="[[selected]]"></data-table-checkbox>
+              </div>
               <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
                 <data-table-cell column="[[column]]" template="[[column.template]]" bind="[[_bind(item, index, selected)]]"></data-table-cell>
               </template>
@@ -272,6 +291,16 @@ inspired styles to your `iron-data-table`.
         },
 
         /**
+         * When `true`, multiple items may be selected at once (in this case,
+         * `selected` is an array of currently selected items).  When `false`,
+         * only one item may be selected at a time.
+         */
+        multiSelection: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
          * If `true`, tapping a row will select the item.
          */
         selectionEnabled: {
@@ -284,6 +313,14 @@ inspired styles to your `iron-data-table`.
          * if no item is selected.
          */
         selectedItem: {
+          type: Object,
+          notify: true
+        },
+
+        /**
+         * When `multiSelection` is true, this is an array that contains the selected items.
+         */
+        selectedItems: {
           type: Object,
           notify: true
         },
@@ -329,6 +366,39 @@ inspired styles to your `iron-data-table`.
        */
       selectItem: function(item) {
         this.$.list.selectItem(item);
+      },
+
+      /*
+       * Selects all the items in the list.
+       */
+      selectAll: function() {
+        // TODO: https://github.com/PolymerElements/iron-list/issues/124
+        this.$.list.items.forEach(function(item) {
+          this.$.list.selectItem(item);
+        }.bind(this));
+      },
+
+      /**
+       * Clears the current selection state.
+       */
+      clearSelection: function() {
+        this.$.list.clearSelection();
+      },
+
+      _toggleSelectAll: function() {
+        if (this.$.list.items.length === this.$.list.selectedItems.length) {
+          this.clearSelection();
+        } else {
+          this.selectAll();
+        }
+      },
+
+      _isSelectAllChecked: function(selectedItemsLength, filteredItems) {
+        return selectedItemsLength > 0 && selectedItemsLength === filteredItems.length;
+      },
+
+      _isSelectAllIndeterminate: function(selectedItemsLength, filteredItems) {
+        return selectedItemsLength > 0 && selectedItemsLength !== filteredItems.length;
       },
 
       /**
