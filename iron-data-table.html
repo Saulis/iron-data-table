@@ -352,6 +352,7 @@ inspired styles to your `iron-data-table`.
         columns: {
           type: Array,
           notify: true,
+          observer: '_columnsChanged',
           value: function() {
             return Polymer.dom(this).querySelectorAll('data-table-column');
           }
@@ -502,15 +503,21 @@ inspired styles to your `iron-data-table`.
         return 0;
       },
 
+      _columnsChanged: function(columns) {
+        columns.forEach(function(column) {
+          this.listen(column, 'filter-value-changed', '_onColumnFilterChanged');
+        }.bind(this));
+      },
+
       _onColumnFilterChanged: function(e) {
         for (var i = 0; i < this.filter.length; i++) {
-          if (this.filter[i].path === e.detail.path) {
-            this.set('filter.' + i + '.filter', e.detail.filter);
+          if (this.filter[i].path === e.path[0].filterBy) {
+            this.set('filter.' + i + '.filter', e.detail.value);
             return;
           }
         }
 
-        this.push('filter', e.detail);
+        this.push('filter', {path: e.path[0].filterBy, filter: e.detail.value});
       },
 
       _resizeCellContainers: function() {

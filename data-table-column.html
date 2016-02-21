@@ -9,7 +9,7 @@
     </style>
 
     <template id="header">
-      <data-table-column-filter name="[[column.name]]" path="[[column.filterBy]]" hidden="[[!column.filterBy]]"></data-table-column-filter>
+      <data-table-column-filter label="[[column.name]]" value="{{column.filterValue}}" hidden="[[!column.filterBy]]"></data-table-column-filter>
       <div hidden="[[column.filterBy]]">[[column.name]]</div>
     </template>
 
@@ -46,6 +46,11 @@
          */
         filterBy: {
           type: String
+        },
+
+        filterValue: {
+          type: String,
+          notify: true
         },
 
         /**
@@ -147,9 +152,14 @@
       },
 
       _forwardInstancePath: function(inst, path, value) {
+        // prevent propagating column specific values to other columns.
+        if (path.startsWith('column')) {
+          return;
+        }
+
         var columns = Polymer.dom(this).parentNode.columns;
 
-        for(var c = 0; c < columns.length; c++) {
+        for (var c = 0; c < columns.length; c++) {
           var instances = columns[c]._templateInstances;
 
           for (var i = 0; i < instances.length; i++) {
