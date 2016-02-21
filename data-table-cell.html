@@ -88,12 +88,15 @@
               this.column._templateInstances.push(this._instance);
               this._render();
             } else {
-              // TODO: could iterate properties instead.
-              this._instance.item = data.item;
-              this._instance.index = data.index;
-              this._instance.selected = data.selected;
+              this._bindData(this._instance, data);
             }
           }
+        }
+      },
+
+      _bindData: function(instance, data) {
+        for (var prop in data) {
+          instance[prop] = data[prop];
         }
       },
 
@@ -139,9 +142,7 @@
           this._render();
 
           if (this.bind) {
-            this._instance.item = this.bind.item;
-            this._instance.index = this.bind.index;
-            this._instance.selected = this.bind.selected;
+            this._bindData(this._instance, bind);
           }
         }
       },

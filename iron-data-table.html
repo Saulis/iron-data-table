@@ -416,11 +416,15 @@ inspired styles to your `iron-data-table`.
       },
 
       _bind: function(item, index, selected) {
-        return {
-          item: item,
-          index: index,
-          selected: selected
-        };
+        if (index !== undefined && selected !== undefined) {
+          return {
+            item: item,
+            index: index,
+            selected: selected
+          };
+        } else {
+          return {column: item};
+        }
       },
 
       _isEven: function(index) {
