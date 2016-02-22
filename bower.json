@@ -53,5 +53,8 @@
     "iron-ajax": "polymerelements/iron-ajax#^1.1.1",
     "vaadin-combo-box": "^1.0.0-alpha5"
   },
+  "resolutions": {
+    "iron-list": "~1.1.0"
+  },
   "version": "1.0.0-alpha2"
 }
