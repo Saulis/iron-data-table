@@ -104,6 +104,12 @@
           type: Object,
           readOnly: true,
           value: function() {
+            var custom = Polymer.dom(this).querySelector('template[is=header]');
+
+            if (custom) {
+              return custom;
+            }
+
             return Polymer.dom(this.root).querySelector('#header');
           }
         },
@@ -115,7 +121,7 @@
           type: Object,
           readOnly: true,
           value: function() {
-            return Polymer.dom(this).querySelector('template');
+            return Polymer.dom(this).querySelector('template:not([is=header])');
           }
         },
 
@@ -192,9 +198,12 @@
         this._instanceProps = {
           item: true,
           index: true,
-          selected: true
+          selected: true,
+          column: true
         };
-        this.templatize(Polymer.dom(this).querySelector('template'));
+
+        this.templatize(this.headerTemplate);
+        this.templatize(this.template);
       }
     });
   </script>
