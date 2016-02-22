@@ -461,7 +461,7 @@ inspired styles to your `iron-data-table`.
           for (var i = 0; i < this.filter.length; i++) {
             var value = this.get(this.filter[i].path, item);
 
-            if (value.indexOf(this.filter[i].filter) === -1) {
+            if (value.toLowerCase().indexOf(this.filter[i].filter.toLowerCase()) === -1) {
               return false;
             }
           }
