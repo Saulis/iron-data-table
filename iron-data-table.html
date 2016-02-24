@@ -452,12 +452,17 @@ inspired styles to your `iron-data-table`.
       },
 
       _filter: function(items, filter) {
-        items = this.items;
-        return Array.prototype.filter.call(items, function(item, index) {
-          for (var i = 0; i < this.filter.length; i++) {
-            var value = this.get(this.filter[i].path, item);
+        // small optimization here to prevent filtering done twice when pushing
+        // on both items.splices and items.length paths.
+        if (items.path === 'items.length') {
+          return;
+        }
 
-            if (value.indexOf(this.filter[i].filter) === -1) {
+        return Array.prototype.filter.call(items.base, function(item, index) {
+          for (var i = 0; i < filter.base.length; i++) {
+            var value = this.get(filter.base[i].path, item);
+
+            if (value.indexOf(filter.base[i].filter) === -1) {
               return false;
             }
           }

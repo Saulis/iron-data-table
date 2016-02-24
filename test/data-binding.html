@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../test-fixture/test-fixture-mocha.js"></script>
+  <link rel="import" href="common.html">
+  <link rel="import" href="../../iron-test-helpers/iron-test-helpers.html">
+  <link rel="import" href="../iron-data-table.html">
+</head>
+
+<body>
+  <test-fixture id="grid">
+    <template>
+      <iron-data-table>
+        <data-table-column name="First Name">
+          <template>[[item.user.name.first]]</template>
+        </data-table-column>
+        <data-table-column name="Last Name">
+          <template>[[item.user.name.last]]</template>
+        </data-table-column>
+      </iron-data-table>
+    </template>
+  </test-fixture>
+
+  <script>
+    describe('Data binding', function() {
+      var grid;
+
+      beforeEach(function(done) {
+        grid = fixture('grid');
+        grid.items = users;
+
+        Polymer.Base.async(done);
+      });
+
+      describe('items', function() {
+        it('should be observed for push', function() {
+          var newItem = {user: {name: {first: 'new'} }};
+          grid.push('items', newItem);
+
+          expect(grid.$.list.items[200].user.name.first).to.eql('new');
+        });
+
+        it('should be observed for mutation', function() {
+          grid.set('items.199.user.name.first', 'new');
+
+          expect(grid.$.list.items[199].user.name.first).to.eql('new');
+        });
+      });
+    });
+  </script>
+
+</body>
+
+</html>
