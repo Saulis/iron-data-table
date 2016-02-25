@@ -90,6 +90,7 @@ Custom property | Description
 ----------------|-------------
 `--iron-data-table-cell-height` | Property that determines the height of the cells
 `--iron-data-table-header` | Mixin applied to the header element
+`--iron-data-table-header-cell` | Mixin applied to the header cells
 `--iron-data-table-row-group` | Mixin applied to the row group element
 `--iron-data-table-row` | Mixin applied to the row item element
 `--iron-data-table-row-hover` | Mixin applied to the row item element when hovered on
@@ -148,6 +149,10 @@ inspired styles to your `iron-data-table`.
 
       #header > data-table-cell, #header .checkbox {
         height: 56px !important;
+      }
+
+      #header > data-table-cell {
+        @apply(--iron-data-table-header-cell);
       }
 
       .group {
