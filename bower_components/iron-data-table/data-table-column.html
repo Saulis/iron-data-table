@@ -9,8 +9,8 @@
     </style>
 
     <template id="header">
-      <data-table-column-filter name="[[item.name]]" path="[[item.filterBy]]" hidden="[[!item.filterBy]]"></data-table-column-filter>
-      <div hidden="[[item.filterBy]]">[[item.name]]</div>
+      <data-table-column-filter label="[[column.name]]" value="{{column.filterValue}}" hidden="[[!column.filterBy]]"></data-table-column-filter>
+      <div hidden="[[column.filterBy]]">[[column.name]]</div>
     </template>
 
   </template>
@@ -46,6 +46,15 @@
          */
         filterBy: {
           type: String
+        },
+
+        /**
+         * Filter value that will be used to filter the items using the property defined
+         * in `filterBy` property.
+         */
+        filterValue: {
+          type: String,
+          notify: true
         },
 
         /**
@@ -99,6 +108,12 @@
           type: Object,
           readOnly: true,
           value: function() {
+            var custom = Polymer.dom(this).querySelector('template[is=header]');
+
+            if (custom) {
+              return custom;
+            }
+
             return Polymer.dom(this.root).querySelector('#header');
           }
         },
@@ -110,7 +125,7 @@
           type: Object,
           readOnly: true,
           value: function() {
-            return Polymer.dom(this).querySelector('template');
+            return Polymer.dom(this).querySelector('template:not([is=header])');
           }
         },
 
@@ -147,9 +162,14 @@
       },
 
       _forwardInstancePath: function(inst, path, value) {
+        // prevent propagating column specific values to other columns.
+        if (path.startsWith('column')) {
+          return;
+        }
+
         var columns = Polymer.dom(this).parentNode.columns;
 
-        for(var c = 0; c < columns.length; c++) {
+        for (var c = 0; c < columns.length; c++) {
           var instances = columns[c]._templateInstances;
 
           for (var i = 0; i < instances.length; i++) {
@@ -182,9 +202,12 @@
         this._instanceProps = {
           item: true,
           index: true,
-          selected: true
+          selected: true,
+          column: true
         };
-        this.templatize(Polymer.dom(this).querySelector('template'));
+
+        this.templatize(this.headerTemplate);
+        this.templatize(this.template);
       }
     });
   </script>

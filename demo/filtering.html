@@ -3,6 +3,7 @@
 <head>
   <script type="text/javascript" src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
   <link rel="import" href="common.html">
+  <link rel="import" href="../bower_components/vaadin-combo-box/vaadin-combo-box.html">
 </head>
 
 <body unresolved>
@@ -31,6 +32,37 @@
             </data-table-column>
             <data-table-column name="Email">
               <template>[[item.user.email]]</template>
+            </data-table-column>
+          </iron-data-table>
+        </template>
+      </template>
+    </demo-snippet>
+
+    <h3>Custom Filter Input (1.0.0-alpha3)</h3>
+    <demo-snippet>
+      <template>
+        <template is="dom-bind">
+          <style is="custom-style">
+            vaadin-combo-box {
+              margin-bottom: 30px;
+              --paper-input-container-label: {
+                font-size: inherit;
+              }
+            }
+          </style>
+          <iron-ajax url="users.json" last-response="{{users}}" auto></iron-ajax>
+          <iron-data-table items="[[users.results]]">
+            <data-table-column name="First Name">
+              <template>[[item.user.name.first]]</template>
+            </data-table-column>
+            <data-table-column name="Last Name">
+              <template>[[item.user.name.last]]</template>
+            </data-table-column>
+            <data-table-column name="State" filter-by="user.location.state">
+              <template is="header">
+                <vaadin-combo-box label="[[column.name]]" value="{{column.filterValue}}" allow-custom-value></vaadin-combo-box>
+              </template>
+              <template>[[item.user.location.state]]</template>
             </data-table-column>
           </iron-data-table>
         </template>
@@ -77,6 +109,65 @@
       </template>
     </demo-snippet>
   </div>
+  <script>
+    document.addEventListener('WebComponentsReady', function() {
+      var combobox = document.querySelector('vaadin-combo-box');
+
+      combobox.items = [
+        'Alabama',
+        'Alaska',
+        'Arizona',
+        'Arkansas',
+        'California',
+        'Colorado',
+        'Connecticut',
+        'Delaware',
+        'District of Columbia',
+        'Florida',
+        'Georgia',
+        'Hawaii',
+        'Idaho',
+        'Illinois',
+        'Indiana',
+        'Iowa',
+        'Kansas',
+        'Kentucky',
+        'Lousiana',
+        'Maine',
+        'Maryland',
+        'Massachusetts',
+        'Michigan',
+        'Minnesota',
+        'Mississippi',
+        'Missouri',
+        'Montana',
+        'Nebraska',
+        'Nevada',
+        'New Hampshire',
+        'New Jersey',
+        'New Mexico',
+        'New York',
+        'North Carolina',
+        'North Dakota',
+        'Ohio',
+        'Oklahoma',
+        'Oregon',
+        'Pennsylvania',
+        'Rhode Island',
+        'South Carolina',
+        'South Dakota',
+        'Tennessee',
+        'Texas',
+        'Utah',
+        'Vermont',
+        'Virginia',
+        'Washington',
+        'West Virginia',
+        'Wisconsin',
+        'Wyoming'
+      ];
+    });
+  </script>
 </body>
 
 </html>

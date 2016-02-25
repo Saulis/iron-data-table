@@ -50,13 +50,17 @@
     "iron-test-helpers": "polymerelements/iron-test-helpers#^1.1.3",
     "iron-flex-layout": "polymerelements/iron-flex-layout#^1.2.3",
     "iron-component-page": "polymerelements/iron-component-page#^1.1.4",
-    "iron-ajax": "polymerelements/iron-ajax#^1.1.1"
+    "iron-ajax": "polymerelements/iron-ajax#^1.1.1",
+    "vaadin-combo-box": "^1.0.0-alpha6"
   },
-  "_release": "99d78f66f9",
+  "resolutions": {
+    "iron-list": "~1.1.0"
+  },
+  "_release": "b22d713b74",
   "_resolution": {
     "type": "branch",
     "branch": "master",
-    "commit": "99d78f66f91543d16576a4f912a43fe3e08e2823"
+    "commit": "b22d713b743f658c51ffd867b49596ab724c089c"
   },
   "_source": "git://github.com/Saulis/iron-data-table.git",
   "_target": "master",

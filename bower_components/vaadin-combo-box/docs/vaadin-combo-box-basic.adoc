@@ -1,0 +1,145 @@
+---
+title: Basic Usage
+order: 2
+layout: page
+---
+
+
+[[vaadin-combo-box.example]]
+= Basic Usage
+
+You need to provide the set of items which the user can select with the [propertyname]#items# property.
+Current selection is indicated by the [propertyname]#value# and [propertyname]#selectedItem# properties.
+You can set or change the selection programmatically by setting the [propertyname]#value# property.
+Doing so also updates the visible fields.
+
+[source,html]
+----
+<vaadin-combo-box label="Element"></vaadin-combo-box>
+----
+
+[source,javascript]
+----
+var combobox = document.querySelector('vaadin-combo-box');
+combobox.items = ['Bohrium', 'Boron', 'Bromine', 'Cadmium', 'Caesium', 'Calcium'];
+combobox.value = 'Bromine';
+----
+
+== Events
+
+The [vaadinelement]#vaadin-combo-box# element dispatches events when the value changes.
+An event contains the [propertyname]#value# property in the [propertyname]#event.detail# object.
+
+
+[source,javascript]
+----
+var combobox = document.querySelector('vaadin-combo-box');
+combobox.addEventListener('value-changed', function(event) {
+  console.log(event.detail.value);
+});
+
+combobox.addEventListener('selected-item-changed', function(event) {
+  console.log(event.detail.value);
+});
+----
+
+When using the element inside another Polymer element, you can use the declarative binding syntax to subscribe for an event:
+
+[source,html]
+----
+<dom-module id="my-element">
+  <template>
+    <vaadin-combo-box on-value-change="valueChanged"></vaadin-combo-box>
+  </template>
+</dom-module>
+<script>
+  Polymer({
+    is: 'my-element',
+    valueChanged: function(event) {
+      alert(event.detail.value);
+    }
+  });
+</script>
+----
+
+== Forms
+
+In addition to other features mentioned earlier, the [vaadinelement]#vaadin-combo-box# implements the [classname]#IronFormElementBehavior#, so it can be used as a field in an [elementname]#iron-form#.
+
+[source,html]
+----
+<form is="iron-form" method="post">
+  <vaadin-combo-box name="name" label="Element"></vaadin-combo-box>
+  <button>Submit</button>
+</form>
+<script>
+  var form = document.querySelector('form');
+  var combobox = document.querySelector('vaadin-combo-box');
+
+  form.addEventListener('iron-form-submit', function() {
+    alert('Form submitted with name: ' + form.serialize().name);
+    return false;
+  });
+</script>
+----
+
+== Custom Input Values
+
+Users can be allowed also to input their own custom values. By default, this feature is disabled, so it
+needs to be explicitly enabled.
+
+[source,html]
+----
+<vaadin-combo-box allow-custom-value></vaadin-combo-box>
+----
+
+When enabled, custom input values are always accepted and used as the value of the [vaadinelement]#vaadin-combo-box#.
+If you need to cancel the automatic assignment, you can provide your own listener for the custom-value-set event
+that prevents the default behavior.
+
+[source,html]
+----
+<dom-module id="my-element">
+  <template>
+    <vaadin-combo-box id="combobox" on-custom-value-set="onCustomValue"></vaadin-combo-box>
+  </template>
+</dom-module>
+<script>
+  Polymer({
+    is: 'my-element',
+    onCustomValue: function(event) {
+      // Prevents the custom value to be assigned.
+      event.preventDefault();
+
+      this.$.combobox.value = 'Default Value';
+    }
+  });
+</script>
+----
+
+== Using Objects as Items
+
+In addition to using Strings as items, Objects can also be used. +
+When using Objects, [vaadinelement]#vaadin-combo-box# needs to know which properties are to be used as the display and string values.
+
+By default, [propertyname]#label# and [propertyname]#value# properties are used from the Object as the display value and the [vaadinelement]#vaadin-combo-box# value, respectively.
+In the absence of these properties, [propertyname]#toString()# function for the Object is used to translate it into a String.
+
+[source,javascript]
+----
+var combobox = document.querySelector('vaadin-combo-box');
+combobox.items = [{ label: 'Display Value', value: 'Actual Value' }];
+----
+
+You can override the default property paths by defining [propertyname]#item-label-path# and [propertyname]#item-value-path# properties.
+
+[source,html]
+----
+<vaadin-combo-box item-label-path="name.first" item-value-path="name.last"></vaadin-combo-box>
+----
+
+[source,javascript]
+----
+var combobox = document.querySelector('vaadin-combo-box');
+combobox.items = [{ name: { first: 'John', last: 'Doe' } }];
+----

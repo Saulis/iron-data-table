@@ -47,6 +47,35 @@
       </template>
     </demo-snippet>
 
+    <h3>Header Templates (1.0.0-alpha3)</h3>
+    <demo-snippet>
+      <template>
+        <template is="dom-bind">
+          <style is="custom-style">
+            #grid2 marquee {
+              width: 800px;
+              font-size: 48px;
+            }
+
+            #grid2 {
+              --iron-data-table-header-cell: {
+                overflow: visible;
+              }
+            }
+          </style>
+          <iron-ajax url="users.json" last-response="{{users}}" auto></iron-ajax>
+          <iron-data-table id="grid2" items="[[users.results]]">
+            <data-table-column>
+              <template is="header">
+                <marquee>Breaking News: Your Browser Supports &lt;marquee&gt;. Nice!</marquee>
+              </template>
+              <template><marquee direction="right">[[item.user.name.first]]</marquee></template>
+            </data-table-column>
+          </iron-data-table>
+        </template>
+      </template>
+    </demo-snippet>
+
     <h3>Two-Way Binding Support</h3>
     <demo-snippet>
       <template>
