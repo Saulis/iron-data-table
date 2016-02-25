@@ -96,6 +96,7 @@ In random order: (please let me know if something is missing or misplaced)
 ## Roadmap (1.x)
 In random order: (please let me know if something is missing or misplaced)
 - Lazy Loading
+- Nested Row Grouping (Tree)
 - Custom Footer templates
 
 # Contributing
