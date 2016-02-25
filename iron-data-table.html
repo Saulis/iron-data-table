@@ -93,6 +93,7 @@ Custom property | Description
 `--iron-data-table-header-cell` | Mixin applied to the header cells
 `--iron-data-table-row-group` | Mixin applied to the row group element
 `--iron-data-table-row` | Mixin applied to the row item element
+`--iron-data-table-row-cell` | Mixin applied to the row cells.
 `--iron-data-table-row-hover` | Mixin applied to the row item element when hovered on
 `--iron-data-table-row-selected` | Mixin applied to the selected row item elements
 `--iron-data-table-row-after` | Mixin applied to :after pseudoelement of the row item element
@@ -153,6 +154,10 @@ inspired styles to your `iron-data-table`.
 
       #header > data-table-cell {
         @apply(--iron-data-table-header-cell);
+      }
+
+      .item > data-table-cell {
+        @apply(--iron-data-table-row-cell);
       }
 
       .group {
