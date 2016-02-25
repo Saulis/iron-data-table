@@ -527,13 +527,13 @@ inspired styles to your `iron-data-table`.
 
       _onColumnFilterChanged: function(e) {
         for (var i = 0; i < this.filter.length; i++) {
-          if (this.filter[i].path === e.path[0].filterBy) {
+          if (this.filter[i].path === e.target.filterBy) {
             this.set('filter.' + i + '.filter', e.detail.value);
             return;
           }
         }
 
-        this.push('filter', {path: e.path[0].filterBy, filter: e.detail.value});
+        this.push('filter', {path: e.target.filterBy, filter: e.detail.value});
       },
 
       _resizeCellContainers: function() {
