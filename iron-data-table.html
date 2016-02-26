@@ -148,7 +148,8 @@ inspired styles to your `iron-data-table`.
         overflow: hidden;
       }
 
-      #header > data-table-cell, #header .checkbox {
+      #header > data-table-cell,
+      #header .checkbox {
         height: 56px !important;
       }
 
@@ -434,7 +435,9 @@ inspired styles to your `iron-data-table`.
             selected: selected
           };
         } else {
-          return {column: item};
+          return {
+            column: item
+          };
         }
       },
 
@@ -533,7 +536,10 @@ inspired styles to your `iron-data-table`.
           }
         }
 
-        this.push('filter', {path: e.target.filterBy, filter: e.detail.value});
+        this.push('filter', {
+          path: e.target.filterBy,
+          filter: e.detail.value
+        });
       },
 
       _resizeCellContainers: function() {
