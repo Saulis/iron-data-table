@@ -31,6 +31,7 @@
 
       beforeEach(function(done) {
         grid = fixture('grid');
+        Polymer.dom.flush();
         grid.items = users;
 
         Polymer.Base.async(done);

@@ -55,10 +55,15 @@
       detached: function() {
         // Polymer.dom(this._content.parentElement) has different childs depending if Shady or native Shadow DOM is used.
         // TODO: see if there's a need to use Polymer.dom here and can it be done somehow.
-        this._content.parentElement.removeChild(this._content);
 
-        Polymer.dom(this).removeChild(this._contentElement);
-        Polymer.dom.flush();
+        if (this._content.parentElement) {
+          this._content.parentElement.removeChild(this._content);
+        }
+
+        if (this._contentElement.parentElement) {
+          Polymer.dom(this).removeChild(this._contentElement);
+          Polymer.dom.flush();
+        }
       },
 
       _orderChanged: function(e) {

@@ -32,6 +32,7 @@
       var grid;
       beforeEach(function(done) {
         grid = fixture('grid');
+        Polymer.dom.flush();
         grid.items = [{
           value: 'foo',
           value2: 'fooz'
