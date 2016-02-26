@@ -81,10 +81,7 @@ bound from the model object provided to the template scope):
 - Flex support for Cells
 - Native Shadow DOM support
 - Column manipulation, resizing, hiding, reordering
-- Custom Header templates (1.0.0-alpha3)
-
-#### Notable Known Issues
-- `<iron-list>` 1.2.x doesn't render all rows. (#4)
+- Custom Header templates
 
 ## Roadmap (1.1)
 In random order: (please let me know if something is missing or misplaced)

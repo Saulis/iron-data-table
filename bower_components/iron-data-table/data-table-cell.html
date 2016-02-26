@@ -12,18 +12,21 @@
 
       properties: {
         template: {
-          type: Object,
-          observer: '_templateChanged'
+          type: Object
         },
 
         bind: {
-          type: Object,
-          observer: '_bindChanged'
+          type: Object
         },
 
         column: {
           type: Object,
           observer: '_columnChanged'
+        },
+
+        _instance: {
+          type: Object,
+          computed: '_templatize(column, template)'
         },
 
         order: Number,
@@ -32,6 +35,8 @@
         _contentElement: Object,
         _content: Object
       },
+
+      observers: ['_bindData(_instance, bind)', '_render(_content, _instance)'],
 
       attached: function() {
         var id = Polymer.IronDataTable.cell++;
@@ -42,8 +47,6 @@
         this._content = document.createElement('div');
         this._content.id = 'cell' + id;
 
-        this._render();
-
         Polymer.dom(this).insertBefore(this._contentElement, Polymer.dom(this).firstChild);
         Polymer.dom(this.domHost).appendChild(this._content);
         Polymer.dom.flush();
@@ -52,10 +55,15 @@
       detached: function() {
         // Polymer.dom(this._content.parentElement) has different childs depending if Shady or native Shadow DOM is used.
         // TODO: see if there's a need to use Polymer.dom here and can it be done somehow.
-        this._content.parentElement.removeChild(this._content);
 
-        Polymer.dom(this).removeChild(this._contentElement);
-        Polymer.dom.flush();
+        if (this._content.parentElement) {
+          this._content.parentElement.removeChild(this._content);
+        }
+
+        if (this._contentElement.parentElement) {
+          Polymer.dom(this).removeChild(this._contentElement);
+          Polymer.dom.flush();
+        }
       },
 
       _orderChanged: function(e) {
@@ -76,22 +84,12 @@
         this.hidden = e.detail.value;
       },
 
-      // data and template might be bound in different order, depending on how <data-table-cell>
-      // is placed in the DOM. We need to call _render() after they've been both bound.
-      _bindChanged: function(data) {
-        if (this.column && this.template) {
-          if (!this.column._templatized) {
-            this._templateChanged(this.template);
-          } else {
-            if (!this._instance) {
-              this._instance = this.column.stamp(data);
-              this.column._templateInstances.push(this._instance);
-              this._render();
-            } else {
-              this._bindData(this._instance, data);
-            }
-          }
-        }
+      _templatize: function(column, template) {
+        column.templatize(template);
+        var instance = column.stamp();
+        column.push('_templateInstances', instance);
+
+        return instance;
       },
 
       _bindData: function(instance, data) {
@@ -114,10 +112,6 @@
 
         this.hidden = column.hidden;
         this._addListener(column, oldColumn, 'hidden');
-
-        if (this.template) {
-          this._templateChanged(this.template);
-        }
       },
 
       // Adding listeners manually *seems* to work better with forwarded parent props
@@ -133,27 +127,11 @@
         this.listen(column, eventName, observerName);
       },
 
-      _templateChanged: function(template) {
-        if (this.column) {
-          this.column.templatize(template);
-          this._instance = this.column.stamp({});
-          this.column.push('_templateInstances', this._instance);
+      _render: function(content, instance) {
+        content.innerHTML = '';
 
-          this._render();
-
-          if (this.bind) {
-            this._bindData(this._instance, bind);
-          }
-        }
-      },
-
-      _render: function() {
-        if (this._content && this._instance) {
-          this._content.innerHTML = '';
-
-          Polymer.dom(this._content).appendChild(this._instance.root);
-          Polymer.dom.flush();
-        }
+        Polymer.dom(content).appendChild(instance.root);
+        Polymer.dom.flush();
       }
     });
   </script>

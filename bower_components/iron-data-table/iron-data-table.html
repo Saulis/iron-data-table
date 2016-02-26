@@ -97,7 +97,8 @@ Custom property | Description
 `--iron-data-table-row-hover` | Mixin applied to the row item element when hovered on
 `--iron-data-table-row-selected` | Mixin applied to the selected row item elements
 `--iron-data-table-row-after` | Mixin applied to :after pseudoelement of the row item element
-`--iron-data-table-row-selected-after` | Mixin applied to :after pseudoelement of the selected row item elements
+`--iron-data-table-row-focused` | Mixin applied to the focused row item elements
+`--iron-data-table-row-focused-after` | Mixin applied to :after pseudoelement of the focused row item elements
 
 To get started, you can import `default-styles.html` which provides material design
 inspired styles to your `iron-data-table`.
@@ -148,7 +149,8 @@ inspired styles to your `iron-data-table`.
         overflow: hidden;
       }
 
-      #header > data-table-cell, #header .checkbox {
+      #header > data-table-cell,
+      #header .checkbox {
         height: 56px !important;
       }
 
@@ -196,11 +198,21 @@ inspired styles to your `iron-data-table`.
         @apply(--iron-data-table-row);
       }
 
+      .item:focus {
+        outline: none;
+
+        @apply(--iron-data-table-row-focused);
+      }
+
+      .item:focus:after {
+        @apply(--iron-data-table-row-focused-after);
+      }
+
       .item:hover {
         @apply(--iron-data-table-row-hover);
       }
 
-      :host:not([multi-selection]) .item[selected] {
+      .item[selected] {
         @apply(--iron-data-table-row-selected);
       }
 
@@ -216,9 +228,6 @@ inspired styles to your `iron-data-table`.
         @apply(--iron-data-table-row-after);
       }
 
-      :host:not([multi-selection]) .item[selected]:after {
-        @apply(--iron-data-table-row-selected-after);
-      }
     </style>
     <div id="container">
       <div id="header">
@@ -238,7 +247,7 @@ inspired styles to your `iron-data-table`.
             <div class="group" hidden$="[[!_getGrouping(index, _groupings)]]" on-mousedown="_stopPropagation" on-touchstart="_stopPropagation">
               <div>[[_getGrouping(index, _groupings)]]</div>
             </div>
-            <div class="item" selected$="[[selected]]" even$="[[!_isEven(index)]]">
+            <div class="item" tabindex$="[[tabIndex]]" selected$="[[selected]]" even$="[[!_isEven(index)]]">
               <div class="checkbox" hidden$="[[!multiSelection]]">
                 <data-table-checkbox checked="[[selected]]"></data-table-checkbox>
               </div>
@@ -369,6 +378,33 @@ inspired styles to your `iron-data-table`.
         }
       },
 
+      ready: function() {
+        this._patchIronListCreatePool();
+      },
+
+      _patchIronListCreatePool: function() {
+        // Since 1.2.0, iron-list changed timings on how the first three rows are
+        // rendered initially: https://github.com/PolymerElements/iron-list/commit/c0e27e52ee93dcd93d33590b569bd17c5c504005#diff-b97995700c5da5fa638d0324b5f3f861L765
+        // Apparently, this causes the Polymer.dom.flush() to be called in such order,
+        // that templatize for the data-table-cells doesn't work properly for the initial render.
+
+        // As a fix, calling Polymer.dom.flush() after the initial rows have been created seems to help.
+        // So far, haven't been able to produce an isolated jsbin to report about this to iron-list.
+
+        var createPool = this.$.list._createPool.bind(this.$.list);
+        var initialCreateCalled = false;
+        this.$.list._createPool = function(size) {
+          var items = createPool(size);
+
+          // Polymer.dom.flush() needs to be called on the initial creation ONLY.
+          if (!initialCreateCalled) {
+            initialCreateCalled = true;
+            Polymer.dom.flush();
+          }
+          return items;
+        };
+      },
+
       _stopPropagation: function(e) {
         e.stopImmediatePropagation();
       },
@@ -434,7 +470,9 @@ inspired styles to your `iron-data-table`.
             selected: selected
           };
         } else {
-          return {column: item};
+          return {
+            column: item
+          };
         }
       },
 
@@ -527,13 +565,16 @@ inspired styles to your `iron-data-table`.
 
       _onColumnFilterChanged: function(e) {
         for (var i = 0; i < this.filter.length; i++) {
-          if (this.filter[i].path === e.path[0].filterBy) {
+          if (this.filter[i].path === e.target.filterBy) {
             this.set('filter.' + i + '.filter', e.detail.value);
             return;
           }
         }
 
-        this.push('filter', {path: e.path[0].filterBy, filter: e.detail.value});
+        this.push('filter', {
+          path: e.target.filterBy,
+          filter: e.detail.value
+        });
       },
 
       _resizeCellContainers: function() {
