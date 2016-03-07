@@ -511,6 +511,11 @@ inspired styles to your `iron-data-table`.
           return;
         }
 
+	// Fix to avoid crashes when items are still null
+        if (items.base == null) {
+          return;
+        }
+
         return Array.prototype.filter.call(items.base, function(item, index) {
           for (var i = 0; i < filter.base.length; i++) {
             var value = this.get(filter.base[i].path, item);
@@ -525,6 +530,10 @@ inspired styles to your `iron-data-table`.
       },
 
       _sort: function(items, sortOrder, groupBy) {
+	// Fix to avoid crashes when items are still null
+        if (items == null) {
+          return;
+        }
         // TODO: need to fire some notifications, because sorting happens in place.
         this.notifyPath('_sortedItems', undefined);
 
