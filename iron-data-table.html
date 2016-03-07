@@ -525,9 +525,8 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
           return;
         }
 
-	// Fix to avoid crashes when items are still null
-        if (items.base == null) {
-          return;
+	      if (!Array.isArray(items.base)) {
+          return [];
         }
 
         return Array.prototype.filter.call(items.base, function(item, index) {
@@ -544,10 +543,10 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
       },
 
       _sort: function(items, sortOrder, groupBy) {
-	// Fix to avoid crashes when items are still null
-        if (items == null) {
-          return;
+        if (!Array.isArray(items)) {
+          return [];
         }
+
         // TODO: need to fire some notifications, because sorting happens in place.
         this.notifyPath('_sortedItems', undefined);
 

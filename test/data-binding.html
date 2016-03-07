@@ -50,6 +50,18 @@
 
           expect(grid.$.list.items[199].user.name.first).to.eql('new');
         });
+
+        it('should handle null', function() {
+          grid.items = null;
+
+          expect(grid.$.list.items).to.be.empty;
+        });
+
+        it('should handle objects', function() {
+          grid.items = 'FOO';
+
+          expect(grid.$.list.items).to.be.empty;
+        });
       });
     });
   </script>
