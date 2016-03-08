@@ -202,7 +202,6 @@ inspired styles to your `iron-data-table`.
 
       .item:focus {
         outline: none;
-
         @apply(--iron-data-table-row-focused);
       }
 
@@ -229,7 +228,6 @@ inspired styles to your `iron-data-table`.
       .item:after {
         @apply(--iron-data-table-row-after);
       }
-
     </style>
     <div id="container">
       <div id="header">
@@ -373,11 +371,22 @@ inspired styles to your `iron-data-table`.
         columns: {
           type: Array,
           notify: true,
-          observer: '_columnsChanged',
-          value: function() {
-            return Polymer.dom(this).querySelectorAll('data-table-column');
-          }
+          observer: '_columnsChanged'
         }
+      },
+
+      created: function() {
+        this._observer = Polymer.dom(this).observeNodes(function(info) {
+          var hasColumns = function(node) {
+            return (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'DATA-TABLE-COLUMN');
+          };
+
+          if (info.addedNodes.filter(hasColumns).length > 0 ||
+              info.removedNodes.filter(hasColumns).length > 0) {
+            this.set('columns', Polymer.dom(this).querySelectorAll('data-table-column'));
+            this.notifyResize();
+          }
+        }.bind(this));
       },
 
       ready: function() {
@@ -559,10 +568,18 @@ inspired styles to your `iron-data-table`.
         return 0;
       },
 
-      _columnsChanged: function(columns) {
-        columns.forEach(function(column) {
-          this.listen(column, 'filter-value-changed', '_onColumnFilterChanged');
-        }.bind(this));
+      _columnsChanged: function(columns, oldColumns) {
+        if (oldColumns) {
+          oldColumns.forEach(function(column) {
+            this.unlisten(column, 'filter-value-changed');
+          }.bind(this));
+        }
+
+        if (columns) {
+          columns.forEach(function(column) {
+            this.listen(column, 'filter-value-changed', '_onColumnFilterChanged');
+          }.bind(this));
+        }
       },
 
       _onColumnFilterChanged: function(e) {

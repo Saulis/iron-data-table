@@ -191,7 +191,7 @@
             for (var prop in this._forwardedParentProps) {
               addedInstance[prop] = this._forwardedParentProps[prop];
             }
-          });
+          }.bind(this));
         }
       },
 
