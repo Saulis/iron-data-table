@@ -163,7 +163,7 @@
 
       _forwardInstancePath: function(inst, path, value) {
         // prevent propagating column specific values to other columns.
-        if (path.startsWith('column')) {
+        if (path.indexOf('column') === 0) {
           return;
         }
 
