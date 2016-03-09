@@ -525,6 +525,10 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
           return;
         }
 
+	      if (!Array.isArray(items.base)) {
+          return [];
+        }
+
         return Array.prototype.filter.call(items.base, function(item, index) {
           for (var i = 0; i < filter.base.length; i++) {
             var value = this.get(filter.base[i].path, item);
@@ -539,6 +543,10 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
       },
 
       _sort: function(items, sortOrder, groupBy) {
+        if (!Array.isArray(items)) {
+          return [];
+        }
+
         // TODO: need to fire some notifications, because sorting happens in place.
         this.notifyPath('_sortedItems', undefined);
 
