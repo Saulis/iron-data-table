@@ -326,6 +326,11 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
           value: false
         },
 
+        pageSize: {
+          type: Number,
+          value: 50
+        },
+
         /**
          * If `true`, tapping a row will select the item.
          */
@@ -375,6 +380,19 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
           type: Array,
           notify: true,
           observer: '_columnsChanged'
+        },
+
+        _currentPage: {
+          type: Number,
+          value: 0,
+          observer: '_currentPageChanged'
+        },
+
+        _cachedPages: {
+          type: Array,
+          value: function() {
+            return [0];
+          }
         }
       },
 
@@ -629,6 +647,15 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
       _onVerticalScroll: function(e) {
         // Toggle shadow when at the top
         this.toggleClass("scrolled", this.$.list.scrollTop !== 0, this.$.header);
+
+        this._currentPage = Math.floor(this.$.list.scrollTop / this.$.list._physicalAverage / this.pageSize);
+      },
+
+      _currentPageChanged: function(page) {
+        if (this._cachedPages && this._cachedPages.indexOf(page) === -1) {
+          console.log('Load page: ', page);
+          this.push('_cachedPages', page);
+        }
       }
     });
   </script>
