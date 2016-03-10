@@ -150,7 +150,6 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         display: flex;
         align-items: center;
         overflow: hidden;
-
         transition: flex-basis 200ms, flex-grow 200ms;
       }
 
@@ -244,7 +243,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         </template>
       </div>
 
-      <iron-list id="list" as="item" items="[[_sortedItems]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" multi-selection="[[multiSelection]]" selected-item="{{selectedItem}}" selected-items="{{selectedItems}}">
+      <iron-list id="list" as="item" items="[[_cachedItems]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" multi-selection="[[multiSelection]]" selected-item="{{selectedItem}}" selected-items="{{selectedItems}}">
         <template>
           <div>
             <div class="group" hidden$="[[!_getGrouping(index, _groupings)]]" on-mousedown="_stopPropagation" on-touchstart="_stopPropagation">
@@ -326,6 +325,9 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
           value: false
         },
 
+        /**
+         * Number of items fetched at a time from the datasource.
+         */
         pageSize: {
           type: Number,
           value: 50
@@ -357,6 +359,14 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         },
 
         /**
+         * Size of the data set.
+         */
+        size: {
+          type: Number,
+          value: 0
+        },
+
+        /**
          * An object with a path/sortorder ('asc' or 'desc') that is used to sort the items
          */
         sortOrder: {
@@ -382,19 +392,27 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
           observer: '_columnsChanged'
         },
 
-        _currentPage: {
-          type: Number,
-          value: 0,
-          observer: '_currentPageChanged'
+        _cachedItems: {
+          type: Array,
+          value: function() {
+            return [];
+          }
         },
 
         _cachedPages: {
           type: Array,
           value: function() {
-            return [0];
+            return [];
           }
+        },
+
+        _currentPage: {
+          type: Number,
+          value: 0
         }
       },
+
+      observers: ['_sizeChanged(_cachedItems, size)', '_currentPageChanged(items, _currentPage)'],
 
       created: function() {
         this._observer = Polymer.dom(this).observeNodes(function(info) {
@@ -403,7 +421,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
           };
 
           if (info.addedNodes.filter(hasColumns).length > 0 ||
-              info.removedNodes.filter(hasColumns).length > 0) {
+            info.removedNodes.filter(hasColumns).length > 0) {
             this.set('columns', Polymer.dom(this).querySelectorAll('data-table-column'));
             this.notifyResize();
           }
@@ -543,9 +561,12 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
           return;
         }
 
-	      if (!Array.isArray(items.base)) {
+        if (!Array.isArray(items.base)) {
           return [];
         }
+
+        //TODO: assigning the size will be moved to an 'items' observer later.
+        this.size = items.base.length;
 
         return Array.prototype.filter.call(items.base, function(item, index) {
           for (var i = 0; i < filter.base.length; i++) {
@@ -651,11 +672,51 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         this._currentPage = Math.floor(this.$.list.scrollTop / this.$.list._physicalAverage / this.pageSize);
       },
 
-      _currentPageChanged: function(page) {
+      /**
+       * Lazy loading
+       */
+       //TODO: 'items' temporarily here to make sure items has been set before calling datasource.
+      _currentPageChanged: function(items, page) {
         if (this._cachedPages && this._cachedPages.indexOf(page) === -1) {
-          console.log('Load page: ', page);
           this.push('_cachedPages', page);
+
+          var success = function(items) {
+            var start = page * this.pageSize;
+
+            for (var i = 0; i < this.pageSize; i++) {
+              this.set('_cachedItems.' + (start + i), items[i]);
+            }
+
+            // resize required for variable row height items.
+            this.$.list.notifyResize();
+          }.bind(this);
+
+          var err = function() {
+            //TODO: remove page from _cachedPages
+          }.bind(this);
+
+          this.dataSource(page, success, err);
         }
+      },
+
+      _sizeChanged: function(cachedItems, size) {
+        // TODO: if these are too heavy operations, use splice to remove and
+        // use set to assign a new array initially, when cachedItems.length === 0.
+        while (cachedItems.length > size) {
+          this.pop('_cachedItems');
+        }
+
+        while (cachedItems.length < size) {
+          this.push('_cachedItems', {});
+        }
+      },
+
+      dataSource: function(page, cb, err) {
+        var start = page * this.pageSize;
+        var end = start + this.pageSize;
+        var slice = this.items.slice(start, end);
+
+        cb(slice);
       }
     });
   </script>
