@@ -234,7 +234,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
     <div id="container">
       <div id="header">
         <div class="checkbox" hidden$="[[!multiSelection]]" on-tap="_toggleSelectAll">
-          <data-table-checkbox checked="[[_isSelectAllChecked(selectedItems.length, _filteredItems)]]" indeterminate="[[_isSelectAllIndeterminate(selectedItems.length, _filteredItems)]]"></data-table-checkbox>
+          <data-table-checkbox checked="[[_isSelectAllChecked(selectedItems.length, items)]]" indeterminate="[[_isSelectAllIndeterminate(selectedItems.length, items)]]"></data-table-checkbox>
         </div>
         <template is="dom-repeat" items="[[columns]]" as="column">
           <data-table-cell column="[[column]]" template="[[column.headerTemplate]]" bind="[[_bind(column)]]">
@@ -246,9 +246,9 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
       <iron-list id="list" as="item" items="[[_cachedItems]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" multi-selection="[[multiSelection]]" selected-item="{{selectedItem}}" selected-items="{{selectedItems}}">
         <template>
           <div>
-            <div class="group" hidden$="[[!_getGrouping(index, _groupings)]]" on-mousedown="_stopPropagation" on-touchstart="_stopPropagation">
+            <!--div class="group" hidden$="[[!_getGrouping(index, _groupings)]]" on-mousedown="_stopPropagation" on-touchstart="_stopPropagation">
               <div>[[_getGrouping(index, _groupings)]]</div>
-            </div>
+            </div-->
             <div class="item" tabindex$="[[tabIndex]]" selected$="[[selected]]" even$="[[!_isEven(index)]]">
               <div class="checkbox" hidden$="[[!multiSelection]]">
                 <data-table-checkbox checked="[[selected]]"></data-table-checkbox>
@@ -308,11 +308,6 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
           value: function() {
             return [];
           }
-        },
-
-        _filteredItems: {
-          type: Array,
-          computed: '_filter(items.*, filter.*)'
         },
 
         /**
@@ -377,11 +372,6 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
           }
         },
 
-        _sortedItems: {
-          type: Array,
-          computed: '_sort(_filteredItems, sortOrder, groupBy)'
-        },
-
         /**
          * An array of `data-table-column` elements which contain the templates
          * to be stamped with items.
@@ -390,6 +380,10 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
           type: Array,
           notify: true,
           observer: '_columnsChanged'
+        },
+
+        dataSource: {
+          type: Object
         },
 
         _cachedItems: {
@@ -412,7 +406,10 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         }
       },
 
-      observers: ['_sizeChanged(_cachedItems, size)', '_currentPageChanged(items, _currentPage)'],
+      observers: ['_itemsChanged(items.*)',
+                  '_sizeChanged(_cachedItems, size)',
+                  '_currentPageChanged(dataSource, _currentPage)',
+                  '_filterChanged(dataSource, filter.*)'],
 
       created: function() {
         this._observer = Polymer.dom(this).observeNodes(function(info) {
@@ -555,30 +552,25 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
       },
 
       _filter: function(items, filter) {
-        // small optimization here to prevent filtering done twice when pushing
-        // on both items.splices and items.length paths.
-        if (items.path === 'items.length') {
-          return;
-        }
+        return Array.prototype.filter.call(items, function(item, index) {
+          for (var i = 0; i < filter.length; i++) {
+            var value = this.get(filter[i].path, item);
 
-        if (!Array.isArray(items.base)) {
-          return [];
-        }
-
-        //TODO: assigning the size will be moved to an 'items' observer later.
-        this.size = items.base.length;
-
-        return Array.prototype.filter.call(items.base, function(item, index) {
-          for (var i = 0; i < filter.base.length; i++) {
-            var value = this.get(filter.base[i].path, item);
-
-            if (value.toLowerCase().indexOf(filter.base[i].filter.toLowerCase()) === -1) {
+            if (value.toLowerCase().indexOf(filter[i].filter.toLowerCase()) === -1) {
               return false;
             }
           }
 
           return true;
         }.bind(this));
+      },
+
+      _filterChanged: function(dataSource, filter) {
+        this.$.list.scrollTop = 0;
+
+        this.debounce('filtering', function() {
+          this.clearCache();
+        }.bind(this), 100);
       },
 
       _sort: function(items, sortOrder, groupBy) {
@@ -675,20 +667,39 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
       /**
        * Lazy loading
        */
-       //TODO: 'items' temporarily here to make sure items has been set before calling datasource.
-      _currentPageChanged: function(items, page) {
-        this._loadPage(page);
+      _itemsChanged: function(items) {
+        if (items.path === 'length') {
+          this.size = items.length;
+          return;
+        } else if (Array.isArray(items.base)) {
+          this.size = items.base.length;
 
-        if (page + 1 < (this.size / this.pageSize)) {
-          this._loadPage(page + 1);
-        }
+          this.dataSource = function(opts, cb, err) {
+            var filteredItems = this._filter(items.base, opts.filter);
+            this.size = filteredItems.length;
 
-        if (page > 0) {
-          this._loadPage(page - 1);
+            var start = opts.page * this.pageSize;
+            var end = start + this.pageSize;
+            var slice = filteredItems.slice(start, end);
+
+            cb(slice);
+          }.bind(this);
         }
       },
 
-      _loadPage: function(page) {
+      _currentPageChanged: function(dataSource, page) {
+        this._loadPage(dataSource, page);
+
+        if (page + 1 < (this.size / this.pageSize)) {
+          this._loadPage(dataSource ,page + 1);
+        }
+
+        if (page > 0) {
+          this._loadPage(dataSource, page - 1);
+        }
+      },
+
+      _loadPage: function(dataSource, page) {
         if (this._cachedPages && this._cachedPages.indexOf(page) === -1) {
           this.push('_cachedPages', page);
 
@@ -711,7 +722,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
             //TODO: remove page from _cachedPages
           }.bind(this);
 
-          this.dataSource({page: page, filter: this.filter}, success, err);
+          dataSource({page: page, filter: this.filter}, success, err);
         }
       },
 
@@ -734,15 +745,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         this._cachedPages = [];
 
         // Force reload on currently visible pages.
-        this._currentPageChanged(this.items, this._currentPage);
-      },
-
-      dataSource: function(opts, cb, err) {
-        var start = opts.page * this.pageSize;
-        var end = start + this.pageSize;
-        var slice = this.items.slice(start, end);
-
-        cb(slice);
+        this._currentPageChanged(this.dataSource, this._currentPage);
       }
     });
   </script>
