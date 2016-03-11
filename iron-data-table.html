@@ -407,7 +407,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
       },
 
       observers: ['_itemsChanged(items.*)',
-                  '_sizeChanged(_cachedItems, size)',
+                  '_sizeChanged(size)',
                   '_currentPageChanged(dataSource, _currentPage)',
                   '_resetData(dataSource, filter.*, sortOrder)'],
 
@@ -566,8 +566,6 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
       },
 
       _resetData: function(dataSource, filter, sortOrder) {
-        this.$.list.scrollTop = 0;
-
         this.debounce('reset', function() {
           this.clearCache();
         }.bind(this), 100);
@@ -719,16 +717,17 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         }
       },
 
-      _sizeChanged: function(cachedItems, size) {
-        // TODO: if these are too heavy operations, use splice to remove and
-        // use set to assign a new array initially, when cachedItems.length === 0.
-        while (cachedItems.length > size) {
-          this.pop('_cachedItems');
+      _sizeChanged: function(size) {
+        var items = [];
+
+        while (items.length !== size) {
+          items.push({});
         }
 
-        while (cachedItems.length < size) {
-          this.push('_cachedItems', {});
-        }
+        // TODO: using set will reset the scroll position, but using splice
+        // for large changes in SLOW. For moderate changes works OK, so probably usable
+        // for infinite scrolling.
+        this.set('_cachedItems', items);
       },
 
       /**
