@@ -671,8 +671,8 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
 
             var sortedItems = this._sort(filteredItems, opts.sortOrder);
 
-            var start = opts.page * this.pageSize;
-            var end = start + this.pageSize;
+            var start = opts.page * opts.pageSize;
+            var end = start + opts.pageSize;
             var slice = sortedItems.slice(start, end);
 
             cb(slice);
@@ -715,7 +715,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
             //TODO: remove page from _cachedPages
           }.bind(this);
 
-          dataSource({page: page, filter: this.filter, sortOrder: this.sortOrder}, success, err);
+          dataSource({page: page, pageSize: this.pageSize, filter: this.filter, sortOrder: this.sortOrder}, success, err);
         }
       },
 
