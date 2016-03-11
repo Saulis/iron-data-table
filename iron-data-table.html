@@ -677,6 +677,18 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
        */
        //TODO: 'items' temporarily here to make sure items has been set before calling datasource.
       _currentPageChanged: function(items, page) {
+        this._loadPage(page);
+
+        if (page + 1 < (this.size / this.pageSize)) {
+          this._loadPage(page + 1);
+        }
+
+        if (page > 0) {
+          this._loadPage(page - 1);
+        }
+      },
+
+      _loadPage: function(page) {
         if (this._cachedPages && this._cachedPages.indexOf(page) === -1) {
           this.push('_cachedPages', page);
 
@@ -688,14 +700,18 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
             }
 
             // resize required for variable row height items.
-            this.$.list.notifyResize();
+            // debouncing for optimizing when multiple requests are running at
+            // the same time.
+            this.debounce('resizing', function() {
+              this.$.list.notifyResize();
+            }.bind(this), 100);
           }.bind(this);
 
           var err = function() {
             //TODO: remove page from _cachedPages
           }.bind(this);
 
-          this.dataSource(page, success, err);
+          this.dataSource({page: page, filter: this.filter}, success, err);
         }
       },
 
@@ -711,8 +727,18 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         }
       },
 
-      dataSource: function(page, cb, err) {
-        var start = page * this.pageSize;
+      /**
+       * Clears the cached pages and reloads data from datasource when needed.
+       */
+      clearCache: function() {
+        this._cachedPages = [];
+
+        // Force reload on currently visible pages.
+        this._currentPageChanged(this.items, this._currentPage);
+      },
+
+      dataSource: function(opts, cb, err) {
+        var start = opts.page * this.pageSize;
         var end = start + this.pageSize;
         var slice = this.items.slice(start, end);
 
