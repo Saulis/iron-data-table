@@ -409,7 +409,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
       observers: ['_itemsChanged(items.*)',
                   '_sizeChanged(_cachedItems, size)',
                   '_currentPageChanged(dataSource, _currentPage)',
-                  '_filterChanged(dataSource, filter.*)'],
+                  '_resetData(dataSource, filter.*, sortOrder)'],
 
       created: function() {
         this._observer = Polymer.dom(this).observeNodes(function(info) {
@@ -565,33 +565,24 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         }.bind(this));
       },
 
-      _filterChanged: function(dataSource, filter) {
+      _resetData: function(dataSource, filter, sortOrder) {
         this.$.list.scrollTop = 0;
 
-        this.debounce('filtering', function() {
+        this.debounce('reset', function() {
           this.clearCache();
         }.bind(this), 100);
       },
 
-      _sort: function(items, sortOrder, groupBy) {
-        if (!Array.isArray(items)) {
-          return [];
-        }
-
-        // TODO: need to fire some notifications, because sorting happens in place.
-        this.notifyPath('_sortedItems', undefined);
-
+      _sort: function(items, sortOrder) {
         return Array.prototype.sort.call(items, function(a, b) {
-          var groupOrder = groupBy ? this._compare(this.get(groupBy, a), this.get(groupBy, b)) : 0;
-
-          if (groupOrder === 0 && sortOrder && sortOrder.path) {
+          if (sortOrder && sortOrder.path) {
             if (sortOrder.direction === 'asc') {
               return this._compare(this.get(sortOrder.path, a), this.get(sortOrder.path, b));
             } else {
               return this._compare(this.get(sortOrder.path, b), this.get(sortOrder.path, a));
             }
           } else {
-            return groupOrder;
+            return 0;
           }
         }.bind(this));
       },
@@ -678,9 +669,11 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
             var filteredItems = this._filter(items.base, opts.filter);
             this.size = filteredItems.length;
 
+            var sortedItems = this._sort(filteredItems, opts.sortOrder);
+
             var start = opts.page * this.pageSize;
             var end = start + this.pageSize;
-            var slice = filteredItems.slice(start, end);
+            var slice = sortedItems.slice(start, end);
 
             cb(slice);
           }.bind(this);
@@ -722,7 +715,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
             //TODO: remove page from _cachedPages
           }.bind(this);
 
-          dataSource({page: page, filter: this.filter}, success, err);
+          dataSource({page: page, filter: this.filter, sortOrder: this.sortOrder}, success, err);
         }
       },
 
