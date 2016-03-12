@@ -135,6 +135,8 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         flex-shrink: 0;
         box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
         transition: box-shadow 200ms;
+        z-index: 1;
+
         @apply(--iron-data-table-header);
       }
 
@@ -689,7 +691,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         this._loadPage(dataSource, page);
 
         if (page + 1 < (this.size / this.pageSize)) {
-          this._loadPage(dataSource ,page + 1);
+          this._loadPage(dataSource, page + 1);
         }
 
         if (page > 0) {
