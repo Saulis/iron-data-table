@@ -358,6 +358,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
          */
         size: {
           type: Number,
+          notify: true,
           value: 0
         },
 
@@ -566,6 +567,12 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
       },
 
       _resetData: function(dataSource, filter, sortOrder) {
+        // Resetting scroll position and selection for consistency here. They are
+        // both reset implicitly when a new _cachedItems is set to iron-list, but
+        // that doesn't happen when size of the dataset changes only by a few items.
+        this.$.list.scrollTop = 0;
+        this.clearSelection();
+
         this.debounce('reset', function() {
           this.clearCache();
         }.bind(this), 100);
@@ -718,16 +725,26 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
       },
 
       _sizeChanged: function(size) {
-        var items = [];
+        // Optimization: Calling `set` on _cachedItems will reset the scroll position and selections,
+        // using `push` and `pop` with large changes (more than 1000 items) is a heavy operation
+        // that jams things up.
+        if (this._cachedItems && Math.abs(this._cachedItems.length - size) < this.pageSize * 2) {
+          while (this._cachedItems.length < size) {
+            this.push('_cachedItems', {});
+          }
 
-        while (items.length !== size) {
-          items.push({});
+          while (this._cachedItems.length > size) {
+            this.pop('_cachedItems');
+          }
+        } else {
+          var items = [];
+
+          while (items.length < size) {
+            items.push({});
+          }
+
+          this.set('_cachedItems', items);
         }
-
-        // TODO: using set will reset the scroll position, but using splice
-        // for large changes in SLOW. For moderate changes works OK, so probably usable
-        // for infinite scrolling.
-        this.set('_cachedItems', items);
       },
 
       /**
