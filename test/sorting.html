@@ -112,7 +112,7 @@
           }, 100);
         });
 
-        it('should sort items descending', function() {
+        it('should sort items descending', function(done) {
           grid.set('sortOrder', {path: 'value', direction: 'desc'});
 
           grid.async(function() {
