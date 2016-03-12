@@ -579,6 +579,10 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
       },
 
       _filter: function(items, filter) {
+        if (filter.length === 0) {
+          return items;
+        }
+
         return Array.prototype.filter.call(items, function(item, index) {
           for (var i = 0; i < filter.length; i++) {
             var value = this.get(filter[i].path, item);
@@ -605,15 +609,15 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
       },
 
       _sort: function(items, sortOrder) {
+        if (!sortOrder || !sortOrder.path) {
+          return items;
+        }
+
         return Array.prototype.sort.call(items, function(a, b) {
-          if (sortOrder && sortOrder.path) {
-            if (sortOrder.direction === 'asc') {
-              return this._compare(this.get(sortOrder.path, a), this.get(sortOrder.path, b));
-            } else {
-              return this._compare(this.get(sortOrder.path, b), this.get(sortOrder.path, a));
-            }
+          if (sortOrder.direction === 'asc') {
+            return this._compare(this.get(sortOrder.path, a), this.get(sortOrder.path, b));
           } else {
-            return 0;
+            return this._compare(this.get(sortOrder.path, b), this.get(sortOrder.path, a));
           }
         }.bind(this));
       },
@@ -690,7 +694,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
        * Lazy loading
        */
       _itemsChanged: function(items) {
-        if (items.path === 'length') {
+        if (items.path === 'items.length') {
           this.size = items.length;
           return;
         } else if (Array.isArray(items.base)) {

@@ -34,7 +34,7 @@
         grid = fixture('grid');
 
         Polymer.dom.flush();
-        
+
         grid.items = [{
           value: 'foo',
           value2: 'fooz'
@@ -103,16 +103,22 @@
       });
 
       describe('using sortOrder property', function() {
-        it('should sort items ascending', function() {
+        it('should sort items ascending', function(done) {
           grid.set('sortOrder', {path: 'value', direction: 'asc'});
 
-          expect(grid.$.list.items[0]).to.eql({value: 'bar', value2: 'bah'});
+          grid.async(function() {
+            expect(grid.$.list.items[0]).to.eql({value: 'bar', value2: 'bah'});
+            done();
+          }, 100);
         });
 
         it('should sort items descending', function() {
           grid.set('sortOrder', {path: 'value', direction: 'desc'});
 
-          expect(grid.$.list.items[0]).to.eql({value: 'qux', value2: 'baz'});
+          grid.async(function() {
+            expect(grid.$.list.items[0]).to.eql({value: 'qux', value2: 'baz'});
+            done();
+          }, 100);
         });
 
         it('should update sorting icon', function() {

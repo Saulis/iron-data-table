@@ -88,17 +88,15 @@
         it('should select all', function() {
           grid.selectAll();
 
-          expect(grid.selectedItems[0]).to.eql(grid.items[0]);
-          expect(grid.selectedItems[1]).to.eql(grid.items[1]);
-          expect(grid.selectedItems[2]).to.eql(grid.items[2]);
+          expect(grid.selectedItems.inverted).to.be.true;
+          expect(grid.selectedItems).to.be.empty;
         });
 
         it('should select all on tap', function() {
           grid.$.header.querySelector('data-table-checkbox').fire('tap');
 
-          expect(grid.selectedItems[0]).to.eql(grid.items[0]);
-          expect(grid.selectedItems[1]).to.eql(grid.items[1]);
-          expect(grid.selectedItems[2]).to.eql(grid.items[2]);
+          expect(grid.selectedItems.inverted).to.be.true;
+          expect(grid.selectedItems).to.be.empty;
         });
 
         it('should deselect all', function() {
@@ -106,6 +104,7 @@
 
           grid.clearSelection();
 
+          expect(grid.selectedItems.inverted).to.be.false;
           expect(grid.selectedItems).to.be.empty;
         });
 

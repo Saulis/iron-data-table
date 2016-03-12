@@ -1,0 +1,158 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../test-fixture/test-fixture-mocha.js"></script>
+  <link rel="import" href="../../iron-test-helpers/iron-test-helpers.html">
+  <link rel="import" href="../iron-data-table.html">
+</head>
+
+<body>
+  <test-fixture id="table">
+    <template>
+      <iron-data-table>
+        <data-table-column name="First" sort="value">
+          <template>[[item.value]]</template>
+        </data-table-column>
+      </iron-data-table>
+    </template>
+  </test-fixture>
+
+  <script>
+    describe('Lazy Loading', function() {
+      var table;
+      beforeEach(function(done) {
+        table = fixture('table');
+        Polymer.dom.flush();
+
+        var items = [];
+
+        for (var i = 0; i < 200; i++) {
+          items.push({foo: 'bar' + i});
+        }
+
+        table.pageSize = 10;
+        table.items = items;
+
+        Polymer.Base.async(done);
+      });
+
+      describe('size', function() {
+        it('should be set from items array', function() {
+          expect(table._cachedItems.length).to.eql(200);
+        });
+
+        it('should set cached items length', function() {
+          table.size = 10;
+
+          expect(table._cachedItems.length).to.eql(10);
+        });
+
+        it('should grow cached items when increased', function() {
+          table.size = 201;
+
+          expect(table._cachedItems[200]).to.eql({});
+        });
+
+        it('should shrink cached items when decreased', function() {
+          table.size = 199;
+
+          expect(table._cachedItems[199]).to.be.undefined;
+        });
+      });
+
+      describe('datasource', function() {
+        var spy;
+
+        beforeEach(function() {
+          spy = sinon.spy(function() {
+
+          });
+
+          table.dataSource = spy;
+        });
+
+        it('should be called to fetch current page when page changes', function() {
+          table._currentPage = 10;
+
+          expect(spy.firstCall.args[0].page).to.eql(10);
+        });
+
+        it('should be called to fetch next page when page changes', function() {
+          table._currentPage = 10;
+
+          expect(spy.secondCall.args[0].page).to.eql(11);
+        });
+
+        it('should be called to fetch previous page when page changes', function() {
+          table._currentPage = 10;
+
+          expect(spy.thirdCall.args[0].page).to.eql(9);
+        });
+
+        it('should not be called to fetch cached pages', function() {
+          table._currentPage = 10;
+          expect(spy.callCount).to.eql(3);
+
+          table._currentPage = 0;
+
+          expect(spy.callCount).to.eql(3);
+        });
+
+        it('should be called when cache is cleared', function(done) {
+          table.clearCache();
+
+          table.async(function() {
+            expect(spy.callCount).to.eql(4);
+
+            done();
+          }, 100);
+        });
+
+        it('should be called with filter', function() {
+          table.filter = [{path: 'foo', filter: 'bar'}];
+
+          table.clearCache();
+
+          expect(spy.firstCall.args[0].filter).to.eql(table.filter);
+        });
+
+        it('should be called with sort order', function() {
+          table.sortOrder = {path: 'foo', sortOrder: 'asc'};
+
+          table.clearCache();
+
+          expect(spy.firstCall.args[0].sortOrder).to.eql(table.sortOrder);
+        });
+
+        it('should be called with page size', function() {
+          table.clearCache();
+
+          expect(spy.firstCall.args[0].pageSize).to.eql(10);
+        });
+      });
+
+      describe('cached pages', function() {
+        it('should be cleared on clear cache', function() {
+          table._currentPage = 10;
+
+          expect(table._cachedPages.indexOf(0)).to.eql(0);
+
+          table.clearCache();
+
+          expect(table._cachedPages.indexOf(0)).to.eql(-1);
+        });
+      });
+
+      describe('cached items', function() {
+
+      });
+    });
+  </script>
+
+</body>
+
+</html>
