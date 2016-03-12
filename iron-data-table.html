@@ -136,7 +136,6 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
         transition: box-shadow 200ms;
         z-index: 1;
-
         @apply(--iron-data-table-header);
       }
 
@@ -236,7 +235,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
     <div id="container">
       <div id="header">
         <div class="checkbox" hidden$="[[!multiSelection]]" on-tap="_toggleSelectAll">
-          <data-table-checkbox checked="[[_isSelectAllChecked(selectedItems.length, items)]]" indeterminate="[[_isSelectAllIndeterminate(selectedItems.length, items)]]"></data-table-checkbox>
+          <data-table-checkbox checked="[[_isSelectAllChecked(selectedItems.length, selectedItems.inverted)]]" indeterminate="[[_isSelectAllIndeterminate(selectedItems.length)]]"></data-table-checkbox>
         </div>
         <template is="dom-repeat" items="[[columns]]" as="column">
           <data-table-cell column="[[column]]" template="[[column.headerTemplate]]" bind="[[_bind(column)]]">
@@ -245,15 +244,15 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         </template>
       </div>
 
-      <iron-list id="list" as="item" items="[[_cachedItems]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" multi-selection="[[multiSelection]]" selected-item="{{selectedItem}}" selected-items="{{selectedItems}}">
+      <iron-list id="list" as="item" items="[[_cachedItems]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" multi-selection="[[multiSelection]]" selected-item="{{selectedItem}}" on-selected-items-changed="_selectedItemsChanged">
         <template>
           <div>
             <!--div class="group" hidden$="[[!_getGrouping(index, _groupings)]]" on-mousedown="_stopPropagation" on-touchstart="_stopPropagation">
               <div>[[_getGrouping(index, _groupings)]]</div>
             </div-->
-            <div class="item" tabindex$="[[tabIndex]]" selected$="[[selected]]" even$="[[!_isEven(index)]]">
+            <div class="item" tabindex$="[[tabIndex]]" selected$="[[_isSelected(selected, selectedItems.inverted)]]" even$="[[!_isEven(index)]]">
               <div class="checkbox" hidden$="[[!multiSelection]]">
-                <data-table-checkbox checked="[[selected]]"></data-table-checkbox>
+                <data-table-checkbox checked="[[_isSelected(selected, selectedItems.inverted)]]"></data-table-checkbox>
               </div>
               <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
                 <data-table-cell column="[[column]]" template="[[column.template]]" bind="[[_bind(item, index, selected)]]"></data-table-cell>
@@ -349,10 +348,14 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
 
         /**
          * When `multiSelection` is true, this is an array that contains the selected items.
+         * If `selectedItems.inverted` is `true`, the array contains deselected items instead.
          */
         selectedItems: {
           type: Object,
-          notify: true
+          notify: true,
+          value: function() {
+            return [];
+          }
         },
 
         /**
@@ -410,9 +413,10 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
       },
 
       observers: ['_itemsChanged(items.*)',
-                  '_sizeChanged(size)',
-                  '_currentPageChanged(dataSource, _currentPage)',
-                  '_resetData(dataSource, filter.*, sortOrder)'],
+        '_sizeChanged(size)',
+        '_currentPageChanged(dataSource, _currentPage)',
+        '_resetData(dataSource, filter.*, sortOrder)'
+      ],
 
       created: function() {
         this._observer = Polymer.dom(this).observeNodes(function(info) {
@@ -469,37 +473,57 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         this.$.list.selectItem(item);
       },
 
+      _isSelected: function(selected, inverted) {
+        return inverted ? !selected : selected;
+      },
+
+      /**
+       * Multi-Selection
+       */
+      _selectedItemsChanged: function(e) {
+        if (Array.isArray(e.detail.value)) {
+          var items = e.detail.value;
+          var inverted = (this.selectedItems && this.selectedItems.inverted) || false;
+
+          this.set('selectedItems', items);
+          this.set('selectedItems.inverted', inverted);
+          this.notifyPath('selectedItems.length', items.length);
+        } else if (e.detail.path === 'selectedItems.splices') {
+          this.notifyPath('selectedItems.splices', e.detail.value);
+          this.notifyPath('selectedItems.length', this.selectedItems.length);
+        }
+      },
+
       /*
        * Selects all the items in the list.
        */
-      selectAll: function() {
-        // TODO: https://github.com/PolymerElements/iron-list/issues/124
-        this.$.list.items.forEach(function(item) {
-          this.$.list.selectItem(item);
-        }.bind(this));
+        selectAll: function() {
+        this.set('selectedItems.inverted', true);
+        this.$.list.clearSelection();
       },
 
       /**
        * Clears the current selection state.
        */
       clearSelection: function() {
+        this.set('selectedItems.inverted', false);
         this.$.list.clearSelection();
       },
 
       _toggleSelectAll: function() {
-        if (this.$.list.items.length === this.$.list.selectedItems.length) {
+        if (this._isSelectAllChecked(this.selectedItems.length, this.selectedItems.inverted)) {
           this.clearSelection();
         } else {
           this.selectAll();
         }
       },
 
-      _isSelectAllChecked: function(selectedItemsLength, filteredItems) {
-        return selectedItemsLength > 0 && selectedItemsLength === filteredItems.length;
+      _isSelectAllChecked: function(selectedItemsLength, inverted) {
+        return selectedItemsLength === (inverted ? 0 : this.size);
       },
 
-      _isSelectAllIndeterminate: function(selectedItemsLength, filteredItems) {
-        return selectedItemsLength > 0 && selectedItemsLength !== filteredItems.length;
+      _isSelectAllIndeterminate: function(selectedItemsLength) {
+        return selectedItemsLength > 0;
       },
 
       /**
@@ -722,7 +746,12 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
             //TODO: remove page from _cachedPages
           }.bind(this);
 
-          dataSource({page: page, pageSize: this.pageSize, filter: this.filter, sortOrder: this.sortOrder}, success, err);
+          dataSource({
+            page: page,
+            pageSize: this.pageSize,
+            filter: this.filter,
+            sortOrder: this.sortOrder
+          }, success, err);
         }
       },
 
