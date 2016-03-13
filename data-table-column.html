@@ -2,12 +2,6 @@
 
 <dom-module id="data-table-column">
   <template>
-    <style>
-      :host {
-        display: block;
-      }
-    </style>
-
     <template id="header">
       <data-table-column-filter label="[[column.name]]" value="{{column.filterValue}}" hidden="[[!column.filterBy]]"></data-table-column-filter>
       <div hidden="[[column.filterBy]]">[[column.name]]</div>
