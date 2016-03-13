@@ -752,7 +752,9 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
           }.bind(this);
 
           var err = function() {
-            //TODO: remove page from _cachedPages
+            var index = this._cachedPages.indexOf(page);
+            this._cachedPages.splice(index, 1);
+
             this._pagesLoading--;
           }.bind(this);
 
