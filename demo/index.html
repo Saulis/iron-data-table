@@ -19,7 +19,7 @@
       </ul>
     </nav>
 
-    <h3>Binding Static Arrays</h3>
+    <h3>Static Arrays</h3>
     <demo-snippet>
       <template>
         <template is="dom-bind">
@@ -44,21 +44,22 @@
       </template>
     </demo-snippet>
 
-    <h3>Binding Remote Data</h3>
+    <h3>Remote Data</h3>
     <demo-snippet>
       <template>
         <template is="dom-bind" id="t2">
-          <iron-data-table selection-enabled size="130" data-source="[[dataSource]]">
-            <data-table-column name="Picture" width="50px" flex="0">
-              <template>
-                <img style="height: 36px" src="[[item.author.avatar_url]]" />
-              </template>
+          <iron-data-table selection-enabled size="100000" data-source="[[dataSource]]">
+            <data-table-column name="#" width="50px" flex="0">
+              <template>[[index]]</template>
             </data-table-column>
-            <data-table-column name="Message" flex="3">
-              <template>[[item.commit.message]]</template>
+            <data-table-column name="First Name">
+              <template>[[item.user.name.first]]</template>
             </data-table-column>
-            <data-table-column name="Timestamp">
-              <template>[[item.commit.author.date]]</template>
+            <data-table-column name="Last Name">
+              <template>[[item.user.name.last]]</template>
+            </data-table-column>
+            <data-table-column name="Email">
+              <template>[[item.user.email]]</template>
             </data-table-column>
           </iron-data-table>
           <script>
@@ -69,12 +70,16 @@
                   if (xhr.readyState == XMLHttpRequest.DONE) {
                     if (xhr.status == 200) {
                       var json = JSON.parse(xhr.responseText);
-                      cb(json.results);
+
+                      // Simulate remote delay...
+                      setTimeout(function() {
+                        cb(json.results.slice(0, opts.pageSize));
+                      }, 250);
                     }
                   }
                 };
 
-                xhr.open("GET", 'https://api.github.com/repos/Saulis/iron-data-table/commits?per_page=' +
+                xhr.open("GET", 'users.json?per_page=' +
                                   opts.pageSize + '&page=' + opts.page, true);
                 xhr.send();
               };
@@ -104,6 +109,10 @@
               document.querySelector('#t3').dataSource = function(opts, cb) {
                 var table = document.querySelector('#infinite');
 
+                if (table.size === 0) {
+                  table.size = 50;
+                }
+
                 // if last page is reached, increment the size.
                 if (table.size / opts.pageSize === opts.page + 1) {
                   table.size += opts.pageSize;
@@ -114,6 +123,26 @@
               };
             });
           </script>
+        </template>
+      </template>
+    </demo-snippet>
+
+    <h3>Multi-Selection</h3>
+    <demo-snippet>
+      <template>
+        <template is="dom-bind">
+          <iron-ajax url="users.json" last-response="{{users}}" auto></iron-ajax>
+          <iron-data-table items="[[users.results]]" selection-enabled multi-selection>
+            <data-table-column name="First Name">
+              <template>[[item.user.name.first]]</template>
+            </data-table-column>
+            <data-table-column name="Last Name">
+              <template>[[item.user.name.first]]</template>
+            </data-table-column>
+            <data-table-column name="Email">
+              <template>[[item.user.email]]</template>
+            </data-table-column>
+          </iron-data-table>
         </template>
       </template>
     </demo-snippet>
