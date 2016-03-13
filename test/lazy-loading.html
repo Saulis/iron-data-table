@@ -31,7 +31,9 @@
         var items = [];
 
         for (var i = 0; i < 200; i++) {
-          items.push({foo: 'bar' + i});
+          items.push({
+            foo: 'bar' + i
+          });
         }
 
         table.pageSize = 10;
@@ -75,75 +77,124 @@
           table.dataSource = spy;
         });
 
-        it('should be called to fetch current page when page changes', function() {
+        it('should be called to fetch current page when page changes', function(done) {
           table._currentPage = 10;
 
-          expect(spy.firstCall.args[0].page).to.eql(10);
+          table.async(function() {
+            expect(spy.firstCall.args[0].page).to.eql(10);
+            done();
+          }, 250);
         });
 
-        it('should be called to fetch next page when page changes', function() {
+        it('should be called to fetch next page when page changes', function(done) {
           table._currentPage = 10;
 
-          expect(spy.secondCall.args[0].page).to.eql(11);
+          table.async(function() {
+            expect(spy.secondCall.args[0].page).to.eql(11);
+            done();
+          }, 250);
         });
 
-        it('should be called to fetch previous page when page changes', function() {
+        it('should be called to fetch previous page when page changes', function(done) {
           table._currentPage = 10;
 
-          expect(spy.thirdCall.args[0].page).to.eql(9);
+          table.async(function() {
+            expect(spy.thirdCall.args[0].page).to.eql(9);
+            done();
+          }, 250);
         });
 
-        it('should not be called to fetch cached pages', function() {
+        it('should not be called to fetch cached pages', function(done) {
           table._currentPage = 10;
-          expect(spy.callCount).to.eql(3);
 
-          table._currentPage = 0;
+          table.async(function() {
+            expect(spy.callCount).to.eql(3);
 
-          expect(spy.callCount).to.eql(3);
+            table._currentPage = 9;
+            table._currentPage = 10;
+            table.async(function() {
+              expect(spy.callCount).to.eql(3);
+              done();
+            }, 250);
+
+
+          }, 250);
         });
 
         it('should be called when cache is cleared', function(done) {
           table.clearCache();
 
           table.async(function() {
-            expect(spy.callCount).to.eql(4);
-
+            expect(spy.callCount).to.eql(2);
             done();
-          }, 100);
+          }, 250);
         });
 
-        it('should be called with filter', function() {
-          table.filter = [{path: 'foo', filter: 'bar'}];
+        it('should be called with filter', function(done) {
+          table.filter = [{
+            path: 'foo',
+            filter: 'bar'
+          }];
 
           table.clearCache();
 
-          expect(spy.firstCall.args[0].filter).to.eql(table.filter);
+          table.async(function() {
+            expect(spy.firstCall.args[0].filter).to.eql(table.filter);
+            done();
+          }, 250);
         });
 
-        it('should be called with sort order', function() {
-          table.sortOrder = {path: 'foo', sortOrder: 'asc'};
+        it('should be called with sort order', function(done) {
+          table.sortOrder = {
+            path: 'foo',
+            sortOrder: 'asc'
+          };
 
           table.clearCache();
-
-          expect(spy.firstCall.args[0].sortOrder).to.eql(table.sortOrder);
+          table.async(function() {
+            expect(spy.firstCall.args[0].sortOrder).to.eql(table.sortOrder);
+            done();
+          }, 250);
         });
 
-        it('should be called with page size', function() {
+        it('should be called with page size', function(done) {
           table.clearCache();
 
-          expect(spy.firstCall.args[0].pageSize).to.eql(10);
+          table.async(function() {
+            expect(spy.firstCall.args[0].pageSize).to.eql(10);
+            done();
+          }, 250);
         });
       });
 
       describe('cached pages', function() {
-        it('should be cleared on clear cache', function() {
+        it('should be cleared on clear cache', function(done) {
           table._currentPage = 10;
 
-          expect(table._cachedPages.indexOf(0)).to.eql(0);
+          table.async(function() {
+            expect(table._cachedPages.indexOf(10)).to.eql(0);
 
-          table.clearCache();
+            table.clearCache();
 
-          expect(table._cachedPages.indexOf(0)).to.eql(-1);
+            expect(table._cachedPages.indexOf(10)).to.eql(-1);
+            done();
+          }, 250);
+        });
+
+        it('should be cleaned after error', function(done) {
+          table.dataSource = function(opts, cb, err) {
+            if (opts.page === 10) {
+              err();
+            }
+          };
+
+          table._currentPage = 10;
+
+          table.async(function() {
+            expect(table._cachedPages).to.eql([11, 9]);
+            done();
+          }, 250);
+
         });
       });
     });

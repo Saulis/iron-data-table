@@ -34,7 +34,7 @@
         Polymer.dom.flush();
         grid.items = Array.from(users);
 
-        Polymer.Base.async(done);
+        Polymer.Base.async(done, 100);
       });
 
       describe('items', function() {
