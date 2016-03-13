@@ -692,7 +692,19 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
             var start = page * this.pageSize;
 
             for (var i = 0; i < this.pageSize; i++) {
-              this.set('_cachedItems.' + (start + i), items[i]);
+              var index = start + i;
+              var item = items[i];
+
+              this.set('_cachedItems.' + index, item);
+
+              // TODO: send an issue/pr to iron-list, that makes sure the internal
+              // collection stays up-to-date when `items` change.
+              this.$.list._collection.store[index] = item;
+              if (item && typeof item == 'object') {
+                this.$.list._collection.omap.set(item, index);
+              } else {
+                this.$.list._collection.pmap[item] = index;
+              }
             }
 
             // resize required for variable row height items.
