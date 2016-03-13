@@ -13,10 +13,18 @@ Current selection is indicated by the [propertyname]#value# and [propertyname]#s
 You can set or change the selection programmatically by setting the [propertyname]#value# property.
 Doing so also updates the visible fields.
 
+When setting the items declaratively, notice that the attribute value needs to be a valid JSON string. You need to use single quotes for the attribute value and double quotes inside the value (in the JSON string). Alternatively, you can escape the double quotes inside the value.
+
 [source,html]
 ----
-<vaadin-combo-box label="Element"></vaadin-combo-box>
+<vaadin-combo-box
+  label="Element"
+  items='["Bohrium", "Boron", "Bromine", "Cadmium", "Caesium", "Calcium"]'
+  value="Bromine">
+</vaadin-combo-box>
 ----
+
+Setting the items and value programmatically:
 
 [source,javascript]
 ----
@@ -27,9 +35,14 @@ combobox.value = 'Bromine';
 
 == Events
 
-The [vaadinelement]#vaadin-combo-box# element dispatches events when the value changes.
+The [vaadinelement]#vaadin-combo-box# element dispatches events when the selection changes.
 An event contains the [propertyname]#value# property in the [propertyname]#event.detail# object.
 
+Since there are two selection properties, namely [propertyname]#value# and [propertyname]#selectedItem#,
+an event is fired for each. [propertyname]#value-changed# event contains the selection as a String value,
+whereas [propertyname]#selected-item-changed# contains the selection as an Object.
+
+Note that the order in which these two events are fired might vary depending on the situation.
 
 [source,javascript]
 ----
@@ -64,7 +77,7 @@ When using the element inside another Polymer element, you can use the declarati
 
 == Forms
 
-In addition to other features mentioned earlier, the [vaadinelement]#vaadin-combo-box# implements the [classname]#IronFormElementBehavior#, so it can be used as a field in an [elementname]#iron-form#.
+The [vaadinelement]#<vaadin-combo-box># element implements the link:https://elements.polymer-project.org/elements/iron-form-element-behavior[[classname]#IronFormElementBehavior#], so it can be used as a field in an link:https://elements.polymer-project.org/elements/iron-form[[elementname]#iron-form#].
 
 [source,html]
 ----
@@ -142,4 +155,19 @@ You can override the default property paths by defining [propertyname]#item-labe
 ----
 var combobox = document.querySelector('vaadin-combo-box');
 combobox.items = [{ name: { first: 'John', last: 'Doe' } }];
+----
+
+== Styling
+
+You can customize certain styles of the [vaadinelement]#vaadin-combo-box# with CSS mixins and properties.
+
+[propertyname]#vaadin-combo-box-overlay-max-height# property can be used to override the default maximum height of the overlay.
+
+[source,html]
+----
+<style is="custom-style">
+  #combobox1 {
+    --vaadin-combo-box-overlay-max-height: 100%;
+  }
+</style>
 ----

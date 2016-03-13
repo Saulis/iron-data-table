@@ -28,8 +28,14 @@ When the selected `value` is changed, a `value-changed` event is triggered.
 This element is also extended with the `IronFormElementBehavior` to
 enable usage within an `iron-form`.
 
+### Styling
+There are custom properties and mixins you can use to style the component:
+
+Custom property | Description | Default
+----------------|-------------|-------------
+`--vaadin-combo-box-overlay-max-height` | Property that determines the max height of overlay | `65vh`
+
 @element vaadin-combo-box
-@demo demo/
 -->
 
 <link rel="import" href="../polymer/polymer.html">
@@ -69,34 +75,33 @@ enable usage within an `iron-form`.
       position: relative;
       width: 24px;
       height: 24px;
+      text-align: center;
     }
 
     paper-input-container iron-icon {
       fill: rgba(0, 0, 0, .26);
       cursor: pointer;
-      padding: 0px;
-      --iron-icon-width: 24px;
-      --iron-icon-height: 24px;
-      transition: all .2s;
+      --iron-icon-width: 20px;
+      --iron-icon-height: 20px;
+      margin-top: -1px;
+      transition: fill 0.2s;
     }
 
     paper-input-container paper-ripple {
       color: rgba(0, 0, 0, .54);
     }
 
+    paper-input-container iron-icon:hover,
     paper-input-container[opened] iron-icon {
       fill: rgba(0, 0, 0, .54);
     }
 
-    paper-input-container[opened] #toggleIcon iron-icon {
-      transform: rotate(-180deg);
+    paper-input-container[opened] iron-icon:hover {
+      fill: rgba(0, 0, 0, .86);
     }
 
-    #clearIcon iron-icon {
-      padding-left: 2px;
-      padding-bottom: 2px;
-      --iron-icon-width: 20px;
-      --iron-icon-height: 20px;
+    #clearIcon {
+      margin-right: 4px;
     }
 
     #input::-ms-clear {
@@ -131,7 +136,7 @@ enable usage within an `iron-form`.
         <paper-ripple class="circle" center></paper-ripple>
       </div>
       <div suffix id="toggleIcon" on-tap="_toggle" on-touchend="_preventDefault" hidden$="[[_hideToggleIcon(disabled, readonly)]]">
-        <iron-icon icon="arrow-drop-down" aria-controls="overlay"></iron-icon>
+        <iron-icon icon="menu" aria-controls="overlay"></iron-icon>
         <paper-ripple class="circle" center></paper-ripple>
       </div>
     </paper-input-container>
@@ -181,6 +186,8 @@ enable usage within an `iron-form`.
       value: {
         type: String,
         observer: '_valueChanged',
+        //notify: true already set in IronFormBehavior, setting this to true will make two value-changed events(?)
+        notify: false,
         value: ''
       },
 
@@ -439,7 +446,6 @@ enable usage within an `iron-form`.
     },
 
     _onClosed: function() {
-      this._focusedIndex = this.$.overlay.indexOfLabel(this.$.input.bindValue);
 
       if (this._focusedIndex > -1) {
         this.$.overlay._selectItem(this._focusedIndex);
@@ -475,8 +481,15 @@ enable usage within an `iron-form`.
      */
 
     _inputValueChanged: function(e) {
-      this._filter = this.$.input.bindValue;
-      this._focusedIndex = this.$.overlay.indexOfLabel(this.$.input.bindValue);
+
+      if (this._filter === this.$.input.bindValue) {
+        // Filter and input value might get out of sync, while keyboard navigating for example.
+        // Afterwards, input value might be changed to the same value as used in filtering.
+        // In situation like these, we need to make sure all the filter changes handlers are run.
+        this._filterChanged(this._filter);
+      } else {
+        this._filter = this.$.input.bindValue;
+      }
 
       if (!this.opened) {
         this.open();
@@ -511,9 +524,17 @@ enable usage within an `iron-form`.
     },
 
     _filterChanged: function(filter) {
-      if (this.items) {
-        this._setItems(this._filterItems(this.items, filter));
-      }
+      this.unlisten(this.$.overlay, '_selected-item-changed', '_selectedItemChanged');
+
+      this._setItems(this._filterItems(this.items, filter));
+      this._focusedIndex = this.$.overlay.indexOfLabel(filter);
+
+      this.listen(this.$.overlay, '_selected-item-changed', '_selectedItemChanged');
+
+      // async needed to reposition correctly after filtering
+      this.async(function() {
+        this.$.overlay.notifyResize();
+      }.bind(this));
     },
 
     _itemsChanged: function(change) {
@@ -523,6 +544,10 @@ enable usage within an `iron-form`.
     },
 
     _filterItems: function(arr, filter) {
+      if (!arr) {
+        return arr;
+      }
+
       return arr.filter((function(item) {
         filter = filter.toString().toLowerCase() || '';
 
@@ -533,33 +558,25 @@ enable usage within an `iron-form`.
     },
 
     _setItems: function(items) {
-      this.unlisten(this.$.overlay, '_selected-item-changed', '_selectedItemChanged');
-
       //TODO: There is something wrong with observers and using set function
       // see here: https://github.com/Polymer/polymer/issues/3254
       //As a workaround setting/notifying the observer with the value undefined helps
       this.$.overlay.notifyPath('_items');
       this.$.overlay.set('_items', items);
 
-      if (this.$.overlay._items && this.$.overlay._items.indexOf(this.selectedItem) > -1) {
-        this.$.overlay._selectItem(this.selectedItem);
-        this._focusedIndex = this.items.indexOf(this.selectedItem);
+      var valueIndex = this._indexOfValue(this.value, items);
+      if (valueIndex > -1) {
+        this.$.overlay._selectItem(valueIndex);
       }
 
       this.$.overlay.hidden = (items === undefined || items === null || items.length === 0);
-
-      this.listen(this.$.overlay, '_selected-item-changed', '_selectedItemChanged');
-
-      // async needed to reposition correctly after filtering
-      this.async(function() {
-        this.$.overlay.notifyResize();
-      }.bind(this));
     },
 
-    _indexOfValue: function(value) {
-      if (this.items && value) {
-        for (var i = 0; i < this.items.length; i++) {
-          if (this._getItemValue(this.items[i]) === value) {
+    _indexOfValue: function(value, items) {
+      items = items || this.items;
+      if (items && value) {
+        for (var i = 0; i < items.length; i++) {
+          if (this._getItemValue(items[i]).toString() === value.toString()) {
             return i;
           }
         }
@@ -573,6 +590,7 @@ enable usage within an `iron-form`.
         this._setSelectedItem(detail.value);
         this.$.input.bindValue = this._getItemLabel(this.selectedItem);
         this.value = this._getItemValue(this.selectedItem);
+        this._focusedIndex = this.$.overlay._items.indexOf(detail.value);
       }
 
       if (this.opened) {
@@ -592,10 +610,9 @@ enable usage within an `iron-form`.
       } else {
         this.$.input.bindValue = this.allowCustomValue ? value : '';
         this._setSelectedItem(null);
+        this._focusedIndex = -1;
         this.$.overlay.$.selector.clearSelection();
       }
-
-      this._focusedIndex = valueIndex;
 
       this.close();
     },
@@ -628,6 +645,14 @@ enable usage within an `iron-form`.
    * @event value-changed
    * @param {Object} detail
    *  @param {String} detail.value the combobox value
+   */
+
+  /**
+   * Fired when selected item changes.
+   *
+   * @event selected-item-changed
+   * @param {Object} detail
+   *  @param {Object|String} detail.value the selected item. Type is the same as the type of `items`.
    */
 
   /**
