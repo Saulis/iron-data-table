@@ -114,7 +114,7 @@
                 }
 
                 // if last page is reached, increment the size.
-                if (table.size / opts.pageSize === opts.page + 1) {
+                if (table.size / opts.pageSize >= opts.page) {
                   table.size += opts.pageSize;
                 }
 
