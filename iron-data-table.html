@@ -167,6 +167,13 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         @apply(--iron-data-table-row-cell);
       }
 
+      #header > data-table-cell div[hidden],
+      #header > data-table-cell data-table-column-filter[hidden],
+      .checkbox[hidden] {
+        /* Fix for Shadow DOM https://github.com/Polymer/polymer/issues/1748 */
+        display: none !important;
+      }
+
       .checkbox {
         height: var(--iron-data-table-cell-height, 48px);
         flex-basis: var(--iron-data-table-cell-height, 48px);
