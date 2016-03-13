@@ -551,11 +551,11 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         // Resetting scroll position and selection for consistency here. They are
         // both reset implicitly when a new _cachedItems is set to iron-list, but
         // that doesn't happen when size of the dataset changes only by a few items.
-        this.$.list.scrollTop = 0;
         this.clearSelection();
 
         this.debounce('reset', function() {
           this.clearCache();
+          this.$.list.scrollToIndex(0);
         }.bind(this), 100);
       },
 
