@@ -377,6 +377,17 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
           observer: '_columnsChanged'
         },
 
+        /**
+         * Function that provides items lazily. Receives parameters `opts`, `callback`, `err`
+         *
+         * `opts.page` Requested page index
+         *
+         * `opts.pageSize` Current page size
+         *
+         * `opts.filter` Current filter parameters
+         *
+         * `opts.sortOrder` Current sorting parameters
+         */
         dataSource: {
           type: Object
         },
@@ -387,6 +398,9 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
           value: 0
         },
 
+        /**
+         * `true` if the table is currently loading data from the data source.
+         */
         loading: {
           type: Boolean,
           reflectToAttribute: true,
