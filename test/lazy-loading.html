@@ -191,7 +191,7 @@
           table._currentPage = 10;
 
           table.async(function() {
-            expect(table._cachedPages).to.eql([11, 9]);
+            expect(table._cachedPages).to.not.contain(10);
             done();
           }, 250);
 
