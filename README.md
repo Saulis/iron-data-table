@@ -70,11 +70,11 @@ bound from the model object provided to the template scope):
 
 ## Features (1.0)
 - Virtual, 'infinite' scrolling provided by `<iron-list>`
+- Lazy Loading
 - Data filtering
 - Data sorting
 - Item selection
 - Multi-Selection
-- Row Grouping
 - Template support for each column
 - Two-way binding support
 - Custom styling support for templates
@@ -92,8 +92,8 @@ In random order: (please let me know if something is missing or misplaced)
 
 ## Roadmap (1.x)
 In random order: (please let me know if something is missing or misplaced)
-- Lazy Loading
 - Nested Row Grouping (Tree)
+- Row Grouping
 - Custom Footer templates
 
 # Contributing
