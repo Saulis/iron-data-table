@@ -18,6 +18,7 @@ limitations under the License.
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../iron-list/iron-list.html">
 <link rel="import" href="../iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="../paper-spinner/paper-spinner-lite.html">
 
 <link rel="import" href="data-table-column.html">
 <link rel="import" href="data-table-column-sort.html">
@@ -184,6 +185,19 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         flex-basis: 100%;
         flex-shrink: 1;
         flex-grow: 0;
+        transition: opacity 200ms;
+      }
+
+      :host[loading] #list {
+        opacity: 0.25;
+      }
+
+      :host[loading] paper-spinner-lite {
+        position: absolute;
+        top: 45%;
+        left: 50%;
+
+        --paper-spinner-color: var(--default-primary-color);
       }
 
       .item {
@@ -248,6 +262,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         </template>
       </iron-list>
     </div>
+    <paper-spinner-lite active hidden=[[!loading]]></paper-spinner-lite>
   </template>
 
   <script>
@@ -364,6 +379,18 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
 
         dataSource: {
           type: Object
+        },
+
+        _pagesLoading: {
+          type: Number,
+          observer: '_pagesLoadingChanged',
+          value: 0
+        },
+
+        loading: {
+          type: Boolean,
+          reflectToAttribute: true,
+          value: false
         },
 
         _cachedItems: {
@@ -673,19 +700,26 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
       },
 
       _currentPageChanged: function(dataSource, page) {
-        this._loadPage(dataSource, page);
-
-        if (page + 1 < (this.size / this.pageSize)) {
-          this._loadPage(dataSource, page + 1);
+        if (this._cachedPages && this._cachedPages.indexOf(page) === -1) {
+          this.loading = true;
         }
 
-        if (page > 0) {
-          this._loadPage(dataSource, page - 1);
-        }
+        this.debounce('loading', function() {
+          this._loadPage(dataSource, page);
+
+          if (page + 1 < (this.size / this.pageSize)) {
+            this._loadPage(dataSource, page + 1);
+          }
+
+          if (page > 0) {
+            this._loadPage(dataSource, page - 1);
+          }
+        }.bind(this), 100);
       },
 
       _loadPage: function(dataSource, page) {
         if (this._cachedPages && this._cachedPages.indexOf(page) === -1) {
+          this._pagesLoading++;
           this.push('_cachedPages', page);
 
           var success = function(items) {
@@ -705,6 +739,8 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
               } else {
                 this.$.list._collection.pmap[item] = index;
               }
+
+              this._pagesLoading--;
             }
 
             // resize required for variable row height items.
@@ -717,6 +753,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
 
           var err = function() {
             //TODO: remove page from _cachedPages
+            this._pagesLoading--;
           }.bind(this);
 
           dataSource({
@@ -759,6 +796,10 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
 
         // Force reload on currently visible pages.
         this._currentPageChanged(this.dataSource, this._currentPage);
+      },
+
+      _pagesLoadingChanged: function(pagesLoading) {
+        this.loading = pagesLoading > 0;
       }
     });
   </script>
