@@ -322,6 +322,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         /**
          * When `multiSelection` is true, this is an array that contains the selected items.
          * If `selectedItems.inverted` is `true`, the array contains deselected items instead.
+         * `selectedItems.filter` contains an array of filters that were active when the selection changed.
          */
         selectedItems: {
           type: Object,
@@ -461,6 +462,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
           this.set('selectedItems', items);
           this.set('selectedItems.inverted', inverted);
           this.notifyPath('selectedItems.length', items.length);
+          this.set('selectedItems.filter', this.filter || []);
         } else if (e.detail.path === 'selectedItems.splices') {
           this.notifyPath('selectedItems.splices', e.detail.value);
           this.notifyPath('selectedItems.length', this.selectedItems.length);
@@ -603,11 +605,17 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         for (var i = 0; i < this.filter.length; i++) {
           if (this.filter[i].path === e.target.filterBy) {
             this.set('filter.' + i + '.filter', e.detail.value);
+            this.set('selectedItems.filter.' + i + '.filter', e.detail.value);
             return;
           }
         }
 
         this.push('filter', {
+          path: e.target.filterBy,
+          filter: e.detail.value
+        });
+
+        this.push('selectedItems.filter', {
           path: e.target.filterBy,
           filter: e.detail.value
         });
