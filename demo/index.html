@@ -71,14 +71,17 @@
                     if (xhr.status == 200) {
                       var json = JSON.parse(xhr.responseText);
 
-                      // Simulate remote delay...
+                      // Simulating remote delay...
                       setTimeout(function() {
+                        // just keeping the data flowing and returning a pageful of items
+                        // on each call.
                         cb(json.results.slice(0, opts.pageSize));
-                      }, 250);
+                      }, 1000);
                     }
                   }
                 };
 
+                // page parameters could be used like this:
                 xhr.open("GET", 'users.json?per_page=' +
                                   opts.pageSize + '&page=' + opts.page, true);
                 xhr.send();
