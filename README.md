@@ -4,7 +4,7 @@
 
 # &lt;iron-data-table&gt;
 
-[Demos and API Documentation](https://saulis.github.io/iron-data-table/)
+[Demos](https://saulis.github.io/iron-data-table/demo/) and [API Documentation](https://saulis.github.io/iron-data-table/)
 
 To install, run: `bower install iron-data-table`
 
