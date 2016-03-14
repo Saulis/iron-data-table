@@ -762,8 +762,6 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
               } else {
                 this.$.list._collection.pmap[item] = index;
               }
-
-              this._pagesLoading--;
             }
 
             // resize required for variable row height items.
@@ -772,6 +770,8 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
             this.debounce('resizing', function() {
               this.$.list.notifyResize();
             }.bind(this), 100);
+
+            this._pagesLoading--;
           }.bind(this);
 
           var err = function() {
