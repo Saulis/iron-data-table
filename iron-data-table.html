@@ -456,33 +456,6 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         }.bind(this));
       },
 
-      ready: function() {
-        this._patchIronListCreatePool();
-      },
-
-      _patchIronListCreatePool: function() {
-        // Since 1.2.0, iron-list changed timings on how the first three rows are
-        // rendered initially: https://github.com/PolymerElements/iron-list/commit/c0e27e52ee93dcd93d33590b569bd17c5c504005#diff-b97995700c5da5fa638d0324b5f3f861L765
-        // Apparently, this causes the Polymer.dom.flush() to be called in such order,
-        // that templatize for the data-table-cells doesn't work properly for the initial render.
-
-        // As a fix, calling Polymer.dom.flush() after the initial rows have been created seems to help.
-        // So far, haven't been able to produce an isolated jsbin to report about this to iron-list.
-
-        var createPool = this.$.list._createPool.bind(this.$.list);
-        var initialCreateCalled = false;
-        this.$.list._createPool = function(size) {
-          var items = createPool(size);
-
-          // Polymer.dom.flush() needs to be called on the initial creation ONLY.
-          if (!initialCreateCalled) {
-            initialCreateCalled = true;
-            Polymer.dom.flush();
-          }
-          return items;
-        };
-      },
-
       _stopPropagation: function(e) {
         e.stopImmediatePropagation();
       },
