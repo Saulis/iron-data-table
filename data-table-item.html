@@ -21,7 +21,7 @@
 
     </style>
 
-    <div id="container" on-tap="_toggle">
+    <div id="container" on-mousedown="_toggle">
       <div id="expandIcon" hidden="[[!treeParent]]" collapsed$="[[collapsed]]">
         <iron-icon icon="arrow-drop-down"></iron-icon>
         <paper-ripple class="circle" center></paper-ripple>
@@ -66,11 +66,17 @@
       _toggle: function(e) {
         if (this.treeParent) {
           this.collapsed = !this.collapsed;
+          e.preventDefault();
         }
       },
 
       _itemChanged: function(item) {
         this.treeParent = item._treePath;
+
+        var cell = Polymer.dom(this).querySelector('data-table-cell');
+        if (cell) {
+          cell.querySelector('div').style.marginLeft = item._nestingPath ? '20px' : '';
+        }
       }
     });
   </script>
