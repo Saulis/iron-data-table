@@ -1,0 +1,77 @@
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../paper-ripple/paper-ripple.html">
+
+<dom-module id="data-table-item">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      #expandIcon {
+        position: absolute;
+        top: 10px;
+        left: 0px;
+      }
+
+      #expandIcon[collapsed] iron-icon {
+        transform: rotate(-90deg);
+      }
+
+    </style>
+
+    <div id="container" on-tap="_toggle">
+      <div id="expandIcon" hidden="[[!treeParent]]" collapsed$="[[collapsed]]">
+        <iron-icon icon="arrow-drop-down"></iron-icon>
+        <paper-ripple class="circle" center></paper-ripple>
+      </div>
+      <content></content>
+    </div>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'data-table-item',
+
+      properties: {
+        collapsed: {
+          type: Boolean,
+          observer: '_collapsedChanged',
+          value: true
+        },
+
+        treeParent: {
+          type: Boolean,
+          reflectToAttribute: true,
+          value: false
+        },
+
+        index: Number,
+
+        item: {
+          type: Object,
+          observer: '_itemChanged'
+        }
+      },
+
+      _collapsedChanged: function(collapsed, oldValue) {
+        if (this.collapsed) {
+          this.fire('collapsed', {index: this.index});
+        } else {
+          this.fire('expanded', {path: this.item._treePath, index: this.index});
+        }
+      },
+
+      _toggle: function(e) {
+        if (this.treeParent) {
+          this.collapsed = !this.collapsed;
+        }
+      },
+
+      _itemChanged: function(item) {
+        this.treeParent = item._treePath;
+      }
+    });
+  </script>
+</dom-module>

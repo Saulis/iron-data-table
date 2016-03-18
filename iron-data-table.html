@@ -24,6 +24,7 @@ limitations under the License.
 <link rel="import" href="data-table-column-sort.html">
 <link rel="import" href="data-table-cell.html">
 <link rel="import" href="data-table-checkbox.html">
+<link rel="import" href="data-table-item.html">
 
 <!--
 `iron-data-table` displays a table or a grid of data.
@@ -146,7 +147,8 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
       .item > data-table-cell:not([hidden]) {
         flex: 1 0 100px;
         padding: 0 24px 0 24px;
-        min-height: 10px; /* Prevent iron-list from looping when item height is really small */
+        min-height: 10px;
+        /* Prevent iron-list from looping when item height is really small */
         height: var(--iron-data-table-cell-height, 48px);
         display: flex;
         align-items: center;
@@ -204,7 +206,6 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         position: absolute;
         top: 45%;
         left: 50%;
-
         --paper-spinner-color: var(--default-primary-color);
       }
 
@@ -259,14 +260,16 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
 
       <iron-list id="list" as="item" items="[[_cachedItems]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" multi-selection="[[multiSelection]]" selected-item="{{selectedItem}}" on-selected-items-changed="_selectedItemsChanged">
         <template>
-          <div class="item" tabindex$="[[tabIndex]]" selected$="[[_isSelected(selected, selectedItems.inverted)]]" even$="[[!_isEven(index)]]">
-            <div class="checkbox" hidden$="[[!multiSelection]]">
-              <data-table-checkbox checked="[[_isSelected(selected, selectedItems.inverted)]]"></data-table-checkbox>
+          <data-table-item item="[[item]]" index="[[index]]" on-expanded="_expand" on-collapsed="_collapsed">
+            <div class="item" tabindex$="[[tabIndex]]" selected$="[[_isSelected(selected, selectedItems.inverted)]]" even$="[[!_isEven(index)]]">
+              <div class="checkbox" hidden$="[[!multiSelection]]">
+                <data-table-checkbox checked="[[_isSelected(selected, selectedItems.inverted)]]"></data-table-checkbox>
+              </div>
+              <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
+                <data-table-cell column="[[column]]" template="[[column.template]]" bind="[[_bind(item, index, selected)]]"></data-table-cell>
+              </template>
             </div>
-            <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
-              <data-table-cell column="[[column]]" template="[[column.template]]" bind="[[_bind(item, index, selected)]]"></data-table-cell>
-            </template>
-          </div>
+          </data-table-item>
         </template>
       </iron-list>
     </div>
@@ -798,6 +801,64 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
 
       _pagesLoadingChanged: function(pagesLoading) {
         this.loading = pagesLoading > 0;
+      },
+
+      /**
+       * Tree Table
+       */
+      _expand: function(e) {
+        var treePath = e.detail.path;
+        var start = e.detail.index + 1;
+
+        var success = function(items) {
+          // TODO: bind this automatically maybe, needed for removing on collapse.
+          this._cachedItems[e.detail.index].childCount = items.length;
+
+          for (var i = 0; i < items.length; i++) {
+            var index = start + i;
+            var item = items[i];
+
+            this.splice('_cachedItems', index, 0, item);
+            //this.set('_cachedItems.' + index, item);
+            /*
+                        // TODO: send an issue/pr to iron-list, that makes sure the internal
+                        // collection stays up-to-date when `items` change.
+                        this.$.list._collection.store[index] = item;
+                        if (item && typeof item == 'object') {
+                          this.$.list._collection.omap.set(item, index);
+                        } else {
+                          this.$.list._collection.pmap[item] = index;
+                        }*/
+          }
+
+          this.size += items.length;
+
+          // resize required for variable row height items.
+          // debouncing for optimizing when multiple requests are running at
+          // the same time.
+          this.debounce('resizing', function() {
+            this.$.list.notifyResize();
+          }.bind(this), 100);
+        }.bind(this);
+
+        this.dataSource({
+          treePath: treePath,
+          filter: this.filter,
+          sortOrder: this.sortOrder
+        }, success);
+      },
+
+      _collapsed: function(e) {
+        // TODO: gets fired on initial collapse before cachedItems is set
+        if (this._cachedItems && e.detail.index !== undefined) {
+          var index = e.detail.index;
+          var childCount = this._cachedItems[index].childCount;
+
+          this.splice('_cachedItems', index + 1, childCount);
+          this.size -= childCount;
+
+          this.$.list.notifyResize();
+        }
       }
     });
   </script>
