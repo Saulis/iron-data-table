@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script type="text/javascript" src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="common.html">
+</head>
+
+<body unresolved>
+  <template is="dom-bind" id="t">
+    <iron-ajax url="vaadin-repos.json" last-response="{{repos}}" auto></iron-ajax>
+    <iron-ajax url="addressbook-commits.json" last-response="{{commits}}" auto></iron-ajax>
+    <iron-data-table data-source="[[dataSource]]" style="width: 100%; border: solid 1px red">
+      <data-table-column name="Author">
+        <template>[[item.commit.author.name]]</template>
+      </data-table-column>
+      <data-table-column name="Message" flex="3">
+        <template>[[item.commit.message]]</template>
+      </data-table-column>
+    </iron-data-table>
+  </template>
+</body>
+
+<script>
+  document.addEventListener('WebComponentsReady', function() {
+    var t = document.querySelector("#t");
+    var table = document.querySelector('iron-data-table');
+
+    table.size = t.repos.length;
+
+    for (var i = 0; i < t.repos.length; i++) {
+      t.repos[i]._treePath = t.repos[i].name + '/commits';
+      t.repos[i].commit = { author: { name: t.repos[i].name }};
+    }
+
+    for (var i = 0; i < t.commits.length; i++) {
+      t.commits[i]._nestingPath = 'addressbook/commits';
+    }
+
+    t.dataSource = function(opts, cb) {
+      if (opts.treePath) {
+        cb(t.commits);
+      } else {
+        cb(t.repos.slice(opts.page * opts.pageSize, opts.pageSize));
+      }
+    };
+
+    t._itemChanged = function(e) {
+      console.log(e.detail);
+    };
+
+  });
+</script>
+
+</html>
