@@ -58,8 +58,6 @@
               return;
             }
           }
-
-
         }
       };
 
@@ -69,14 +67,29 @@
             throw Error(path + ' already added.');
           }
 
-          var newNode = {path: path, start: index, end: index + count - 1, count: count};
+          var newNode = {
+            path: path,
+            start: index,
+            end: index + count - 1,
+            count: count
+          };
 
           for (var i = 0; i < nodes.length; i++) {
             var node = nodes[i];
 
             if (node.start <= index && node.end >= index) {
-              var splittedStart = {path: node.path, start: node.start, end: index - 1, count: node.count};
-              var splittedEnd = {path: node.path, start: index + count, end: index + count + (node.end - node.start) - (splittedStart.end - splittedStart.start) - 1, count: node.count};
+              var splittedStart = {
+                path: node.path,
+                start: node.start,
+                end: index - 1,
+                count: node.count
+              };
+              var splittedEnd = {
+                path: node.path,
+                start: index + count,
+                end: index + count + (node.end - node.start) - (splittedStart.end - splittedStart.start) - 1,
+                count: node.count
+              };
               nodes.splice(i, 1, splittedStart, newNode, splittedEnd);
 
               _updateIndexes();
@@ -104,6 +117,47 @@
           var first = _findFirst(index);
 
           return first ? first.path : undefined;
+        },
+
+        getPage: function(index, pageSize) {
+          var first = _findFirst(index);
+
+          if (first) {
+            var pageIndex = index - first.start;
+
+            return {
+              path: first.path,
+              page: Math.floor(pageIndex / pageSize)
+            };
+          }
+        },
+
+        getPages: function(start, end, pageSize) {
+          var pages = [];
+
+          if (start <= end) {
+            for (var i = start; i <= end; i++) {
+              var page = this.getPage(i, pageSize);
+
+              if (pages.filter(function(p) {
+                  return p.path === page.path && p.page === page.page;
+                }).length === 0) {
+                pages.push(page);
+              }
+            }
+          } else {
+            for (var i = start; i >= end; i--) {
+              var page = this.getPage(i, pageSize);
+
+              if (pages.filter(function(p) {
+                  return p.path === page.path && p.page === page.page;
+                }).length === 0) {
+                pages.push(page);
+              }
+            }
+          }
+
+          return pages;
         },
 
         //public to help debugging
@@ -141,6 +195,67 @@
           tree.add('/', 0, 100);
 
           expect(tree.getPath(100)).to.be.undefined;
+        });
+      });
+
+      describe('Returning pages', function() {
+        it('should return a single page', function() {
+          tree.add('/', 0, 100);
+
+          expect(tree.getPage(20, 10)).to.eql({
+            path: '/',
+            page: 2
+          });
+        });
+
+        it('should return a nested page', function() {
+          tree.add('/', 0, 100);
+          tree.add('/foo', 50, 100);
+
+          expect(tree.getPage(60, 10)).to.eql({
+            path: '/foo',
+            page: 1
+          });
+        });
+
+        it('should return all requested pages', function() {
+          tree.add('/', 0, 100);
+          tree.add('/foo', 50, 100);
+
+          var pages = tree.getPages(40, 60, 10);
+
+          expect(pages[0]).to.eql({
+            path: '/',
+            page: 4
+          });
+          expect(pages[1]).to.eql({
+            path: '/foo',
+            page: 0
+          });
+          expect(pages[2]).to.eql({
+            path: '/foo',
+            page: 1
+          });
+        });
+
+        it('should return all requested pages in reverse', function() {
+          tree.add('/', 0, 100);
+          tree.add('/foo', 50, 100);
+
+          var pages = tree.getPages(60, 40, 10);
+
+          expect(pages[0]).to.eql({
+            path: '/foo',
+            page: 1
+          });
+          expect(pages[1]).to.eql({
+            path: '/foo',
+            page: 0
+          });
+          expect(pages[2]).to.eql({
+            path: '/',
+            page: 4
+          });
         });
       });
 
