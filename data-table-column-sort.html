@@ -1,6 +1,6 @@
-<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../iron-icons/iron-icons.html">
-<link rel="import" href="../paper-ripple/paper-ripple.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
 
 <dom-module id="data-table-column-sort">
   <template>
@@ -10,42 +10,45 @@
         margin: 4px;
       }
 
-      :host[hidden] {
+	  :host[hidden] {
         display: none;
       }
 
-      #sortIcon {
-        position: relative;
-        width: 24px;
-        height: 24px;
+      paper-icon-button {
       }
 
-      iron-icon {
-        fill: rgba(0, 0, 0, .16);
-        cursor: pointer;
-        padding: 0px;
+        position: relative;
+        opacity: .16;
+      }
+
+      paper-icon-button[active],
+      paper-icon-button:hover,
+      paper-icon-button[focused] {
+        opacity: .84;
+      }
+
+      paper-icon-button::content iron-icon {
+        padding: 0;
         --iron-icon-width: 24px;
         --iron-icon-height: 24px;
         transition: all .2s;
       }
 
-      iron-icon[active], iron-icon:hover {
-        fill: rgba(0, 0, 0, .87);
-      }
-
-      paper-ripple {
-        color: rgba(0, 0, 0, .54);
-      }
-
-      #sortIcon[direction='desc'] iron-icon[active] {
+      paper-icon-button[direction='desc'][active]::content iron-icon {
         transform: rotate(-180deg);
+      }
+
+      paper-icon-button[direction]:after {
+        content: attr(sort-order);
+        font-size: 9px;
+        font-weight: bold;
+        position: absolute;
+        right: 4px;
+        bottom: 8px;
       }
     </style>
 
-    <div id="sortIcon" on-tap="_sort" direction$="[[direction]]">
-      <iron-icon active$="[[_isActive(path, sortOrder)]]" icon="arrow-upward"></iron-icon>
-      <paper-ripple class="circle" center></paper-ripple>
-    </div>
+    <paper-icon-button id="sortIcon" on-tap="_sort" icon="arrow-upward" active="[[_isActive(path, sortOrder)]]" direction$="[[direction]]" sort-order$="[[_computeSortOrder(path, sortOrder)]]"></paper-icon-button>
 
   </template>
   <script>
@@ -53,7 +56,10 @@
       is: 'data-table-column-sort',
 
       properties: {
-        direction: String,
+        direction: {
+          type: String,
+          notify: true
+        },
         path: String,
         sortOrder: {
           type: Object,
@@ -62,19 +68,54 @@
       },
 
       _isActive: function(path, sortOrder) {
+        if (Array.isArray(sortOrder)) {
+          return sortOrder.find(function(item) {
+            return item.path == path;
+          }) !== undefined;
+        }
         return path === sortOrder.path;
       },
 
       _sortOrderChanged: function(sortOrder) {
-        if (sortOrder.path === this.path) {
-          this.direction = sortOrder.direction;
+        if (Array.isArray(sortOrder)) {
+          var path = this.path;
+          var sort = sortOrder.find(function(item) {
+            return item.path == path;
+          });
+          if (sort) {
+            this.direction = sort.direction;
+          } else {
+            this.direction = null;
+          }
+        } else {
+          if (sortOrder.path === this.path) {
+            this.direction = sortOrder.direction;
+          } else {
+            this.direction = null;
+          }
         }
+      },
+
+      _computeSortOrder: function(path, sortOrder) {
+        if (Array.isArray(sortOrder)) {
+          var sort = sortOrder.find(function(item) {
+            return item.path == path;
+          });
+          return sort && sort.order ? sort.order : null;
+        }
+        if (path === sortOrder.path) {
+          return sortOrder.order ? sortOrder.order : null;
+        }
+        return null;
       },
 
       _sort: function() {
         this.direction = this.direction === 'asc' ? 'desc' : 'asc';
 
-        this.fire('sort-direction-changed', { path: this.path, direction: this.direction });
+        this.fire('sort-direction-changed', {
+          path: this.path,
+          direction: this.direction
+        });
       }
     });
   </script>
