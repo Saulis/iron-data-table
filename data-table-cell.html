@@ -1,3 +1,4 @@
+<link rel="import" href="../polymer/polymer.html">
 <dom-module id="data-table-cell">
   <template>
     <content></content>
@@ -47,6 +48,10 @@
         this._content = document.createElement('div');
         this._content.id = 'cell' + id;
 
+        if(Polymer.Settings.useNativeShadow) {
+          this.listen(this._content, 'tap', '_shadowTap');
+        }
+
         Polymer.dom(this).insertBefore(this._contentElement, Polymer.dom(this).firstChild);
         Polymer.dom(this.domHost).appendChild(this._content);
         Polymer.dom.flush();
@@ -56,6 +61,10 @@
         // Polymer.dom(this._content.parentElement) has different childs depending if Shady or native Shadow DOM is used.
         // TODO: see if there's a need to use Polymer.dom here and can it be done somehow.
 
+        if(Polymer.Settings.useNativeShadow) {
+          this.unlisten(this._content, 'tap', '_shadowTap');
+        }
+
         if (this._content.parentElement) {
           this._content.parentElement.removeChild(this._content);
         }
@@ -64,6 +73,16 @@
           Polymer.dom(this).removeChild(this._contentElement);
           Polymer.dom.flush();
         }
+      },
+
+      _shadowTap: function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.fire(event.type, {sourceEvent: e}, {
+          node: this,
+          bubbles: e.bubbles,
+          cancelable: e.cancelable
+        });
       },
 
       _orderChanged: function(e) {
