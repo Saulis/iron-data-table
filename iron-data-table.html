@@ -525,17 +525,52 @@ inspired styles to your `iron-data-table`.
       },
 
       _sort: function(items, sortOrder) {
-        if (!sortOrder || !sortOrder.path) {
-          return items;
-        }
-
-        return Array.prototype.sort.call(items, function(a, b) {
-          if (sortOrder.direction === 'asc') {
-            return this._compare(this.get(sortOrder.path, a), this.get(sortOrder.path, b));
-          } else {
-            return this._compare(this.get(sortOrder.path, b), this.get(sortOrder.path, a));
+          if (!sortOrder) {
+              return items;
           }
-        }.bind(this));
+
+          if(Array.isArray(sortOrder)) {
+              if(sortOrder.length > 1) {
+                  return this._multiSort(items, sortOrder);
+              } else if(sortOrder.length == 1) {
+                  sortOrder = sortOrder[0];
+              } else {
+                  return items;
+              }
+          }
+          if(!sortOrder.path) {
+              return items;
+          }
+
+          return Array.prototype.sort.call(items, function(a, b) {
+              if (sortOrder.direction === 'asc') {
+                  return this._compare(this.get(sortOrder.path, a), this.get(sortOrder.path, b));
+              } else {
+                  return this._compare(this.get(sortOrder.path, b), this.get(sortOrder.path, a));
+              }
+          }.bind(this));
+      },
+
+      _multiSort: function(items, sortOrder) {
+        var table = this;
+        function multiSort(sortArray) {
+            return function(a,b) {
+                return sortArray.map(function (o) {
+                            if (o.direction === 'asc') {
+                                return table._compare(table.get(o.path, a), table.get(o.path, b));
+                            } else if(o.direction === 'desc') {
+                                return table._compare(table.get(o.path, b), table.get(o.path, a));
+                            }
+                            return 0;
+                        }
+                ).reduce(function firstNonZeroValue (p,n) {
+                            return p ? p : n;
+                        },
+                        0
+                );
+            };
+        }
+        return Array.prototype.sort.call(items, multiSort(sortOrder));
       },
 
       _sortDirectionChanged: function(e) {
