@@ -91,9 +91,79 @@
         </template>
       </template>
     </demo-snippet>
+      <h3>Multi-Sorting</h3>
+      <demo-snippet>
+          <template>
+              <template id="multi-sort" is="dom-bind">
+                  <iron-ajax url="users.json" last-response="{{users}}" auto></iron-ajax>
+                  <iron-data-table id="multi-sort-table" items="[[users.results]]" sort-order="[[sortOrder]]">
+                      <data-table-column name="First Name" filter-by="user.name.first" sort-by="user.name.first">
+                          <template>[[item.user.name.first]]</template>
+                      </data-table-column>
+                      <data-table-column name="Last Name" sort-by="user.name.last">
+                          <template>[[item.user.name.last]]</template>
+                      </data-table-column>
+                      <data-table-column name="Email">
+                          <template>[[item.user.email]]</template>
+                      </data-table-column>
+                  </iron-data-table>
+              </template>
+          </template>
+      </demo-snippet>
   </div>
   <script>
     document.addEventListener('WebComponentsReady', function() {
+        var multiSortTemplate = document.querySelector('#multi-sort');
+        var multiSortTable = document.querySelector('#multi-sort-table');
+        multiSortTemplate.sortOrder = [];
+        multiSortTemplate.sorting = false;
+        multiSortTemplate._columnSorted = function(e) {
+            if(!multiSortTemplate.sorting) {
+                multiSortTemplate.sorting = true;
+                var detail = e.detail.value;
+                var column;
+                if(Array.isArray(detail)) {
+                    column = detail[0];
+                } else {
+                    column = detail;
+                }
+                var sortOrder = multiSortTemplate.sortOrder;
+                var sorted = sortOrder.find(function(sort) {
+                    return column.path == sort.path;
+                });
+                if(sorted) {
+                    if (sorted.direction == 'asc') {
+                        sorted.direction = 'desc';
+                    } else {
+                        var i, found = false;
+                        for(i = 0; i < sortOrder.length; i++) {
+                            if(sortOrder[i].path == column.path) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if(found) {
+                            sortOrder.splice(i, 1);
+                        }
+                    }
+                } else {
+                    sortOrder.push({
+                        path: column.path,
+                        direction: column.direction,
+                        order: 1
+                    });
+                }
+                sortOrder.forEach(function(sort, index) {
+                    sort.order = index + 1;
+                });
+                e.target.sortOrder = sortOrder;
+                setTimeout(function() {
+                    multiSortTemplate.sorting = false;
+                }, 100);
+            }
+        };
+        multiSortTable.addEventListener('sort-order-changed', multiSortTemplate._columnSorted, false);
+
       var combobox = document.querySelector('vaadin-combo-box');
 
       combobox.items = [
