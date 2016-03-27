@@ -1,4 +1,5 @@
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../iron-icons/iron-icons.html">
 <link rel="import" href="../paper-icon-button/paper-icon-button.html">
 
@@ -6,27 +7,21 @@
     <template>
         <style>
             :host {
-                display: block;
+                display: inherit;
                 margin: 4px;
             }
 
             paper-icon-button {
                 position: relative;
                 opacity: .16;
+                transition: all .2s;
             }
 
             paper-icon-button[active], paper-icon-button:hover, paper-icon-button[focused] {
                 opacity: .84;
             }
 
-            paper-icon-button ::content iron-icon {
-                padding: 0;
-                --iron-icon-width: 24px;
-                --iron-icon-height: 24px;
-                transition: all .2s;
-            }
-
-            paper-icon-button[direction='desc'][active] ::content iron-icon {
+            paper-icon-button[direction='desc'][active] {
                 transform: rotate(-180deg);
             }
 
@@ -38,15 +33,20 @@
                 right: 4px;
                 bottom: 8px;
             }
+            paper-icon-button[direction='desc']:after {
+                transform: rotate(180deg);
+            }
         </style>
 
-        <paper-icon-button id="sortIcon"
-                           on-tap="_sort"
+        <paper-icon-button on-tap="_sort"
                            hidden="[[hidden]]"
                            icon="arrow-upward"
                            active="[[_isActive(path, sortOrder)]]"
                            direction$="[[direction]]"
-                           sort-order$="[[_computeSortOrder(path, sortOrder)]]"></paper-icon-button>
+        sort-order$="[[_computeSortOrder(path, sortOrder)]]"></paper-icon-button>
+        <paper-icon-button on-tap="_clearSort"
+                           hidden="true"
+                           icon="clear"></paper-icon-button>
 
     </template>
     <script>
@@ -56,7 +56,8 @@
             properties: {
                 direction: {
                     type: String,
-                    notify: true
+                    notify: true,
+                    observer: '_changeDirection'
                 },
                 hidden: Boolean,
                 path: String,
@@ -65,7 +66,18 @@
                     observer: '_sortOrderChanged'
                 }
             },
-
+            _changeDirection: function() {
+                if(this.direction == 'asc') {
+                    this.toggleAttribute('aria-sorted', true, this);
+                    this.setAttribute('aria-sort', 'ascending');
+                } else if (this.direction == 'desc') {
+                    this.toggleAttribute('aria-sorted', true, this);
+                    this.setAttribute('aria-sort', 'descending');
+                } else {
+                    this.toggleAttribute('aria-sorted', false, this);
+                    this.removeAttribute('aria-sort');
+                }
+            },
             _isActive: function(path, sortOrder) {
                 if(Array.isArray(sortOrder)) {
                     return sortOrder.find(function(item) {
@@ -74,7 +86,6 @@
                 }
                 return path === sortOrder.path;
             },
-
             _sortOrderChanged: function(sortOrder) {
                 if(Array.isArray(sortOrder)) {
                     var path = this.path;
@@ -93,6 +104,7 @@
                         this.direction = null;
                     }
                 }
+                this.$$('paper-icon-button[icon="clear"]').hidden = this.direction == null;
             },
 
             _computeSortOrder: function(path, sortOrder) {
@@ -112,6 +124,10 @@
                 this.direction = this.direction === 'asc' ? 'desc' : 'asc';
 
                 this.fire('sort-direction-changed', { path: this.path, direction: this.direction });
+            },
+            _clearSort: function() {
+                this.direction = null;
+                this.fire('sort-direction-changed', { path: this.path, direction: null });
             }
         });
     </script>
