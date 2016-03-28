@@ -5,7 +5,7 @@
         display: block;
       }
 
-      #container {
+      [table-checkbox-container] {
         position: relative;
         box-sizing: border-box;
         height: 18px;
@@ -18,7 +18,7 @@
         transition: background-color 140ms, border-color 140ms;
       }
 
-      :host[checked] #container {
+      :host[checked] [table-checkbox-container] {
         border-color: var(--default-primary-color);
         background-color: var(--default-primary-color);
       }
@@ -80,7 +80,7 @@
       }
     </style>
 
-    <div id="container">
+    <div table-checkbox-container>
       <div class="checkmark"></div>
     </div>
 

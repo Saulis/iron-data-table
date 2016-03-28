@@ -1,78 +1,134 @@
-<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../iron-icons/iron-icons.html">
-<link rel="import" href="../paper-ripple/paper-ripple.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
 
 <dom-module id="data-table-column-sort">
-  <template>
-    <style>
-      :host {
-        display: block;
-        margin: 4px;
-      }
+    <template>
+        <style>
+            :host {
+                display: inherit;
+                margin: 4px;
+            }
 
-      #sortIcon {
-        position: relative;
-        width: 24px;
-        height: 24px;
-      }
+            paper-icon-button {
+                position: relative;
+                opacity: .16;
+                transition: all .2s;
+            }
 
-      iron-icon {
-        fill: rgba(0, 0, 0, .16);
-        cursor: pointer;
-        padding: 0px;
-        --iron-icon-width: 24px;
-        --iron-icon-height: 24px;
-        transition: all .2s;
-      }
+            paper-icon-button[active], paper-icon-button:hover, paper-icon-button[focused] {
+                opacity: .84;
+            }
 
-      iron-icon[active], iron-icon:hover {
-        fill: rgba(0, 0, 0, .87);
-      }
+            paper-icon-button[direction='desc'][active] {
+                transform: rotate(-180deg);
+            }
 
-      paper-ripple {
-        color: rgba(0, 0, 0, .54);
-      }
+            paper-icon-button[direction]:after {
+                content: attr(sort-order);
+                font-size: 9px;
+                font-weight: bold;
+                position: absolute;
+                right: 4px;
+                bottom: 8px;
+            }
+            paper-icon-button[direction='desc']:after {
+                transform: rotate(180deg);
+            }
+        </style>
 
-      #sortIcon[direction='desc'] iron-icon[active] {
-        transform: rotate(-180deg);
-      }
-    </style>
+        <paper-icon-button on-tap="_sort"
+                           hidden="[[hidden]]"
+                           icon="arrow-upward"
+                           active="[[_isActive(path, sortOrder)]]"
+                           direction$="[[direction]]"
+        sort-order$="[[_computeSortOrder(path, sortOrder)]]"></paper-icon-button>
+        <paper-icon-button on-tap="_clearSort"
+                           hidden="true"
+                           icon="clear"></paper-icon-button>
 
-    <div id="sortIcon" on-tap="_sort" hidden="[[hidden]]" direction$="[[direction]]">
-      <iron-icon active$="[[_isActive(path, sortOrder)]]" icon="arrow-upward"></iron-icon>
-      <paper-ripple class="circle" center></paper-ripple>
-    </div>
+    </template>
+    <script>
+        Polymer({
+            is: 'data-table-column-sort',
 
-  </template>
-  <script>
-    Polymer({
-      is: 'data-table-column-sort',
+            properties: {
+                direction: {
+                    type: String,
+                    notify: true,
+                    observer: '_changeDirection'
+                },
+                hidden: Boolean,
+                path: String,
+                sortOrder: {
+                    type: Object,
+                    observer: '_sortOrderChanged'
+                }
+            },
+            _changeDirection: function() {
+                if(this.direction == 'asc') {
+                    this.toggleAttribute('aria-sorted', true, this);
+                    this.setAttribute('aria-sort', 'ascending');
+                } else if (this.direction == 'desc') {
+                    this.toggleAttribute('aria-sorted', true, this);
+                    this.setAttribute('aria-sort', 'descending');
+                } else {
+                    this.toggleAttribute('aria-sorted', false, this);
+                    this.removeAttribute('aria-sort');
+                }
+            },
+            _isActive: function(path, sortOrder) {
+                if(Array.isArray(sortOrder)) {
+                    return sortOrder.find(function(item) {
+                        return item.path == path;
+                    }) !== undefined;
+                }
+                return path === sortOrder.path;
+            },
+            _sortOrderChanged: function(sortOrder) {
+                if(Array.isArray(sortOrder)) {
+                    var path = this.path;
+                    var sort = sortOrder.find(function(item) {
+                        return item.path == path;
+                    });
+                    if(sort) {
+                        this.direction = sort.direction;
+                    } else {
+                        this.direction = null;
+                    }
+                } else {
+                    if (sortOrder.path === this.path) {
+                        this.direction = sortOrder.direction;
+                    } else {
+                        this.direction = null;
+                    }
+                }
+                this.$$('paper-icon-button[icon="clear"]').hidden = this.direction == null;
+            },
 
-      properties: {
-        direction: String,
-        hidden: Boolean,
-        path: String,
-        sortOrder: {
-          type: Object,
-          observer: '_sortOrderChanged'
-        }
-      },
+            _computeSortOrder: function(path, sortOrder) {
+                if(Array.isArray(sortOrder)) {
+                    var sort = sortOrder.find(function(item) {
+                        return item.path == path;
+                    });
+                    return sort && sort.order ? sort.order: null;
+                }
+                if (path === sortOrder.path) {
+                    return sortOrder.order ? sortOrder.order : null;
+                }
+                return null;
+            },
 
-      _isActive: function(path, sortOrder) {
-        return path === sortOrder.path;
-      },
+            _sort: function() {
+                this.direction = this.direction === 'asc' ? 'desc' : 'asc';
 
-      _sortOrderChanged: function(sortOrder) {
-        if (sortOrder.path === this.path) {
-          this.direction = sortOrder.direction;
-        }
-      },
-
-      _sort: function() {
-        this.direction = this.direction === 'asc' ? 'desc' : 'asc';
-
-        this.fire('sort-direction-changed', { path: this.path, direction: this.direction });
-      }
-    });
-  </script>
+                this.fire('sort-direction-changed', { path: this.path, direction: this.direction });
+            },
+            _clearSort: function() {
+                this.direction = null;
+                this.fire('sort-direction-changed', { path: this.path, direction: null });
+            }
+        });
+    </script>
 </dom-module>
