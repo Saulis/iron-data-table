@@ -1,0 +1,66 @@
+<link rel="import" href="../../polymer/polymer-micro.html">
+<link rel="import" href="../../iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../iron-icons/iron-icons.html">
+<link rel="import" href="../../iron-ajax/iron-ajax.html">
+<link rel="import" href="../../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../paper-input/paper-input.html">
+<link rel="import" href="../../paper-fab/paper-fab.html">
+<link rel="import" href="../iron-data-table.html">
+<dom-module id="fill-component">
+    <template>
+       <style is="custom-style">
+           :host {
+               font-size: 9px;
+           }
+           paper-input {
+               margin-bottom: 2px;
+               --paper-input-container-label: {
+                font-size: 8px;
+               }
+           }
+           [wrapper] {
+               /* 100vh - (body top and bottom padding) - (h1 top and bottom padding) - (iron-data-table header) */
+               height: calc(100vh - (24px + 24px) - (0.87em + 0.87em) - 56px);
+           }
+           [wrapper-wrapper] {
+               /* 100% - iron-data-table padding */
+               height: calc(100% - 10px);
+           }
+           iron-data-table {
+               font-size: 9px;
+               height: 100%;
+           }
+           #add {
+               position: absolute;
+               right: 48px;
+               bottom: 80px;
+               z-index: 1;
+           }
+       </style>
+        <iron-ajax url="users.json" last-response="{{users}}" auto></iron-ajax>
+        <div wrapper>
+            <div wrapper-wrapper>
+                <iron-data-table items="[[users.results]]">
+                    <data-table-column name="First Name" filter-by="user.name.first">
+                        <template>[[item.user.name.first]]</template>
+                    </data-table-column>
+                    <data-table-column name="Last Name" filter-by="user.name.last">
+                        <template>[[item.user.name.last]]</template>
+                    </data-table-column>
+                    <data-table-column name="Email">
+                        <template>[[item.user.email]]</template>
+                    </data-table-column>
+                </iron-data-table>
+                <paper-fab id="add" disabled="[[!isReady]]" icon="add" mini label="Nueva vivienda"></paper-fab>
+            </div>
+        </div>
+    </template>
+    <script>
+        (function() {
+            'use strict';
+            Polymer({
+                is: 'fill-component'
+            });
+        })();
+    </script>
+</dom-module>

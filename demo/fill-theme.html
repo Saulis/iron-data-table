@@ -1,0 +1,105 @@
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../paper-styles/color.html">
+<link rel="import" href="../../paper-styles/default-theme.html">
+<link rel="import" href="../../paper-styles/shadow.html">
+<link rel="import" href="../../paper-styles/typography.html">
+<style is="custom-style">
+    :root {
+        iron-data-table {
+            --iron-data-table-row: {
+                 border-bottom: 1px solid #e3e3e3;
+             };
+
+            --iron-data-table-row-hover: {
+                 background-color: #eee;
+             };
+
+            --iron-data-table-row-selected: {
+                 color: var(--default-primary-color, --primary-color);
+             };
+
+            --iron-data-table-row-after: {
+                 background-color: var(--default-primary-color, --primary-color);
+                 bottom: 0;
+                 content: "";
+                 height: 2px;
+                 left: 0;
+                 pointer-events: none;
+                 position: absolute;
+                 right: 0;
+                 transition: all 0.16s ease-in-out;
+
+                 -webkit-transform: scaleX(0.0);
+                 transform: scaleX(0.0);
+                 z-index: 1;
+             };
+
+            --iron-data-table-row-focused: {
+                 background-color: #eee;
+             };
+
+            --iron-data-table-row-focused-after: {
+                 -webkit-transform: scaleX(1.0);
+                 transform: scaleX(1.0);
+             };
+            --iron-data-table-header: {
+                 font-size: 8px;
+             };
+
+        };
+    };
+    #forkongithub a {
+        background: var(--default-primary-color);
+        color: #fff;
+        text-decoration: none;
+        font-family: arial, sans-serif;
+        text-align: center;
+        font-weight: bold;
+        padding: 5px 40px;
+        font-size: 0.8rem;
+        line-height: 1.4rem;
+        position: relative;
+        transition: 0.5s;
+    }
+
+    #forkongithub a::before,
+    #forkongithub a::after {
+        content: "";
+        width: 100%;
+        display: block;
+        position: absolute;
+        top: 1px;
+        left: 0;
+        height: 1px;
+        background: #fff;
+    }
+
+    #forkongithub a::after {
+        bottom: 1px;
+        top: auto;
+    }
+
+    #forkongithub {
+        position: absolute;
+        display: block;
+        top: 0;
+        right: 0;
+        width: 200px;
+        overflow: hidden;
+        height: 200px;
+        z-index: 9999;
+    }
+
+    #forkongithub a {
+        width: 200px;
+        position: absolute;
+        top: 60px;
+        right: -60px;
+        transform: rotate(45deg);
+        -webkit-transform: rotate(45deg);
+        -ms-transform: rotate(45deg);
+        -moz-transform: rotate(45deg);
+        -o-transform: rotate(45deg);
+        box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.8);
+    }
+</style>
