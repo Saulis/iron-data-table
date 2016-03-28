@@ -119,13 +119,13 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         -webkit-overflow-scrolling: touch;
       }
 
-      #container {
+      [table-container] {
         height: inherit;
         display: flex;
         flex-direction: column;
       }
 
-      #header {
+      [table-header] {
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -138,11 +138,11 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         @apply(--iron-data-table-header);
       }
 
-      #header.scrolled {
+      [table-header].scrolled {
         box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 2px 0 rgba(0, 0, 0, 0.075), 0 3px 0 rgba(0, 0, 0, 0.05), 0 4px 0 rgba(0, 0, 0, 0.015);
       }
 
-      #header > data-table-cell,
+      [table-header] > data-table-cell,
       .item > data-table-cell:not([hidden]) {
         flex: 1 0 100px;
         padding: 0 24px 0 24px;
@@ -154,12 +154,12 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         transition: flex-basis 200ms, flex-grow 200ms;
       }
 
-      #header > data-table-cell,
-      #header .checkbox {
+      [table-header] > data-table-cell,
+      [table-header] .checkbox {
         height: 56px !important;
       }
 
-      #header > data-table-cell {
+      [table-header] > data-table-cell {
         @apply(--iron-data-table-header-cell);
       }
 
@@ -167,8 +167,8 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         @apply(--iron-data-table-row-cell);
       }
 
-      #header > data-table-cell div[hidden],
-      #header > data-table-cell data-table-column-filter[hidden],
+      [table-header] > data-table-cell div[hidden],
+      [table-header] > data-table-cell data-table-column-filter[hidden],
       .checkbox[hidden] {
         /* Fix for Shadow DOM https://github.com/Polymer/polymer/issues/1748 */
         display: none !important;
@@ -186,7 +186,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         border-right: 1px solid #e3e3e3;
       }
 
-      #list {
+      iron-list {
         overflow-x: hidden !important;
         overflow-y: auto !important;
         flex-basis: 100%;
@@ -196,7 +196,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         -webkit-transition: opacity 200ms;
       }
 
-      :host[loading] #list {
+      :host[loading] iron-list {
         opacity: 0.25;
       }
 
@@ -245,8 +245,8 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         @apply(--iron-data-table-row-after);
       }
     </style>
-    <div id="container">
-      <div id="header">
+    <div table-container>
+      <div table-header>
         <div class="checkbox" hidden$="[[!multiSelection]]" on-tap="_toggleSelectAll">
           <data-table-checkbox checked="[[_isSelectAllChecked(selectedItems.length, selectedItems.inverted)]]" indeterminate="[[_isSelectAllIndeterminate(selectedItems.length)]]"></data-table-checkbox>
         </div>
@@ -257,7 +257,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         </template>
       </div>
 
-      <iron-list id="list" as="item" items="[[_cachedItems]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" multi-selection="[[multiSelection]]" selected-item="{{selectedItem}}" on-selected-items-changed="_selectedItemsChanged">
+      <iron-list as="item" items="[[_cachedItems]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" multi-selection="[[multiSelection]]" selected-item="{{selectedItem}}" on-selected-items-changed="_selectedItemsChanged">
         <template>
           <div class="item" tabindex$="[[tabIndex]]" selected$="[[_isSelected(selected, selectedItems.inverted)]]" even$="[[!_isEven(index)]]">
             <div class="checkbox" hidden$="[[!multiSelection]]">
@@ -269,9 +269,10 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
           </div>
         </template>
       </iron-list>
+      <content select="[footer]"></content>
     </div>
     <paper-spinner-lite active hidden=[[!loading]]></paper-spinner-lite>
-    <content></content>
+    <content select=":not([footer])"></content>
   </template>
 
   <script>
@@ -456,6 +457,40 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         }.bind(this));
       },
 
+      ready: function() {
+        this._patchIronListCreatePool();
+      },
+      get _container() {
+        return this.$$('[table-container]');
+      },
+      get _header() {
+        return this.$$('[table-header]');
+      },
+      get _list() {
+        return this.$$('iron-list');
+      },
+      _patchIronListCreatePool: function() {
+        // Since 1.2.0, iron-list changed timings on how the first three rows are
+        // rendered initially: https://github.com/PolymerElements/iron-list/commit/c0e27e52ee93dcd93d33590b569bd17c5c504005#diff-b97995700c5da5fa638d0324b5f3f861L765
+        // Apparently, this causes the Polymer.dom.flush() to be called in such order,
+        // that templatize for the data-table-cells doesn't work properly for the initial render.
+
+        // As a fix, calling Polymer.dom.flush() after the initial rows have been created seems to help.
+        // So far, haven't been able to produce an isolated jsbin to report about this to iron-list.
+        var list = this._list;
+        var createPool = list._createPool.bind(list);
+        var initialCreateCalled = false;
+        list._createPool = function(size) {
+          var items = createPool(size);
+
+          // Polymer.dom.flush() needs to be called on the initial creation ONLY.
+          if (!initialCreateCalled) {
+            initialCreateCalled = true;
+            Polymer.dom.flush();
+          }
+          return items;
+        };
+      },
       _stopPropagation: function(e) {
         e.stopImmediatePropagation();
       },
@@ -467,7 +502,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
        * @param {(Object|number)} item The item object or its index
        */
       selectItem: function(item) {
-        this.$.list.selectItem(item);
+        this._list.selectItem(item);
       },
 
       _isSelected: function(selected, inverted) {
@@ -497,7 +532,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
        */
       selectAll: function() {
         this.set('selectedItems.inverted', true);
-        this.$.list.clearSelection();
+        this._list.clearSelection();
       },
 
       /**
@@ -505,7 +540,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
        */
       clearSelection: function() {
         this.set('selectedItems.inverted', false);
-        this.$.list.clearSelection();
+        this._list.clearSelection();
       },
 
       _toggleSelectAll: function() {
@@ -531,7 +566,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
        * @param {(Object|number)} item The item object or its index
        */
       deselectItem: function(item) {
-        this.$.list.deselectItem(item);
+        this._list.deselectItem(item);
       },
 
       _bind: function(item, index, selected) {
@@ -578,57 +613,57 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
 
         this.debounce('reset', function() {
           this.clearCache();
-          this.$.list.scrollToIndex(0);
+          this._list.scrollToIndex(0);
         }.bind(this), 100);
       },
 
       _sort: function(items, sortOrder) {
-          if (!sortOrder) {
-              return items;
-          }
+        if (!sortOrder/* || !sortOrder.path*/) {
+          return items;
+        }
 
-          if(Array.isArray(sortOrder)) {
-              if(sortOrder.length > 1) {
-                  return this._multiSort(items, sortOrder);
-              } else if(sortOrder.length == 1) {
-                  sortOrder = sortOrder[0];
-              } else {
-                  return items;
-              }
-          }
-          if(!sortOrder.path) {
-              return items;
-          }
+        if(Array.isArray(sortOrder)) {
+            if(sortOrder.length > 1) {
+                return this._multiSort(items, sortOrder);
+            } else if(sortOrder.length == 1) {
+                sortOrder = sortOrder[0];
+            } else {
+                return items;
+            }
+        }
+        if(!sortOrder.path) {
+            return items;
+        }
 
-          return Array.prototype.sort.call(items, function(a, b) {
-              if (sortOrder.direction === 'asc') {
-                  return this._compare(this.get(sortOrder.path, a), this.get(sortOrder.path, b));
-              } else {
-                  return this._compare(this.get(sortOrder.path, b), this.get(sortOrder.path, a));
-              }
-          }.bind(this));
+        return Array.prototype.sort.call(items, function(a, b) {
+          if (sortOrder.direction === 'asc') {
+            return this._compare(this.get(sortOrder.path, a), this.get(sortOrder.path, b));
+          } else {
+            return this._compare(this.get(sortOrder.path, b), this.get(sortOrder.path, a));
+          }
+        }.bind(this));
       },
 
       _multiSort: function(items, sortOrder) {
-        var table = this;
-        function multiSort(sortArray) {
-            return function(a,b) {
-                return sortArray.map(function (o) {
-                            if (o.direction === 'asc') {
-                                return table._compare(table.get(o.path, a), table.get(o.path, b));
-                            } else if(o.direction === 'desc') {
-                                return table._compare(table.get(o.path, b), table.get(o.path, a));
-                            }
-                            return 0;
-                        }
-                ).reduce(function firstNonZeroValue (p,n) {
-                            return p ? p : n;
-                        },
-                        0
-                );
-            };
-        }
-        return Array.prototype.sort.call(items, multiSort(sortOrder));
+          var table = this;
+          function multiSort(sortArray) {
+              return function(a,b) {
+                  return sortArray.map(function (o) {
+                              if (o.direction === 'asc') {
+                                  return table._compare(table.get(o.path, a), table.get(o.path, b));
+                              } else if(o.direction === 'desc') {
+                                  return table._compare(table.get(o.path, b), table.get(o.path, a));
+                              }
+                              return 0;
+                          }
+                  ).reduce(function firstNonZeroValue (p,n) {
+                              return p ? p : n;
+                          },
+                          0
+                  );
+              };
+          }
+          return Array.prototype.sort.call(items, multiSort(sortOrder));
       },
 
       _sortDirectionChanged: function(e) {
@@ -680,19 +715,20 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
       },
 
       _resizeCellContainers: function() {
+        var container = this._container;
         // reset header width first to make the cells and scroll width to reset their widths.
-        this.$.container.style.width = '';
+        container.style.width = '';
 
         this.async(function() {
-          this.$.container.style.width = Math.min(this.scrollWidth, this.clientWidth + this.scrollLeft) + 'px';
-        }.bind(this));
+          container.style.width = Math.min(this.scrollWidth, this.clientWidth + this.scrollLeft) + 'px';
+        });
       },
 
       _onHorizontalScroll: function() {
         if (!this.isDebouncerActive('scrolling')) {
-          this.$.container.style.width = this.scrollWidth + 'px';
+          this._container.style.width = this.scrollWidth + 'px';
           this.debounce('scrolling', function() {
-            this.$.container.style.width = Math.min(this.scrollWidth, this.clientWidth + this.scrollLeft) + 'px';
+            this._container.style.width = Math.min(this.scrollWidth, this.clientWidth + this.scrollLeft) + 'px';
             // long timeout here to prevent jerkiness with the rubberband effect on iOS especially.
           }, 1000);
         }
@@ -700,9 +736,10 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
 
       _onVerticalScroll: function(e) {
         // Toggle shadow when at the top
-        this.toggleClass("scrolled", this.$.list.scrollTop !== 0, this.$.header);
+        var list = this._list;
+        this.toggleClass("scrolled", list.scrollTop !== 0, this._header);
 
-        this._currentPage = Math.floor(this.$.list.scrollTop / this.$.list._physicalAverage / this.pageSize);
+        this._currentPage = Math.floor(list.scrollTop / list._physicalAverage / this.pageSize);
       },
 
       /**
@@ -756,6 +793,8 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
           var success = function(items) {
             var start = page * this.pageSize;
 
+            var list = this._list;
+
             for (var i = 0; i < this.pageSize; i++) {
               var index = start + i;
               var item = items[i];
@@ -764,11 +803,11 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
 
               // TODO: send an issue/pr to iron-list, that makes sure the internal
               // collection stays up-to-date when `items` change.
-              this.$.list._collection.store[index] = item;
+              list._collection.store[index] = item;
               if (item && typeof item == 'object') {
-                this.$.list._collection.omap.set(item, index);
+                list._collection.omap.set(item, index);
               } else {
-                this.$.list._collection.pmap[item] = index;
+                list._collection.pmap[item] = index;
               }
             }
 
@@ -776,7 +815,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
             // debouncing for optimizing when multiple requests are running at
             // the same time.
             this.debounce('resizing', function() {
-              this.$.list.notifyResize();
+              this._list.notifyResize();
             }.bind(this), 100);
 
             this._pagesLoading--;
