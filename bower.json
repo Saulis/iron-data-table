@@ -52,7 +52,8 @@
     "iron-flex-layout": "polymerelements/iron-flex-layout#^1.2.3",
     "iron-component-page": "polymerelements/iron-component-page#^1.1.4",
     "iron-ajax": "polymerelements/iron-ajax#^1.1.1",
-    "vaadin-combo-box": "^1.0.0-beta1"
+    "vaadin-combo-box": "^1.0.0-beta1",
+    "paper-slider": "polymerelements/paper-slider#^1.0.9"
   },
   "resolutions": {
     "iron-list": "^1.1.0"
