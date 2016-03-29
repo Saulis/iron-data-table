@@ -666,9 +666,9 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
 
       _onVerticalScroll: function(e) {
         // Toggle shadow when at the top
-        this.toggleClass("scrolled", this.$.list.scrollTop !== 0, this.$.header);
+        this.toggleClass("scrolled", this.$.list.scrollTop >= 1, this.$.header);
 
-        this._currentPage = Math.floor(this.$.list.scrollTop / this.$.list._physicalAverage / this.pageSize);
+        this._currentPage = Math.max(0, Math.floor(this.$.list.scrollTop / this.$.list._physicalAverage / this.pageSize));
       },
 
       /**
