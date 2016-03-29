@@ -77,6 +77,8 @@
         sortOrder: Array
       },
 
+      observers: ['_sortOrderChanged(sortOrder.*)'],
+
       _order: function(path, sortOrder, length) {
         if (length <= 1) {
           return '';
@@ -86,6 +88,18 @@
           if (sortOrder[i].path === path) {
             return i + 1;
           }
+        }
+      },
+
+      _sortOrderChanged: function(sortOrder) {
+        // TODO: if sortOrder for this column has been removed from outside, direction is not updated.
+        if (sortOrder.base) {
+          sortOrder.base.forEach(function(sort) {
+            if (sort.path === this.path) {
+              this.direction = sort.direction;
+              return;
+            }
+          }.bind(this));
         }
       },
 

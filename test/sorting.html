@@ -67,7 +67,7 @@
 
           fireEvent('tap', {}, sortIcon);
 
-          expect(sortIcon.querySelector('iron-icon').hasAttribute('active')).to.be.true;
+          expect(columnSortElement(0).querySelector('paper-icon-button').hasAttribute('direction')).to.be.true;
         });
 
         it('should change sorting direction on tap', function() {
@@ -83,7 +83,7 @@
 
           fireEvent('tap', {}, columnSort.$.sortIcon);
 
-          expect(grid.sortOrder).to.eql({
+          expect(grid.sortOrder[0]).to.eql({
             path: 'value',
             direction: 'asc'
           });
@@ -95,7 +95,7 @@
           fireEvent('tap', {}, columnSort.$.sortIcon);
           fireEvent('tap', {}, columnSort.$.sortIcon);
 
-          expect(grid.sortOrder).to.eql({
+          expect(grid.sortOrder[0]).to.eql({
             path: 'value',
             direction: 'desc'
           });
@@ -104,7 +104,7 @@
 
       describe('using sortOrder property', function() {
         it('should sort items ascending', function(done) {
-          grid.set('sortOrder', {path: 'value', direction: 'asc'});
+          grid.push('sortOrder', {path: 'value', direction: 'asc'});
 
           grid.async(function() {
             expect(grid.$.list.items[0]).to.eql({value: 'bar', value2: 'bah'});
@@ -113,7 +113,7 @@
         });
 
         it('should sort items descending', function(done) {
-          grid.set('sortOrder', {path: 'value', direction: 'desc'});
+          grid.push('sortOrder', {path: 'value', direction: 'desc'});
 
           grid.async(function() {
             expect(grid.$.list.items[0]).to.eql({value: 'qux', value2: 'baz'});
@@ -122,7 +122,7 @@
         });
 
         it('should update sorting icon', function() {
-          grid.set('sortOrder', {path: 'value2', direction: 'desc'});
+          grid.push('sortOrder', {path: 'value2', direction: 'desc'});
 
           var columnSort = columnSortElement(1);
 
