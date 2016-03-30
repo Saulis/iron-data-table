@@ -210,6 +210,32 @@
 
         this.templatize(this.headerTemplate);
         this.templatize(this.template);
+      },
+
+      _templatize: function(template, parentElement) {
+        this.templatize(template);
+        var instance = this.stamp({user: {name: {first: 'foo'}}});
+
+        this.push('_templateInstances', instance);
+
+        Polymer.dom(parentElement).appendChild(instance.root);
+        Polymer.dom.flush();
+
+        return {
+          bind: function(data) {
+            for (var prop in data) {
+              instance[prop] = data[prop];
+            }
+          }
+        };
+      },
+
+      templatizeRow: function(parentElement) {
+        return this._templatize(this.template, parentElement);
+      },
+
+      templatizeHeader: function(parentElement) {
+        return this._templatize(this.headerTemplate, parentElement);
       }
     });
   </script>

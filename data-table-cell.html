@@ -23,7 +23,7 @@
       is: 'data-table-cell',
 
       properties: {
-        template: {
+        templatizer: {
           type: Object
         },
 
@@ -38,14 +38,14 @@
 
         _instance: {
           type: Object,
-          computed: '_templatize(column, template)'
+          computed: '_templatize(column, _content, templatizer)'
         },
 
         order: Number,
         width: String
       },
 
-      observers: ['_bindData(_instance, bind)', '_render(_instance)'],
+      observers: ['_bindData(_instance, bind)'],
 
       _orderChanged: function(e) {
         this.style.order = e.detail.value;
@@ -63,18 +63,12 @@
         this.hidden = e.detail.value;
       },
 
-      _templatize: function(column, template) {
-        column.templatize(template);
-        var instance = column.stamp();
-        column.push('_templateInstances', instance);
-
-        return instance;
+      _templatize: function(column, content, templatizer) {
+        return templatizer.bind(column)(content);
       },
 
       _bindData: function(instance, data) {
-        for (var prop in data) {
-          instance[prop] = data[prop];
-        }
+        instance.bind(data);
       },
 
       _columnChanged: function(column, oldColumn) {
@@ -104,11 +98,6 @@
         }
 
         this.listen(column, eventName, observerName);
-      },
-
-      _render: function(instance) {
-        Polymer.dom(this).insertBefore(instance.root, Polymer.dom(this).firstElementChild);
-        Polymer.dom.flush();
       }
     });
   </script>
