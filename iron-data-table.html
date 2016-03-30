@@ -213,6 +213,7 @@ inspired styles to your `iron-data-table`.
       listeners: {
         'column-filter-changed': '_onColumnFilterChanged',
         'iron-resize': '_resizeCellContainers',
+        'item-changed': '_itemChanged',
         'scroll': '_onHorizontalScroll'
       },
 
@@ -638,10 +639,7 @@ inspired styles to your `iron-data-table`.
        * Lazy loading
        */
       _itemsChanged: function(items) {
-        if (items.path === 'items.length') {
-          this.size = items.length;
-          return;
-        } else if (Array.isArray(items.base)) {
+        if ((items.path === 'items' || items.path === 'items.splices') && Array.isArray(items.base)) {
           this.size = items.base.length;
 
           this.dataSource = function(opts, cb, err) {
@@ -656,6 +654,35 @@ inspired styles to your `iron-data-table`.
 
             cb(slice);
           }.bind(this);
+        } else if (items.path.indexOf('items.#') === 0 && Array.isArray(items.base)) {
+          var index = items.path.split('.')[1].substring(1);
+          var item = this.items[index];
+
+          var cachedIndex = this._cachedItems.indexOf(item);
+
+          if (cachedIndex >= 0) {
+            for (var c = 0; c < this.columns.length; c++) {
+              var column = this.columns[c];
+
+              for (var t = 0; t < column._templateInstances.length; t++) {
+                var templateInstance = column._templateInstances[t];
+
+                if (templateInstance.item === item) {
+                  templateInstance.notifyPath(items.path.replace('items.', 'item.').replace('.#' + index, ''), items.value);
+                }
+              }
+            }
+            this.set(items.path.replace('items.', '_cachedItems.').replace('#' + index, cachedIndex), items.value);
+          }
+        }
+      },
+
+      _itemChanged: function(e) {
+        if (this.items) {
+          var index = this.items.indexOf(e.detail.item);
+          if (index >= 0) {
+            this.set('items.' + index + '.' + e.detail.path, e.detail.value);
+          }
         }
       },
 
