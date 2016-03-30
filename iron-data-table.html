@@ -89,6 +89,7 @@ There are several custom properties and mixins you can use to style the componen
 
 Custom property | Description
 ----------------|-------------
+`--iron-data-table` | Mixin applied to the main element
 `--iron-data-table-cell-height` | Property that determines the height of the cells
 `--iron-data-table-header` | Mixin applied to the header element
 `--iron-data-table-header-cell` | Mixin applied to the header cells
@@ -116,6 +117,8 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         overflow-x: auto;
         overflow-y: hidden;
         -webkit-overflow-scrolling: touch;
+
+        @apply(--iron-data-table);
       }
 
       #container {
