@@ -209,7 +209,11 @@
         };
 
         this.templatize(this.headerTemplate);
-        this.templatize(this.template);
+
+        // template not present in angular 2 at this point.
+        if (this.template) {
+          this.templatize(this.template);
+        }
       },
 
       _templatize: function(template, parentElement) {
