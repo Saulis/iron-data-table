@@ -218,7 +218,7 @@
 
       _templatize: function(template, parentElement) {
         this.templatize(template);
-        var instance = this.stamp({user: {name: {first: 'foo'}}});
+        var instance = this.stamp();
 
         this.push('_templateInstances', instance);
 
