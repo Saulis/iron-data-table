@@ -1,5 +1,17 @@
 <dom-module id="data-table-cell">
   <template>
+    <style>
+      :host {
+        flex: 1 0 100px;
+        padding: 0 24px 0 24px;
+        min-height: 10px; /* Prevent iron-list from looping when item height is really small */
+        height: var(--iron-data-table-cell-height, 48px);
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        transition: flex-basis 200ms, flex-grow 200ms;
+      }
+    </style>
     <content></content>
   </template>
   <script>
@@ -36,35 +48,7 @@
         _content: Object
       },
 
-      observers: ['_bindData(_instance, bind)', '_render(_content, _instance)'],
-
-      attached: function() {
-        var id = Polymer.IronDataTable.cell++;
-
-        this._contentElement = document.createElement('content');
-        this._contentElement.setAttribute('select', '#cell' + id);
-
-        this._content = document.createElement('div');
-        this._content.id = 'cell' + id;
-
-        Polymer.dom(this).insertBefore(this._contentElement, Polymer.dom(this).firstChild);
-        Polymer.dom(this.domHost).appendChild(this._content);
-        Polymer.dom.flush();
-      },
-
-      detached: function() {
-        // Polymer.dom(this._content.parentElement) has different childs depending if Shady or native Shadow DOM is used.
-        // TODO: see if there's a need to use Polymer.dom here and can it be done somehow.
-
-        if (this._content.parentElement) {
-          this._content.parentElement.removeChild(this._content);
-        }
-
-        if (this._contentElement.parentElement) {
-          Polymer.dom(this).removeChild(this._contentElement);
-          Polymer.dom.flush();
-        }
-      },
+      observers: ['_bindData(_instance, bind)', '_render(_instance)'],
 
       _orderChanged: function(e) {
         this.style.order = e.detail.value;
@@ -73,6 +57,7 @@
       _widthChanged: function(e) {
         this.style.flexBasis = e.detail.value;
 
+        //TODO: domHost not available after reattach of data-table-row.
         this.domHost.notifyResize();
       },
 
@@ -127,10 +112,8 @@
         this.listen(column, eventName, observerName);
       },
 
-      _render: function(content, instance) {
-        content.innerHTML = '';
-
-        Polymer.dom(content).appendChild(instance.root);
+      _render: function(instance) {
+        Polymer.dom(this).insertBefore(instance.root, Polymer.dom(this).firstElementChild);
         Polymer.dom.flush();
       }
     });

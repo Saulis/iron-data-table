@@ -1,0 +1,43 @@
+<dom-module id="data-table-row">
+  <template>
+    <style is="custom-style">
+      :host {
+        display: flex;
+        justify-content: space-between;
+        opacity: 1;
+      }
+
+      :host:not(.header) {
+        cursor: pointer;
+        @apply(--iron-data-table-row);
+      }
+
+      :host.header,
+      :host.header ::content data-table-cell {
+        height: 56px;
+      }
+    </style>
+    <content></content>
+  </template>
+  <script>
+    Polymer({
+      is: 'data-table-row',
+
+      attached: function() {
+        if (this.domHost) {
+          var id = Polymer.IronDataTable.cell++;
+
+          var item = this.parentElement;
+          if (!item.container) {
+            this._contentElement = document.createElement('content');
+            this._contentElement.setAttribute('select', '#item' + id);
+            Polymer.dom(item).appendChild(this._contentElement);
+
+            this.id = 'item' + id;
+            Polymer.dom(this.domHost).appendChild(this);
+          }
+        }
+      }
+    });
+  </script>
+</dom-module>
