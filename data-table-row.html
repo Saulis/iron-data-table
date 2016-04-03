@@ -5,16 +5,24 @@
         display: flex;
         justify-content: space-between;
         opacity: 1;
-      }
-
-      :host:not(.header) {
         cursor: pointer;
         @apply(--iron-data-table-row);
       }
 
-      :host.header,
-      :host.header ::content data-table-cell {
-        height: 56px;
+      :host([selected]) {
+        @apply(--iron-data-table-row-selected);
+      }
+
+      :host(:not([header]):hover) {
+        @apply(--iron-data-table-row-hover);
+      }
+
+      :host(:not([header])[even]) {
+        @apply(--iron-data-table-row-even);
+      }
+
+      :host(:not([header]):not([even])) {
+        @apply(--iron-data-table-row-odd);
       }
     </style>
     <content></content>

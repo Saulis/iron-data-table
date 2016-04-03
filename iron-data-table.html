@@ -93,9 +93,7 @@ Custom property | Description
 `--iron-data-table` | Mixin applied to the main element
 `--iron-data-table-cell-height` | Property that determines the height of the cells
 `--iron-data-table-header` | Mixin applied to the header element
-`--iron-data-table-header-cell` | Mixin applied to the header cells
 `--iron-data-table-row` | Mixin applied to the row item element
-`--iron-data-table-row-cell` | Mixin applied to the row cells.
 `--iron-data-table-row-hover` | Mixin applied to the row item element when hovered on
 `--iron-data-table-row-selected` | Mixin applied to the selected row item elements
 `--iron-data-table-row-after` | Mixin applied to :after pseudoelement of the row item element
@@ -144,50 +142,6 @@ inspired styles to your `iron-data-table`.
         box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 2px 0 rgba(0, 0, 0, 0.075), 0 3px 0 rgba(0, 0, 0, 0.05), 0 4px 0 rgba(0, 0, 0, 0.015);
       }
 
-      #header > data-table-cell,
-      .item > data-table-cell:not([hidden]) {
-        flex: 1 0 100px;
-        padding: 0 24px 0 24px;
-        min-height: 10px; /* Prevent iron-list from looping when item height is really small */
-        height: var(--iron-data-table-cell-height, 48px);
-        display: flex;
-        align-items: center;
-        overflow: hidden;
-        transition: flex-basis 200ms, flex-grow 200ms;
-      }
-
-      #header > data-table-cell,
-      #header .checkbox {
-        height: 56px !important;
-      }
-
-      #header > data-table-cell {
-        @apply(--iron-data-table-header-cell);
-      }
-
-      .item > data-table-cell {
-        @apply(--iron-data-table-row-cell);
-      }
-
-      #header > data-table-cell div[hidden],
-      #header > data-table-cell data-table-column-filter[hidden],
-      .checkbox[hidden] {
-        /* Fix for Shadow DOM https://github.com/Polymer/polymer/issues/1748 */
-        display: none !important;
-      }
-
-      .checkbox {
-        height: var(--iron-data-table-cell-height, 48px);
-        flex-basis: var(--iron-data-table-cell-height, 48px);
-        flex-grow: 0;
-        flex-shrink: 0;
-        padding: 0 8px 0 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-right: 1px solid #e3e3e3;
-      }
-
       #list {
         overflow-x: hidden !important;
         overflow-y: auto !important;
@@ -208,14 +162,6 @@ inspired styles to your `iron-data-table`.
         --paper-spinner-color: var(--default-primary-color);
       }
 
-      .item2 {
-        cursor: pointer;
-        display: flex;
-        justify-content: space-between;
-        opacity: 1;
-        @apply(--iron-data-table-row);
-      }
-
       .item:focus {
         outline: none;
         @apply(--iron-data-table-row-focused);
@@ -225,34 +171,16 @@ inspired styles to your `iron-data-table`.
         @apply(--iron-data-table-row-focused-after);
       }
 
-      .item:hover {
-        @apply(--iron-data-table-row-hover);
-      }
-
-      .item[selected] {
-        @apply(--iron-data-table-row-selected);
-      }
-
-      .item[even] {
-        @apply(--iron-data-table-row-even);
-      }
-
-      .item:not([even]) {
-        @apply(--iron-data-table-row-odd);
-      }
-
       .item:after {
         @apply(--iron-data-table-row-after);
       }
     </style>
     <div id="container">
       <div id="header">
-        <data-table-row class="header">
-          <div class="checkbox" hidden$="[[!multiSelection]]" on-tap="_toggleSelectAll">
-            <data-table-checkbox checked="[[_isSelectAllChecked(selectedItems.length, selectedItems.inverted)]]" indeterminate="[[_isSelectAllIndeterminate(selectedItems.length)]]"></data-table-checkbox>
-          </div>
+        <data-table-row header>
+          <data-table-checkbox header hidden$="[[!multiSelection]]" on-tap="_toggleSelectAll" checked="[[_isSelectAllChecked(selectedItems.length, selectedItems.inverted)]]" indeterminate="[[_isSelectAllIndeterminate(selectedItems.length)]]"></data-table-checkbox>
           <template is="dom-repeat" items="[[columns]]" as="column">
-            <data-table-cell column="[[column]]" template="[[column.headerTemplate]]" bind="[[_bind(column)]]">
+            <data-table-cell header column="[[column]]" template="[[column.headerTemplate]]" bind="[[_bind(column)]]">
               <data-table-column-sort sort-order="[[sortOrder]]" path="[[column.sortBy]]" on-sort-direction-changed="_sortDirectionChanged" hidden$="[[!column.sortBy]]"></data-table-column-sort>
             </data-table-cell>
           </template>
@@ -261,11 +189,9 @@ inspired styles to your `iron-data-table`.
 
       <iron-list id="list" as="item" items="[[_cachedItems]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" multi-selection="[[multiSelection]]" selected-item="{{selectedItem}}" on-selected-items-changed="_selectedItemsChanged">
         <template>
-          <div class="item" tabindex$="[[tabIndex]]" selected$="[[_isSelected(selected, selectedItems.inverted)]]" even$="[[!_isEven(index)]]">
-            <data-table-row>
-              <div class="checkbox" hidden$="[[!multiSelection]]">
-                <data-table-checkbox checked="[[_isSelected(selected, selectedItems.inverted)]]"></data-table-checkbox>
-              </div>
+          <div class="item" tabindex$="[[tabIndex]]">
+            <data-table-row selected$="[[_isSelected(selected, selectedItems.inverted)]]" even$="[[!_isEven(index)]]">
+              <data-table-checkbox hidden$="[[!multiSelection]]" checked="[[_isSelected(selected, selectedItems.inverted)]]"></data-table-checkbox>
               <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
                 <data-table-cell column="[[column]]" template="[[column.template]]" bind="[[_bind(item, index, selected)]]"></data-table-cell>
               </template>
@@ -458,6 +384,19 @@ inspired styles to your `iron-data-table`.
             this.notifyResize();
           }
         }.bind(this));
+      },
+
+      ready: function() {
+        this.$.list._selectionHandler = function(e) {
+          var first = Polymer.dom(e).event.path.filter(function(p) {
+            return this.modelForElement(p);
+          }.bind(this))[0];
+
+          var model = this.modelForElement(first);
+          if (model) {
+              this.toggleSelectionForItem(model[this.as]);
+          }
+        };
       },
 
       _stopPropagation: function(e) {
