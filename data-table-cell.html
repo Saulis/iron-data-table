@@ -1,11 +1,11 @@
 <dom-module id="data-table-cell">
   <template>
-    <style>
+    <style is="custom-style">
       :host {
         flex: 1 0 100px;
         padding: 0 24px 0 24px;
         min-height: 10px; /* Prevent iron-list from looping when item height is really small */
-        height: var(--iron-data-table-cell-height, 48px);
+        height: 48px;
         display: flex;
         align-items: center;
         overflow: hidden;
