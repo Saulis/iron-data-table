@@ -31,9 +31,16 @@
     Polymer({
       is: 'data-table-row',
 
+      properties: {
+        _static: {
+          type: Object,
+          value: { id: 0 }
+        }
+      },
+
       attached: function() {
         if (this.domHost) {
-          var id = Polymer.IronDataTable.cell++;
+          var id = this._static.id++;
 
           var item = this.parentElement;
           if (!item.container) {
