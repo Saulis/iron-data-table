@@ -161,13 +161,10 @@
     <demo-snippet>
       <template>
         <template is="dom-bind">
-          <style is="custom-style">
-            #grid3 {
-              --iron-data-table-cell-height: auto;
-            }
-          </style>
-
           <style>
+            #grid3 data-table-cell:not([header]) {
+              height: auto;
+            }
             #grid3 .hawaii {
               display: flex;
               align-items: center;

@@ -10,6 +10,10 @@
         margin: 4px;
       }
 
+      :host[hidden] {
+        display: none;
+      }
+
       #sortIcon {
         position: relative;
         width: 24px;
@@ -38,7 +42,7 @@
       }
     </style>
 
-    <div id="sortIcon" on-tap="_sort" hidden="[[hidden]]" direction$="[[direction]]">
+    <div id="sortIcon" on-tap="_sort" direction$="[[direction]]">
       <iron-icon active$="[[_isActive(path, sortOrder)]]" icon="arrow-upward"></iron-icon>
       <paper-ripple class="circle" center></paper-ripple>
     </div>
@@ -50,7 +54,6 @@
 
       properties: {
         direction: String,
-        hidden: Boolean,
         path: String,
         sortOrder: {
           type: Object,
