@@ -275,13 +275,16 @@ inspired styles to your `iron-data-table`.
         /**
          * When `multiSelection` is true, this is an array that contains the selected items.
          * If `selectedItems.inverted` is `true`, the array contains deselected items instead.
-         * `selectedItems.filter` contains an array of filters that were active when the selection changed.
+         * `selectedItems.filters` contains an array of filters that were active when the selection changed.
          */
         selectedItems: {
           type: Object,
           notify: true,
           value: function() {
-            return [];
+            var items = [];
+            items.filters = [];
+
+            return items;
           }
         },
 
@@ -427,7 +430,7 @@ inspired styles to your `iron-data-table`.
           this.set('selectedItems', items);
           this.set('selectedItems.inverted', inverted);
           this.notifyPath('selectedItems.length', items.length);
-          this.set('selectedItems.filter', this.filter || []);
+          this.set('selectedItems.filters', this.filter || []);
         } else if (e.detail.path === 'selectedItems.splices') {
           this.notifyPath('selectedItems.splices', e.detail.value);
           this.notifyPath('selectedItems.length', this.selectedItems.length);
@@ -593,7 +596,7 @@ inspired styles to your `iron-data-table`.
         for (var i = 0; i < this.filter.length; i++) {
           if (this.filter[i].path === e.target.filterBy) {
             this.set('filter.' + i + '.filter', e.detail.value);
-            this.set('selectedItems.filter.' + i + '.filter', e.detail.value);
+            this.set('selectedItems.filters.' + i + '.filter', e.detail.value);
             return;
           }
         }
@@ -603,7 +606,7 @@ inspired styles to your `iron-data-table`.
           filter: e.detail.value
         });
 
-        this.push('selectedItems.filter', {
+        this.push('selectedItems.filters', {
           path: e.target.filterBy,
           filter: e.detail.value
         });
