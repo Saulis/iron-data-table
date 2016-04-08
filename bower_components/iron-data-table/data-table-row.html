@@ -1,0 +1,58 @@
+<dom-module id="data-table-row">
+  <template>
+    <style is="custom-style">
+      :host {
+        display: flex;
+        justify-content: space-between;
+        opacity: 1;
+        cursor: pointer;
+        @apply(--iron-data-table-row);
+      }
+
+      :host([selected]) {
+        @apply(--iron-data-table-row-selected);
+      }
+
+      :host(:not([header]):hover) {
+        @apply(--iron-data-table-row-hover);
+      }
+
+      :host(:not([header])[even]) {
+        @apply(--iron-data-table-row-even);
+      }
+
+      :host(:not([header]):not([even])) {
+        @apply(--iron-data-table-row-odd);
+      }
+    </style>
+    <content></content>
+  </template>
+  <script>
+    Polymer({
+      is: 'data-table-row',
+
+      properties: {
+        _static: {
+          type: Object,
+          value: { id: 0 }
+        }
+      },
+
+      attached: function() {
+        if (this.domHost) {
+          var id = this._static.id++;
+
+          var item = this.parentElement;
+          if (!item.container) {
+            this._contentElement = document.createElement('content');
+            this._contentElement.setAttribute('select', '#item' + id);
+            Polymer.dom(item).appendChild(this._contentElement);
+
+            this.id = 'item' + id;
+            Polymer.dom(this.domHost).appendChild(this);
+          }
+        }
+      }
+    });
+  </script>
+</dom-module>

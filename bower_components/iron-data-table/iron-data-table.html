@@ -23,6 +23,7 @@ limitations under the License.
 <link rel="import" href="data-table-column.html">
 <link rel="import" href="data-table-column-sort.html">
 <link rel="import" href="data-table-cell.html">
+<link rel="import" href="data-table-row.html">
 <link rel="import" href="data-table-checkbox.html">
 
 <!--
@@ -89,11 +90,9 @@ There are several custom properties and mixins you can use to style the componen
 
 Custom property | Description
 ----------------|-------------
-`--iron-data-table-cell-height` | Property that determines the height of the cells
+`--iron-data-table` | Mixin applied to the main element
 `--iron-data-table-header` | Mixin applied to the header element
-`--iron-data-table-header-cell` | Mixin applied to the header cells
 `--iron-data-table-row` | Mixin applied to the row item element
-`--iron-data-table-row-cell` | Mixin applied to the row cells.
 `--iron-data-table-row-hover` | Mixin applied to the row item element when hovered on
 `--iron-data-table-row-selected` | Mixin applied to the selected row item elements
 `--iron-data-table-row-after` | Mixin applied to :after pseudoelement of the row item element
@@ -102,9 +101,6 @@ Custom property | Description
 
 To get started, you can import `default-styles.html` which provides material design
 inspired styles to your `iron-data-table`.
-
-__Important:__ Because `iron-list` must be explicitly sized, make sure set an explicit height either directly
-to `iron-data-table` or to any of its parents. Using `px` or `vh` values will work fine, default height is `400px`.
 -->
 
 <dom-module id="iron-data-table">
@@ -112,25 +108,28 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
     <style is="custom-style">
       :host {
         display: block;
-        height: 400px;
         position: relative;
         overflow-x: auto;
         overflow-y: hidden;
         -webkit-overflow-scrolling: touch;
+
+        /* Default height just to help users get started in making stuff visible.  */
+        height: 400px;
+
+        @apply(--iron-data-table);
       }
 
       #container {
-        height: inherit;
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+
         display: flex;
         flex-direction: column;
       }
 
       #header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-grow: 0;
-        flex-shrink: 0;
         box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
         transition: box-shadow 200ms;
         -webkit-transition: box-shadow 200ms;
@@ -142,56 +141,10 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 2px 0 rgba(0, 0, 0, 0.075), 0 3px 0 rgba(0, 0, 0, 0.05), 0 4px 0 rgba(0, 0, 0, 0.015);
       }
 
-      #header > data-table-cell,
-      .item > data-table-cell:not([hidden]) {
-        flex: 1 0 100px;
-        padding: 0 24px 0 24px;
-        min-height: 10px; /* Prevent iron-list from looping when item height is really small */
-        height: var(--iron-data-table-cell-height, 48px);
-        display: flex;
-        align-items: center;
-        overflow: hidden;
-        transition: flex-basis 200ms, flex-grow 200ms;
-      }
-
-      #header > data-table-cell,
-      #header .checkbox {
-        height: 56px !important;
-      }
-
-      #header > data-table-cell {
-        @apply(--iron-data-table-header-cell);
-      }
-
-      .item > data-table-cell {
-        @apply(--iron-data-table-row-cell);
-      }
-
-      #header > data-table-cell div[hidden],
-      #header > data-table-cell data-table-column-filter[hidden],
-      .checkbox[hidden] {
-        /* Fix for Shadow DOM https://github.com/Polymer/polymer/issues/1748 */
-        display: none !important;
-      }
-
-      .checkbox {
-        height: var(--iron-data-table-cell-height, 48px);
-        flex-basis: var(--iron-data-table-cell-height, 48px);
-        flex-grow: 0;
-        flex-shrink: 0;
-        padding: 0 8px 0 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-right: 1px solid #e3e3e3;
-      }
-
       #list {
         overflow-x: hidden !important;
         overflow-y: auto !important;
-        flex-basis: 100%;
-        flex-shrink: 1;
-        flex-grow: 0;
+        flex: 1;
         transition: opacity 200ms;
         -webkit-transition: opacity 200ms;
       }
@@ -204,16 +157,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         position: absolute;
         top: 45%;
         left: 50%;
-
         --paper-spinner-color: var(--default-primary-color);
-      }
-
-      .item {
-        cursor: pointer;
-        display: flex;
-        justify-content: space-between;
-        opacity: 1;
-        @apply(--iron-data-table-row);
       }
 
       .item:focus {
@@ -225,53 +169,37 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         @apply(--iron-data-table-row-focused-after);
       }
 
-      .item:hover {
-        @apply(--iron-data-table-row-hover);
-      }
-
-      .item[selected] {
-        @apply(--iron-data-table-row-selected);
-      }
-
-      .item[even] {
-        @apply(--iron-data-table-row-even);
-      }
-
-      .item:not([even]) {
-        @apply(--iron-data-table-row-odd);
-      }
-
       .item:after {
         @apply(--iron-data-table-row-after);
       }
     </style>
     <div id="container">
       <div id="header">
-        <div class="checkbox" hidden$="[[!multiSelection]]" on-tap="_toggleSelectAll">
-          <data-table-checkbox checked="[[_isSelectAllChecked(selectedItems.length, selectedItems.inverted)]]" indeterminate="[[_isSelectAllIndeterminate(selectedItems.length)]]"></data-table-checkbox>
-        </div>
-        <template is="dom-repeat" items="[[columns]]" as="column">
-          <data-table-cell column="[[column]]" template="[[column.headerTemplate]]" bind="[[_bind(column)]]">
-            <data-table-column-sort sort-order="[[sortOrder]]" path="[[column.sortBy]]" on-sort-direction-changed="_sortDirectionChanged" hidden="[[!column.sortBy]]"></data-table-column-sort>
-          </data-table-cell>
-        </template>
+        <data-table-row header>
+          <data-table-checkbox header hidden$="[[!multiSelection]]" on-tap="_toggleSelectAll" checked="[[_isSelectAllChecked(selectedItems.length, selectedItems.inverted)]]" indeterminate="[[_isSelectAllIndeterminate(selectedItems.length)]]"></data-table-checkbox>
+          <template is="dom-repeat" items="[[columns]]" as="column">
+            <data-table-cell header column="[[column]]" templatizer="[[column.templatizeHeader]]" bind="[[_bind(column)]]">
+              <data-table-column-sort sort-order="[[sortOrder]]" path="[[column.sortBy]]" on-sort-direction-changed="_sortDirectionChanged" hidden$="[[!column.sortBy]]"></data-table-column-sort>
+            </data-table-cell>
+          </template>
+        </data-table-row>
       </div>
 
       <iron-list id="list" as="item" items="[[_cachedItems]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" multi-selection="[[multiSelection]]" selected-item="{{selectedItem}}" on-selected-items-changed="_selectedItemsChanged">
         <template>
-          <div class="item" tabindex$="[[tabIndex]]" selected$="[[_isSelected(selected, selectedItems.inverted)]]" even$="[[!_isEven(index)]]">
-            <div class="checkbox" hidden$="[[!multiSelection]]">
-              <data-table-checkbox checked="[[_isSelected(selected, selectedItems.inverted)]]"></data-table-checkbox>
-            </div>
-            <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
-              <data-table-cell column="[[column]]" template="[[column.template]]" bind="[[_bind(item, index, selected)]]"></data-table-cell>
-            </template>
+          <div class="item" tabindex$="[[tabIndex]]">
+            <data-table-row selected$="[[_isSelected(selected, selectedItems.inverted)]]" even$="[[!_isEven(index)]]">
+              <data-table-checkbox hidden$="[[!multiSelection]]" checked="[[_isSelected(selected, selectedItems.inverted)]]"></data-table-checkbox>
+              <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
+                <data-table-cell column="[[column]]" templatizer="[[column.templatizeRow]]" bind="[[_bind(item, index, selected)]]"></data-table-cell>
+              </template>
+            </data-table-row>
           </div>
         </template>
       </iron-list>
     </div>
     <paper-spinner-lite active hidden=[[!loading]]></paper-spinner-lite>
-    <content></content>
+    <content select="data-table-column"></content>
   </template>
 
   <script>
@@ -285,6 +213,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
       listeners: {
         'column-filter-changed': '_onColumnFilterChanged',
         'iron-resize': '_resizeCellContainers',
+        'item-changed': '_itemChanged',
         'scroll': '_onHorizontalScroll'
       },
 
@@ -346,13 +275,16 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         /**
          * When `multiSelection` is true, this is an array that contains the selected items.
          * If `selectedItems.inverted` is `true`, the array contains deselected items instead.
-         * `selectedItems.filter` contains an array of filters that were active when the selection changed.
+         * `selectedItems.filters` contains an array of filters that were active when the selection changed.
          */
         selectedItems: {
           type: Object,
           notify: true,
           value: function() {
-            return [];
+            var items = [];
+            items.filters = [];
+
+            return items;
           }
         },
 
@@ -366,13 +298,13 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         },
 
         /**
-         * An object with a path/sortorder ('asc' or 'desc') that is used to sort the items
+         * An array with a path/sortorder ('asc' or 'desc') pairs that are used to sort the items.
          */
         sortOrder: {
-          type: Object,
+          type: Array,
           notify: true,
           value: function() {
-            return {};
+            return [];
           }
         },
 
@@ -412,6 +344,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
          */
         loading: {
           type: Boolean,
+          notify: true,
           reflectToAttribute: true,
           value: false
         },
@@ -439,7 +372,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
       observers: ['_itemsChanged(items.*)',
         '_sizeChanged(size)',
         '_currentPageChanged(dataSource, _currentPage)',
-        '_resetData(dataSource, filter.*, sortOrder)'
+        '_resetData(dataSource, filter.*, sortOrder.*)'
       ],
 
       created: function() {
@@ -457,29 +390,15 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
       },
 
       ready: function() {
-        this._patchIronListCreatePool();
-      },
+        this.$.list._selectionHandler = function(e) {
+          var first = Polymer.dom(e).event.path.filter(function(p) {
+            return this.modelForElement(p);
+          }.bind(this))[0];
 
-      _patchIronListCreatePool: function() {
-        // Since 1.2.0, iron-list changed timings on how the first three rows are
-        // rendered initially: https://github.com/PolymerElements/iron-list/commit/c0e27e52ee93dcd93d33590b569bd17c5c504005#diff-b97995700c5da5fa638d0324b5f3f861L765
-        // Apparently, this causes the Polymer.dom.flush() to be called in such order,
-        // that templatize for the data-table-cells doesn't work properly for the initial render.
-
-        // As a fix, calling Polymer.dom.flush() after the initial rows have been created seems to help.
-        // So far, haven't been able to produce an isolated jsbin to report about this to iron-list.
-
-        var createPool = this.$.list._createPool.bind(this.$.list);
-        var initialCreateCalled = false;
-        this.$.list._createPool = function(size) {
-          var items = createPool(size);
-
-          // Polymer.dom.flush() needs to be called on the initial creation ONLY.
-          if (!initialCreateCalled) {
-            initialCreateCalled = true;
-            Polymer.dom.flush();
+          var model = this.modelForElement(first);
+          if (model) {
+              this.toggleSelectionForItem(model[this.as]);
           }
-          return items;
         };
       },
 
@@ -512,7 +431,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
           this.set('selectedItems', items);
           this.set('selectedItems.inverted', inverted);
           this.notifyPath('selectedItems.length', items.length);
-          this.set('selectedItems.filter', this.filter || []);
+          this.set('selectedItems.filters', this.filter || []);
         } else if (e.detail.path === 'selectedItems.splices') {
           this.notifyPath('selectedItems.splices', e.detail.value);
           this.notifyPath('selectedItems.length', this.selectedItems.length);
@@ -588,7 +507,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
           for (var i = 0; i < filter.length; i++) {
             var value = this.get(filter[i].path, item);
 
-            if (value.toLowerCase().indexOf(filter[i].filter.toLowerCase()) === -1) {
+            if (value.toString().toLowerCase().indexOf(filter[i].filter.toString().toLowerCase()) === -1) {
               return false;
             }
           }
@@ -610,21 +529,44 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
       },
 
       _sort: function(items, sortOrder) {
-        if (!sortOrder || !sortOrder.path) {
+        if (!sortOrder || sortOrder.length === 0) {
           return items;
         }
 
-        return Array.prototype.sort.call(items, function(a, b) {
-          if (sortOrder.direction === 'asc') {
-            return this._compare(this.get(sortOrder.path, a), this.get(sortOrder.path, b));
-          } else {
-            return this._compare(this.get(sortOrder.path, b), this.get(sortOrder.path, a));
-          }
-        }.bind(this));
+        var multiSort = function() {
+          return function(a, b) {
+            return sortOrder.map(function(sort) {
+              if (sort.direction === 'asc') {
+                return this._compare(this.get(sort.path, a), this.get(sort.path, b));
+              } else if (sort.direction === 'desc') {
+                return this._compare(this.get(sort.path, b), this.get(sort.path, a));
+              }
+              return 0;
+            }.bind(this)).reduce(function firstNonZeroValue(p, n) {
+                return p ? p : n;
+              }, 0);
+          };
+        };
+
+        return Array.prototype.sort.call(items, multiSort(sortOrder).bind(this));
       },
 
       _sortDirectionChanged: function(e) {
-        this.set('sortOrder', e.detail);
+        for (var i = 0; i < this.sortOrder.length; i++) {
+          if (this.sortOrder[i].path === e.detail.path) {
+            if (e.detail.direction) {
+              this.set('sortOrder.' + i + '.direction', e.detail.direction);
+            } else {
+              this.splice('sortOrder', i, 1);
+            }
+            return;
+          }
+        }
+
+        this.push('sortOrder', {
+          path: e.detail.path,
+          direction: e.detail.direction
+        });
       },
 
       _compare: function(a, b) {
@@ -655,7 +597,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
         for (var i = 0; i < this.filter.length; i++) {
           if (this.filter[i].path === e.target.filterBy) {
             this.set('filter.' + i + '.filter', e.detail.value);
-            this.set('selectedItems.filter.' + i + '.filter', e.detail.value);
+            this.set('selectedItems.filters.' + i + '.filter', e.detail.value);
             return;
           }
         }
@@ -665,7 +607,7 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
           filter: e.detail.value
         });
 
-        this.push('selectedItems.filter', {
+        this.push('selectedItems.filters', {
           path: e.target.filterBy,
           filter: e.detail.value
         });
@@ -692,19 +634,16 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
 
       _onVerticalScroll: function(e) {
         // Toggle shadow when at the top
-        this.toggleClass("scrolled", this.$.list.scrollTop !== 0, this.$.header);
+        this.toggleClass("scrolled", this.$.list.scrollTop >= 1, this.$.header);
 
-        this._currentPage = Math.floor(this.$.list.scrollTop / this.$.list._physicalAverage / this.pageSize);
+        this._currentPage = Math.max(0, Math.floor(this.$.list.scrollTop / this.$.list._physicalAverage / this.pageSize));
       },
 
       /**
        * Lazy loading
        */
       _itemsChanged: function(items) {
-        if (items.path === 'items.length') {
-          this.size = items.length;
-          return;
-        } else if (Array.isArray(items.base)) {
+        if ((items.path === 'items' || items.path === 'items.splices') && Array.isArray(items.base)) {
           this.size = items.base.length;
 
           this.dataSource = function(opts, cb, err) {
@@ -719,6 +658,35 @@ to `iron-data-table` or to any of its parents. Using `px` or `vh` values will wo
 
             cb(slice);
           }.bind(this);
+        } else if (items.path.indexOf('items.#') === 0 && Array.isArray(items.base)) {
+          var index = items.path.split('.')[1].substring(1);
+          var item = this.items[index];
+
+          var cachedIndex = this._cachedItems.indexOf(item);
+
+          if (cachedIndex >= 0) {
+            for (var c = 0; c < this.columns.length; c++) {
+              var column = this.columns[c];
+
+              for (var t = 0; t < column._templateInstances.length; t++) {
+                var templateInstance = column._templateInstances[t];
+
+                if (templateInstance.item === item) {
+                  templateInstance.notifyPath(items.path.replace('items.', 'item.').replace('.#' + index, ''), items.value);
+                }
+              }
+            }
+            this.set(items.path.replace('items.', '_cachedItems.').replace('#' + index, cachedIndex), items.value);
+          }
+        }
+      },
+
+      _itemChanged: function(e) {
+        if (this.items) {
+          var index = this.items.indexOf(e.detail.item);
+          if (index >= 0) {
+            this.set('items.' + index + '.' + e.detail.path, e.detail.value);
+          }
         }
       },
 
