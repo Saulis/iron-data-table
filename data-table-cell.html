@@ -38,7 +38,7 @@
 
         _instance: {
           type: Object,
-          computed: '_templatize(column, _content, templatizer)'
+          computed: '_templatize(column, templatizer)'
         },
 
         order: Number,
@@ -63,8 +63,8 @@
         this.hidden = e.detail.value;
       },
 
-      _templatize: function(column, content, templatizer) {
-        return templatizer.bind(column)(content);
+      _templatize: function(column, templatizer) {
+        return templatizer.bind(column)(this);
       },
 
       _bindData: function(instance, data) {

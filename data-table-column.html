@@ -222,7 +222,7 @@
 
         this.push('_templateInstances', instance);
 
-        Polymer.dom(parentElement).appendChild(instance.root);
+        Polymer.dom(parentElement).insertBefore(instance.root, Polymer.dom(parentElement).firstElementChild);
         Polymer.dom.flush();
 
         return {
