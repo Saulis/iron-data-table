@@ -75,6 +75,7 @@ bound from the model object provided to the template scope):
 - Lazy Loading
 - Data filtering
 - Data sorting
+- Multi-Column sorting
 - Item selection
 - Multi-Selection
 - Template support for each column
@@ -84,6 +85,7 @@ bound from the model object provided to the template scope):
 - Native Shadow DOM support
 - Column manipulation, resizing, hiding, reordering
 - Custom Header templates
+- Basic Angular 2 support with directives
 
 ## Roadmap (1.1)
 In random order: (please let me know if something is missing or misplaced)
