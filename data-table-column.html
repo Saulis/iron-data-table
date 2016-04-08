@@ -209,7 +209,37 @@
         };
 
         this.templatize(this.headerTemplate);
-        this.templatize(this.template);
+
+        // template not present in angular 2 at this point.
+        if (this.template) {
+          this.templatize(this.template);
+        }
+      },
+
+      _templatize: function(template, parentElement) {
+        this.templatize(template);
+        var instance = this.stamp();
+
+        this.push('_templateInstances', instance);
+
+        Polymer.dom(parentElement).insertBefore(instance.root, Polymer.dom(parentElement).firstElementChild);
+        Polymer.dom.flush();
+
+        return {
+          bind: function(data) {
+            for (var prop in data) {
+              instance[prop] = data[prop];
+            }
+          }
+        };
+      },
+
+      templatizeRow: function(parentElement) {
+        return this._templatize(this.template, parentElement);
+      },
+
+      templatizeHeader: function(parentElement) {
+        return this._templatize(this.headerTemplate, parentElement);
       }
     });
   </script>

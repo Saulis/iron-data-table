@@ -178,7 +178,7 @@ inspired styles to your `iron-data-table`.
         <data-table-row header>
           <data-table-checkbox header hidden$="[[!multiSelection]]" on-tap="_toggleSelectAll" checked="[[_isSelectAllChecked(selectedItems.length, selectedItems.inverted)]]" indeterminate="[[_isSelectAllIndeterminate(selectedItems.length)]]"></data-table-checkbox>
           <template is="dom-repeat" items="[[columns]]" as="column">
-            <data-table-cell header column="[[column]]" template="[[column.headerTemplate]]" bind="[[_bind(column)]]">
+            <data-table-cell header column="[[column]]" templatizer="[[column.templatizeHeader]]" bind="[[_bind(column)]]">
               <data-table-column-sort sort-order="[[sortOrder]]" path="[[column.sortBy]]" on-sort-direction-changed="_sortDirectionChanged" hidden$="[[!column.sortBy]]"></data-table-column-sort>
             </data-table-cell>
           </template>
@@ -191,7 +191,7 @@ inspired styles to your `iron-data-table`.
             <data-table-row selected$="[[_isSelected(selected, selectedItems.inverted)]]" even$="[[!_isEven(index)]]">
               <data-table-checkbox hidden$="[[!multiSelection]]" checked="[[_isSelected(selected, selectedItems.inverted)]]"></data-table-checkbox>
               <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
-                <data-table-cell column="[[column]]" template="[[column.template]]" bind="[[_bind(item, index, selected)]]"></data-table-cell>
+                <data-table-cell column="[[column]]" templatizer="[[column.templatizeRow]]" bind="[[_bind(item, index, selected)]]"></data-table-cell>
               </template>
             </data-table-row>
           </div>
@@ -344,6 +344,7 @@ inspired styles to your `iron-data-table`.
          */
         loading: {
           type: Boolean,
+          notify: true,
           reflectToAttribute: true,
           value: false
         },
