@@ -134,6 +134,26 @@
           value: function() {
             return {};
           }
+        },
+
+        templatizeRow: {
+          type: Object,
+          notify: true,
+          value: function() {
+           return function(parentElement) {
+             return this._templatize(this.template, parentElement);
+           }.bind(this)
+          }
+        },
+
+        templatizeHeader: {
+          type: Object,
+          notify: true,
+          value: function() {
+           return function(parentElement) {
+             return this._templatize(this.headerTemplate, parentElement);
+           }.bind(this)
+          }
         }
       },
 
@@ -240,15 +260,8 @@
             }
           }
         };
-      },
-
-      templatizeRow: function(parentElement) {
-        return this._templatize(this.template, parentElement);
-      },
-
-      templatizeHeader: function(parentElement) {
-        return this._templatize(this.headerTemplate, parentElement);
       }
+
     });
   </script>
 </dom-module>
