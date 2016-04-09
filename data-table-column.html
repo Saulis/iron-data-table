@@ -142,7 +142,15 @@
       ],
 
       _forwardParentProp: function(prop, value) {
-        this.set('_forwardedParentProps.' + prop, value);
+        //TODO: Bug in Templatizer forwards also [[item]] etc. instance properties
+        // through this function when Shadow DOM is on AND iron-data-table is nested inside
+        // another Polymer element. Inside a dom-bind template everything seems to work...
+        if (prop.indexOf('item') === -1 &&
+            prop.indexOf('selected') === -1 &&
+            prop.indexOf('index') === -1 &&
+            prop.indexOf('column') === -1) {
+          this.set('_forwardedParentProps.' + prop, value);
+        }
       },
 
       _forwardedParentPropsChanged: function(changeRecord) {
