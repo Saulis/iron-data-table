@@ -39,7 +39,7 @@
       },
 
       attached: function() {
-        if (this.domHost) {
+        if (this.domHost && this.domHost.tagName === 'IRON-DATA-TABLE') {
           var id = this._static.id++;
 
           var item = this.parentElement;
