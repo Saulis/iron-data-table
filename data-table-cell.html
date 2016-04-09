@@ -23,13 +23,10 @@
       is: 'data-table-cell',
 
       properties: {
-        templatizer: {
-          type: Object
-        },
-
-        bind: {
-          type: Object
-        },
+        bind: Object,
+        order: Number,
+        header: Boolean,
+        width: String,
 
         column: {
           type: Object,
@@ -38,11 +35,10 @@
 
         _instance: {
           type: Object,
-          computed: '_templatize(column, templatizer)'
+          computed: '_templatize(column, _templatizer)'
         },
 
-        order: Number,
-        width: String
+        _templatizer: Object
       },
 
       observers: ['_bindData(_instance, bind)'],
@@ -61,6 +57,18 @@
 
       _hiddenChanged: function(e) {
         this.hidden = e.detail.value;
+      },
+
+      _templatizeRowChanged: function(e) {
+        if (!this.header) {
+          this._templatizer = e.detail.value;
+        }
+      },
+
+      _templatizeHeaderChanged: function(e) {
+        if (this.header) {
+          this._templatizer = e.detail.value;
+        }
       },
 
       _templatize: function(column, templatizer) {
@@ -85,12 +93,20 @@
 
         this.hidden = column.hidden;
         this._addListener(column, oldColumn, 'hidden');
+
+        if (this.header && column.templatizeHeader) {
+          this._templatizer = column.templatizeHeader;
+        } else if (column.templatizeRow) {
+          this._templatizer = column.templatizeRow;
+        }
+        this._addListener(column, oldColumn, 'templatizeRow');
+        this._addListener(column, oldColumn, 'templatizeHeader');
       },
 
       // Adding listeners manually *seems* to work better with forwarded parent props
       // than normal data-binding. Something to do with notifying the paths correctly.
       _addListener: function(column, oldColumn, prop) {
-        var eventName = prop + '-changed';
+        var eventName = Polymer.CaseMap.camelToDashCase(prop) + '-changed';
         var observerName = '_' + prop + 'Changed';
 
         if (oldColumn) {
