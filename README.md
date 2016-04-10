@@ -75,7 +75,7 @@ bound from the model object provided to the template scope):
 - Lazy Loading
 - Data filtering
 - Data sorting
-- Multi-Column sorting
+- Multi-Column sorting (thanks to @userquin)
 - Item selection
 - Multi-Selection
 - Template support for each column
