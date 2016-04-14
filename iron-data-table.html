@@ -25,6 +25,7 @@ limitations under the License.
 <link rel="import" href="data-table-cell.html">
 <link rel="import" href="data-table-row.html">
 <link rel="import" href="data-table-checkbox.html">
+<link rel="import" href="data-table-row-detail.html">
 
 <!--
 `iron-data-table` displays a table or a grid of data.
@@ -160,6 +161,10 @@ inspired styles to your `iron-data-table`.
         --paper-spinner-color: var(--default-primary-color);
       }
 
+      .item {
+        @apply(--iron-data-table-item);
+      }
+
       .item:focus {
         outline: none;
         @apply(--iron-data-table-row-focused);
@@ -188,18 +193,22 @@ inspired styles to your `iron-data-table`.
       <iron-list id="list" as="item" items="[[_cachedItems]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" multi-selection="[[multiSelection]]" selected-item="{{selectedItem}}" on-selected-items-changed="_selectedItemsChanged">
         <template>
           <div class="item" tabindex$="[[tabIndex]]" on-tap="_onItemTap">
-            <data-table-row selected$="[[_isSelected(selected, selectedItems.inverted)]]" even$="[[!_isEven(index)]]">
+            <data-table-row selected$="[[_isSelected(selected, selectedItems.inverted)]]" even$="[[!_isEven(index)]]" row-detail$="[[ _showDetail(showDetail, index) ]]">
               <data-table-checkbox hidden$="[[!multiSelection]]" checked="[[_isSelected(selected, selectedItems.inverted)]]"></data-table-checkbox>
               <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
-                <data-table-cell column="[[column]]" bind="[[_bind(item, index, selected)]]"></data-table-cell>
+                <data-table-cell column="[[column]]" bind="[[_bind(item, index, selected)]]" on-tap="handleRowDetail"></data-table-cell>
               </template>
             </data-table-row>
+            <template is="dom-if" if="[[ _showDetail(showDetail, index) ]]" on-dom-change="_updateSize">
+              <data-table-row-detail detail="[[ rowDetail ]]" bind="[[ _bind(item, index, selected) ]]"></data-table-row-detail>
+            </template>
           </div>
         </template>
       </iron-list>
     </div>
     <paper-spinner-lite active hidden=[[!loading]]></paper-spinner-lite>
     <content select="data-table-column"></content>
+    <content id="rowDetail" select=".row-detail"></content>
   </template>
 
   <script>
@@ -384,6 +393,16 @@ inspired styles to your `iron-data-table`.
           if (info.addedNodes.filter(hasColumns).length > 0 ||
             info.removedNodes.filter(hasColumns).length > 0) {
             this.set('columns', this.getContentChildren('[select=data-table-column]'));
+            this.notifyResize();
+          }
+
+          var hasRowDetail = function(node) {
+            return (node.nodeType === Node.ELEMENT_NODE && node.classList && node.classList.contains('row-detail'));
+          };
+
+          if (info.addedNodes.filter(hasRowDetail).length > 0 ||
+            info.removedNodes.filter(hasRowDetail).length > 0) {
+            this.set('rowDetail', this.getContentChildren('#rowDetail')[0]);
             this.notifyResize();
           }
         }.bind(this));
@@ -801,6 +820,28 @@ inspired styles to your `iron-data-table`.
         if (path && path[0].tagName === "INPUT") {
           e.stopPropagation();
         }
+      },
+
+      handleRowDetail: function(event) {
+        var model = event.path[2]._templateInstance;
+        if (this.rowDetail && !event.model.column.disableDetail && model && !model.get('selectionEnabled')) {
+          if (model.get('showDetail') === model.get('index')) {
+            model.set('showDetail', null);
+          } else {
+            model.set('showDetail', model.get('index'));
+          }
+        }
+      },
+
+      _showDetail: function(showDetail, index) {
+        return showDetail === index;
+      },
+
+      _updateSize: function(event) {
+        if (!this.items || 'number' !== typeof event.model.get('index') || 'undefined' === typeof event.model.get('showDetail')) {
+          return;
+        }
+        this.$.list.updateSizeForItem(this.items[event.model.get('index')]);
       }
     });
   </script>
