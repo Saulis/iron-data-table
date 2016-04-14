@@ -46,7 +46,7 @@
           if (!item.container) {
             this._contentElement = document.createElement('content');
             this._contentElement.setAttribute('select', '#item' + id);
-            Polymer.dom(item).appendChild(this._contentElement);
+            Polymer.dom(item).insertBefore(this._contentElement, Polymer.dom(item).firstElementChild);
 
             this.id = 'item' + id;
             Polymer.dom(this.domHost).appendChild(this);
