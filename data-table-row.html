@@ -43,12 +43,13 @@
           var id = this._static.id++;
 
           var item = this.parentElement;
-          if (!item.container) {
+          if (!item._rowId) {
             this._contentElement = document.createElement('content');
             this._contentElement.setAttribute('select', '#item' + id);
             Polymer.dom(item).appendChild(this._contentElement);
-
             this.id = 'item' + id;
+            item._rowId = id;
+
             Polymer.dom(this.domHost).appendChild(this);
           }
         }
