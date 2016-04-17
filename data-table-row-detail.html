@@ -6,8 +6,6 @@
         display: flex;
         align-items: center;
         height: 48px;
-
-        @apply(--iron-data-table-row-detail);
       }
     </style>
     <content></content>
@@ -19,11 +17,11 @@
       properties: {
         bind: Object,
 
-        detail: Object,
+        rowDetailTemplate: Object,
 
         _instance: {
           type: Object,
-          computed: '_computeInstance(detail)'
+          computed: '_computeInstance(rowDetailTemplate)'
         }
       },
 
@@ -33,9 +31,8 @@
 
       observers: ['_bindData(_instance, bind)'],
 
-      _computeInstance: function(detail) {
-        var template = Polymer.dom(detail).querySelector('template');
-        return this._templatize(template, this);
+      _computeInstance: function(rowDetailTemplate) {
+        return this._templatize(rowDetailTemplate, this);
       },
 
       _bindData: function(instance, data) {

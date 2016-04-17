@@ -161,10 +161,6 @@ inspired styles to your `iron-data-table`.
         --paper-spinner-color: var(--default-primary-color);
       }
 
-      .item {
-        @apply(--iron-data-table-item);
-      }
-
       .item:focus {
         outline: none;
         @apply(--iron-data-table-row-focused);
@@ -198,17 +194,16 @@ inspired styles to your `iron-data-table`.
               <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
                 <data-table-cell column="[[column]]" bind="[[_bind(item, index, selected)]]" on-tap="handleRowDetail"></data-table-cell>
               </template>
+              <template is="dom-if" if="[[ _showDetail(showDetail, index) ]]" on-dom-change="notifyResize">
+                <data-table-row-detail row-detail-template="[[ rowDetail ]]" bind="[[ _bind(item, index, selected) ]]"></data-table-row-detail>
+              </template>
             </data-table-row>
-            <template is="dom-if" if="[[ _showDetail(showDetail, index) ]]" on-dom-change="_updateSize">
-              <data-table-row-detail detail="[[ rowDetail ]]" bind="[[ _bind(item, index, selected) ]]"></data-table-row-detail>
-            </template>
           </div>
         </template>
       </iron-list>
     </div>
     <paper-spinner-lite active hidden=[[!loading]]></paper-spinner-lite>
     <content select="data-table-column"></content>
-    <content id="rowDetail" select=".row-detail"></content>
   </template>
 
   <script>
@@ -395,16 +390,6 @@ inspired styles to your `iron-data-table`.
             this.set('columns', this.getContentChildren('[select=data-table-column]'));
             this.notifyResize();
           }
-
-          var hasRowDetail = function(node) {
-            return (node.nodeType === Node.ELEMENT_NODE && node.classList && node.classList.contains('row-detail'));
-          };
-
-          if (info.addedNodes.filter(hasRowDetail).length > 0 ||
-            info.removedNodes.filter(hasRowDetail).length > 0) {
-            this.set('rowDetail', this.getContentChildren('#rowDetail')[0]);
-            this.notifyResize();
-          }
         }.bind(this));
       },
 
@@ -419,6 +404,7 @@ inspired styles to your `iron-data-table`.
               this.toggleSelectionForItem(model[this.as]);
           }
         };
+        this.set('rowDetail', Polymer.dom(this).querySelector('template[is=row-detail]'));
       },
 
       _stopPropagation: function(e) {
@@ -815,7 +801,7 @@ inspired styles to your `iron-data-table`.
       },
 
       handleRowDetail: function(event) {
-        var model = event.path[2]._templateInstance;
+        var model = event.path[3]._templateInstance;
         if (this.rowDetail && !event.model.column.disableDetail && model && !model.get('selectionEnabled')) {
           if (model.get('showDetail') === model.get('index')) {
             model.set('showDetail', null);
@@ -827,13 +813,6 @@ inspired styles to your `iron-data-table`.
 
       _showDetail: function(showDetail, index) {
         return showDetail === index;
-      },
-
-      _updateSize: function(event) {
-        if (!this.items || 'number' !== typeof event.model.get('index') || 'undefined' === typeof event.model.get('showDetail')) {
-          return;
-        }
-        this.$.list.updateSizeForItem(this.items[event.model.get('index')]);
       }
     });
   </script>
