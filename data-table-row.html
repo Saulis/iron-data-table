@@ -2,8 +2,7 @@
   <template>
     <style is="custom-style">
       :host {
-        display: flex;
-        justify-content: space-between;
+        @apply(--layout-vertical);
         opacity: 1;
         cursor: pointer;
         @apply(--iron-data-table-row);
@@ -24,7 +23,16 @@
       :host(:not([header]):not([even])) {
         @apply(--iron-data-table-row-odd);
       }
+
+      .columns {
+        @apply(--layout-horizontal);
+      }
     </style>
+    <div class="columns">
+      <content select="data-table-checkbox"></content>
+      <content select="data-table-cell"></content>
+      <content select="template[is=dom-repeat]"></content>
+    </div>
     <content></content>
   </template>
   <script>
@@ -46,7 +54,7 @@
           if (!item._rowId) {
             this._contentElement = document.createElement('content');
             this._contentElement.setAttribute('select', '#item' + id);
-            Polymer.dom(item).insertBefore(this._contentElement, Polymer.dom(item).firstElementChild);
+            Polymer.dom(item).appendChild(this._contentElement);
             this.id = 'item' + id;
             item._rowId = id;
 
