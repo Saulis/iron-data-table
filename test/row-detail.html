@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../test-fixture/test-fixture-mocha.js"></script>
+  <link rel="import" href="../../iron-test-helpers/iron-test-helpers.html">
+  <link rel="import" href="../iron-data-table.html">
+</head>
+
+<body>
+  <test-fixture id="grid">
+    <template>
+      <iron-data-table>
+        <data-table-column name="First">
+          <template>[[item.value]]</template>
+        </data-table-column>
+        <data-table-column name="Second" disable-detail>
+          <template>[[item.value2]]</template>
+        </data-table-column>
+        <template is="row-detail">[[ item.value2 ]]</template>
+      </iron-data-table>
+    </template>
+  </test-fixture>
+
+  <script>
+    describe('Row Detail', function() {
+      var grid;
+      beforeEach(function(done) {
+        grid = fixture('grid');
+        Polymer.dom.flush();
+        grid.items = [{
+          value: 'foo',
+          value2: 'fooz'
+        }, {
+          value: 'bar',
+          value2: 'bah'
+        }, {
+          value: 'qux',
+          value2: 'baz'
+        }];
+
+        Polymer.Base.async(done, 200);
+      });
+
+      it('should show row detail when row cells are clicked', function(done) {
+        var firstRow = grid.querySelector('#items .item:nth-of-type(1)');
+        firstRow.querySelector('data-table-cell').click();
+
+        setTimeout(function() {
+          var rowDetail = firstRow.querySelector('data-table-row-detail');
+          expect(rowDetail).to.exist;
+          expect(rowDetail.hidden).to.be['false'];
+          var columns = firstRow.querySelector('.columns');
+          expect(firstRow.clientHeight).to.equal(columns.clientHeight + rowDetail.clientHeight);
+          expect(firstRow.querySelector('data-table-row').getAttribute('row-detail')).to.exist;
+
+          var secondRow = grid.querySelector('#items .item:nth-of-type(2)');
+          expect(secondRow.style.transform).to.contain(firstRow.clientHeight + 'px');
+          done();
+        }, 50);
+      });
+
+      it('should not show row detail when row cell with disableDetail are clicked', function(done) {
+        var firstRow = grid.querySelector('#items .item:nth-of-type(1)');
+        firstRow.querySelector('data-table-cell:nth-of-type(2)').click();
+
+        setTimeout(function() {
+          var rowDetail = firstRow.querySelector('data-table-row-detail');
+          expect(!rowDetail || rowDetail.hidden).to.be['true'];
+          expect(firstRow.querySelector('data-table-row').getAttribute('row-detail')).to.not.exist;
+          done();
+        }, 50);
+      });
+    });
+  </script>
+
+</body>
+
+</html>

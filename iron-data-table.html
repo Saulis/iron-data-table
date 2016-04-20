@@ -189,12 +189,12 @@ inspired styles to your `iron-data-table`.
       <iron-list id="list" as="item" items="[[_cachedItems]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" multi-selection="[[multiSelection]]" selected-item="{{selectedItem}}" on-selected-items-changed="_selectedItemsChanged">
         <template>
           <div class="item" tabindex$="[[tabIndex]]">
-            <data-table-row selected$="[[_isSelected(selected, selectedItems.inverted)]]" even$="[[!_isEven(index)]]" row-detail$="[[ _showDetail(showDetail, index) ]]">
+            <data-table-row selected$="[[_isSelected(selected, selectedItems.inverted)]]" even$="[[!_isEven(index)]]" row-detail$="[[ _showDetail(rowDetailIndex, index) ]]">
               <data-table-checkbox hidden$="[[!multiSelection]]" checked="[[_isSelected(selected, selectedItems.inverted)]]"></data-table-checkbox>
               <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
-                <data-table-cell column="[[column]]" bind="[[_bind(item, index, selected)]]" on-tap="handleRowDetail"></data-table-cell>
+                <data-table-cell column="[[column]]" bind="[[_bind(item, index, selected)]]" on-tap="_handleRowDetail"></data-table-cell>
               </template>
-              <template is="dom-if" if="[[ _showDetail(showDetail, index) ]]" on-dom-change="notifyResize">
+              <template is="dom-if" if="[[ _showDetail(rowDetailIndex, index) ]]" on-dom-change="notifyResize">
                 <data-table-row-detail row-detail-template="[[ rowDetail ]]" bind="[[ _bind(item, index, selected) ]]"></data-table-row-detail>
               </template>
             </data-table-row>
@@ -800,19 +800,18 @@ inspired styles to your `iron-data-table`.
         this.loading = pagesLoading > 0;
       },
 
-      handleRowDetail: function(event) {
-        var model = event.path[3]._templateInstance;
-        if (this.rowDetail && !event.model.column.disableDetail && model && !model.get('selectionEnabled')) {
-          if (model.get('showDetail') === model.get('index')) {
-            model.set('showDetail', null);
+      _handleRowDetail: function(event) {
+        if (this.rowDetail && !event.model.column.disableDetail && !this.selectionEnabled) {
+          if (event.model.index === this.rowDetailIndex) {
+            this.set('rowDetailIndex', null);
           } else {
-            model.set('showDetail', model.get('index'));
+            this.set('rowDetailIndex', event.model.index);
           }
         }
       },
 
-      _showDetail: function(showDetail, index) {
-        return showDetail === index;
+      _showDetail: function(rowDetailIndex, index) {
+        return rowDetailIndex === index;
       }
     });
   </script>
