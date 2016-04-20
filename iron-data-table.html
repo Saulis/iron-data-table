@@ -390,6 +390,8 @@ inspired styles to your `iron-data-table`.
             this.set('columns', this.getContentChildren('[select=data-table-column]'));
             this.notifyResize();
           }
+
+          this.set('rowDetail', Polymer.dom(this).querySelector('template[is=row-detail]'));
         }.bind(this));
       },
 
@@ -404,7 +406,6 @@ inspired styles to your `iron-data-table`.
               this.toggleSelectionForItem(model[this.as]);
           }
         };
-        this.set('rowDetail', Polymer.dom(this).querySelector('template[is=row-detail]'));
       },
 
       _stopPropagation: function(e) {
