@@ -187,7 +187,7 @@ inspired styles to your `iron-data-table`.
 
       <iron-list id="list" as="item" items="[[_cachedItems]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" multi-selection="[[multiSelection]]" selected-item="{{selectedItem}}" on-selected-items-changed="_selectedItemsChanged">
         <template>
-          <div class="item" tabindex$="[[tabIndex]]">
+          <div class="item" tabindex$="[[tabIndex]]" on-tap="_onItemTap">
             <data-table-row selected$="[[_isSelected(selected, selectedItems.inverted)]]" even$="[[!_isEven(index)]]">
               <data-table-checkbox hidden$="[[!multiSelection]]" checked="[[_isSelected(selected, selectedItems.inverted)]]"></data-table-checkbox>
               <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
@@ -793,6 +793,14 @@ inspired styles to your `iron-data-table`.
 
       _pagesLoadingChanged: function(pagesLoading) {
         this.loading = pagesLoading > 0;
+      },
+
+      _onItemTap: function(e) {
+        var path = Polymer.dom(e).path;
+
+        if (path && path[0].tagName === "INPUT") {
+          e.stopPropagation();
+        }
       }
     });
   </script>
