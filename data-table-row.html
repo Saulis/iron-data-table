@@ -62,6 +62,8 @@
       },
 
       properties: {
+        beforeBind: Object,
+        bind: Object,
         header: Boolean,
         expanded: {
           type: Boolean,
@@ -79,6 +81,8 @@
         }
       },
 
+      observers: ['_bindChanged(bind, beforeBind)'],
+
       attached: function() {
         if (this.domHost && this.domHost.tagName === 'IRON-DATA-TABLE') {
           var id = this._static.id++;
@@ -94,6 +98,10 @@
             Polymer.dom(this.domHost).appendChild(this);
           }
         }
+      },
+
+      _bindChanged: function(data, beforeBind) {
+        beforeBind(data, this);
       },
 
       _onTap: function(e) {
