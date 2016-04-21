@@ -25,6 +25,7 @@ limitations under the License.
 <link rel="import" href="data-table-cell.html">
 <link rel="import" href="data-table-row.html">
 <link rel="import" href="data-table-checkbox.html">
+<link rel="import" href="data-table-row-detail.html">
 
 <!--
 `iron-data-table` displays a table or a grid of data.
@@ -188,10 +189,13 @@ inspired styles to your `iron-data-table`.
       <iron-list id="list" as="item" items="[[_cachedItems]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" multi-selection="[[multiSelection]]" selected-item="{{selectedItem}}" on-selected-items-changed="_selectedItemsChanged">
         <template>
           <div class="item" tabindex$="[[tabIndex]]">
-            <data-table-row selected$="[[_isSelected(selected, selectedItems.inverted)]]" even$="[[!_isEven(index)]]">
+            <data-table-row selected$="[[_isSelected(selected, selectedItems.inverted)]]" even$="[[!_isEven(index)]]" row-detail$="[[ _showDetail(rowDetailIndex, index) ]]">
               <data-table-checkbox hidden$="[[!multiSelection]]" checked="[[_isSelected(selected, selectedItems.inverted)]]"></data-table-checkbox>
               <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
-                <data-table-cell column="[[column]]" bind="[[_bind(item, index, selected)]]"></data-table-cell>
+                <data-table-cell column="[[column]]" bind="[[_bind(item, index, selected)]]" on-tap="_handleRowDetail"></data-table-cell>
+              </template>
+              <template is="dom-if" if="[[ _showDetail(rowDetailIndex, index) ]]" on-dom-change="notifyResize">
+                <data-table-row-detail row-detail-template="[[ rowDetail ]]" bind="[[ _bind(item, index, selected) ]]"></data-table-row-detail>
               </template>
             </data-table-row>
           </div>
@@ -386,6 +390,8 @@ inspired styles to your `iron-data-table`.
             this.set('columns', this.getContentChildren('[select=data-table-column]'));
             this.notifyResize();
           }
+
+          this.set('rowDetail', Polymer.dom(this).querySelector('template[is=row-detail]'));
         }.bind(this));
       },
 
@@ -793,6 +799,20 @@ inspired styles to your `iron-data-table`.
 
       _pagesLoadingChanged: function(pagesLoading) {
         this.loading = pagesLoading > 0;
+      },
+
+      _handleRowDetail: function(event) {
+        if (this.rowDetail && !event.model.column.disableDetail && !this.selectionEnabled) {
+          if (event.model.index === this.rowDetailIndex) {
+            this.set('rowDetailIndex', null);
+          } else {
+            this.set('rowDetailIndex', event.model.index);
+          }
+        }
+      },
+
+      _showDetail: function(rowDetailIndex, index) {
+        return rowDetailIndex === index;
       }
     });
   </script>

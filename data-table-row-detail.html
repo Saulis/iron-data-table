@@ -1,0 +1,60 @@
+<dom-module id="data-table-row-detail">
+  <template>
+    <style is="custom-style">
+      :host {
+        padding: 0 24px 0 24px;
+        display: flex;
+        align-items: center;
+        height: 48px;
+      }
+    </style>
+    <content></content>
+  </template>
+  <script>
+    Polymer({
+      is: 'data-table-row-detail',
+
+      properties: {
+        bind: Object,
+
+        rowDetailTemplate: Object,
+
+        _instance: {
+          type: Object,
+          computed: '_computeInstance(rowDetailTemplate)'
+        }
+      },
+
+      behaviors: [
+        Polymer.Templatizer
+      ],
+
+      observers: ['_bindData(_instance, bind)'],
+
+      _computeInstance: function(rowDetailTemplate) {
+        return this._templatize(rowDetailTemplate, this);
+      },
+
+      _bindData: function(instance, data) {
+        instance.bind(data);
+      },
+
+      _templatize: function(template, parentElement) {
+        this.templatize(template);
+        var instance = this.stamp();
+
+        Polymer.dom(parentElement).insertBefore(instance.root, Polymer.dom(parentElement).firstElementChild);
+        Polymer.dom.flush();
+
+        return {
+          bind: function(data) {
+            for (var prop in data) {
+              instance[prop] = data[prop];
+            }
+          }
+        };
+      }
+
+    });
+  </script>
+</dom-module>
