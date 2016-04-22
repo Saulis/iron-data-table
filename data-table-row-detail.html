@@ -21,7 +21,7 @@
 
         _instance: {
           type: Object,
-          computed: '_computeInstance(rowDetailTemplate)'
+          computed: '_templatize(rowDetailTemplate)'
         }
       },
 
@@ -36,19 +36,45 @@
         Polymer.StyleTransformer.dom(this, 'iron-data-table', this._scopeCssViaAttr, true);
       },
 
-      _computeInstance: function(rowDetailTemplate) {
-        return this._templatize(rowDetailTemplate, this);
+       _forwardParentProp: function(prop, value) {
+         if (this._instance) {
+           // TODO: this doesn't work for some reason. Calling this._instance.bind(..) manually from console
+           // works though. Most likely same issue that #8 has.
+           this._instance.bind({prop: value});
+         }
+       },
+
+      _forwardInstancePath: function(inst, path, value) {
+        if (path.indexOf('item') === 0) {
+
+          var row = Polymer.dom(this).parentNode;
+          var table = Polymer.dom(row).parentNode;
+
+          // instance.notifyPath above will call _forwardInstancePath recursively,
+          // so need to debounce to avoid firing the same event multiple times.
+          table.debounce('item-changed', function() {
+            // stripping 'item.' from path.
+            table.fire('item-changed', {item: inst.item, path: path.substring(5), value: value});
+          }.bind(this));
+        }
       },
 
       _bindData: function(instance, data) {
         instance.bind(data);
       },
 
-      _templatize: function(template, parentElement) {
+      _templatize: function(template) {
+        this._instanceProps = {
+          item: true,
+          index: true,
+          selected: true
+        };
+
         this.templatize(template);
+
         var instance = this.stamp();
 
-        Polymer.dom(parentElement).insertBefore(instance.root, Polymer.dom(parentElement).firstElementChild);
+        Polymer.dom(this).appendChild(instance.root);
         Polymer.dom.flush();
 
         return {

@@ -84,9 +84,10 @@
         if (path && path[0].tagName === "INPUT") {
           e.stopPropagation();
         } else {
-          // fire event for customization WIP
+          // TODO: fire event for customization WIP
           // var event = this.fire('iron-data-table-row-tap', this, { bubbles: true });
           this.expandDetails = !this.expandDetails;
+          Polymer.dom(this).parentNode.notifyResize();
         }
       }
     });
