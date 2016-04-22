@@ -10,7 +10,7 @@
         @apply(--iron-data-table-row);
       }
 
-      :host([selected]) {
+      :host([selected]) .cells {
         @apply(--iron-data-table-row-selected);
       }
 
@@ -26,12 +26,12 @@
         @apply(--iron-data-table-row-odd);
       }
 
-      .columns {
+      .cells {
         display: flex;
         flex-direction: row;
       }
     </style>
-    <div class="columns">
+    <div class="cells">
       <content select="data-table-checkbox"></content>
       <content select="data-table-cell"></content>
     </div>
