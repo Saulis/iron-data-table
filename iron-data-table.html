@@ -373,6 +373,22 @@ inspired styles to your `iron-data-table`.
         }
       },
 
+     /**
+      * Fired before row details is expanded/collapsed.
+      *
+      * @event iron-data-table-row-expanding
+      * @param {Object} detail.row the data-table-row element being tapped
+      * @param {Object} detail.target the target element of the original tap event
+      */
+
+      /**
+       * Fired before row is selected/deselected.
+       *
+       * @event iron-data-table-row-selecting
+       * @param {Object} detail.row the data-table-row element being tapped
+       * @param {Object} detail.target the target element of the original tap event
+       */
+
       observers: ['_itemsChanged(items.*)',
         '_sizeChanged(size)',
         '_currentPageChanged(dataSource, _currentPage)',

@@ -85,10 +85,16 @@
         if (path && path[0].tagName === "INPUT") {
           e.stopPropagation();
         } else {
-          // TODO: fire event for customization WIP
-          // var event = this.fire('iron-data-table-row-tap', this, { bubbles: true });
-          if (this.rowDetailTemplate) {
+          //TODO: event should be fired only when template exists
+          var expandEvent = this.fire('iron-data-table-row-expanding', { row: this, target: e.target }, { bubbles: true, cancelable: true });
+          if (this.rowDetailTemplate && !expandEvent.defaultPrevented) {
             this.expandDetails = !this.expandDetails;
+          }
+
+          //TODO: event should be fired only when selection is enabled
+          var selectEvent = this.fire('iron-data-table-row-selecting', { row: this, target: e.target }, { bubbles: true, cancelable: true });
+          if (selectEvent.defaultPrevented) {
+            e.stopPropagation();
           }
         }
       }
