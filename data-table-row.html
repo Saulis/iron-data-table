@@ -33,13 +33,26 @@
       <content select="data-table-cell"></content>
       <content select="template[is=dom-repeat]"></content>
     </div>
-    <content></content>
+    <template is="dom-if" if="[[expandDetails]]">
+      <div class="details">
+        <content select="data-table-row-detail"></content>
+      </div>
+    </template>
   </template>
   <script>
     Polymer({
       is: 'data-table-row',
 
+      listeners: {
+        'tap': '_onTap'
+      },
+
       properties: {
+        expandDetails: {
+          type: Boolean,
+          value: false
+        },
+
         _static: {
           type: Object,
           value: { id: 0 }
@@ -60,6 +73,18 @@
 
             Polymer.dom(this.domHost).appendChild(this);
           }
+        }
+      },
+
+      _onTap: function(e) {
+        var path = Polymer.dom(e).path;
+
+        if (path && path[0].tagName === "INPUT") {
+          e.stopPropagation();
+        } else {
+          // fire event for customization WIP
+          // var event = this.fire('iron-data-table-row-tap', this, { bubbles: true });
+          this.expandDetails = !this.expandDetails;
         }
       }
     });
