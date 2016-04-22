@@ -2,9 +2,11 @@
   <template>
     <style is="custom-style">
       :host {
-        @apply(--layout-vertical);
+        display: flex;
+        flex-direction: column;
         opacity: 1;
         cursor: pointer;
+
         @apply(--iron-data-table-row);
       }
 
@@ -25,7 +27,8 @@
       }
 
       .columns {
-        @apply(--layout-horizontal);
+        display: flex;
+        flex-direction: row;
       }
     </style>
     <div class="columns">
