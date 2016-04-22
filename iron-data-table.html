@@ -189,13 +189,13 @@ inspired styles to your `iron-data-table`.
       <iron-list id="list" as="item" items="[[_cachedItems]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" multi-selection="[[multiSelection]]" selected-item="{{selectedItem}}" on-selected-items-changed="_selectedItemsChanged">
         <template>
           <div class="item" tabindex$="[[tabIndex]]">
-            <data-table-row selected$="[[_isSelected(selected, selectedItems.inverted)]]" even$="[[!_isEven(index)]]">
+            <data-table-row selected$="[[_isSelected(selected, selectedItems.inverted)]]" even$="[[!_isEven(index)]]" row-detail-template="[[rowDetail]]" expand-details="{{item.__expandDetails__}}">
               <data-table-checkbox hidden$="[[!multiSelection]]" checked="[[_isSelected(selected, selectedItems.inverted)]]"></data-table-checkbox>
               <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
                 <data-table-cell column="[[column]]" bind="[[_bind(item, index, selected)]]"></data-table-cell>
               </template>
-              <template is="dom-if" if="[[rowDetail]]">
-                <data-table-row-detail row-detail-template="[[ rowDetail ]]" bind="[[ _bind(item, index, selected) ]]"></data-table-row-detail>
+              <template is="dom-if" if="[[item.__expandDetails__]]" on-dom-change="notifyResize">
+                <data-table-row-detail row-detail-template="[[rowDetail]]" bind="[[_bind(item, index, selected)]]"></data-table-row-detail>
               </template>
             </data-table-row>
           </div>

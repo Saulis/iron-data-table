@@ -35,11 +35,9 @@
       <content select="data-table-checkbox"></content>
       <content select="data-table-cell"></content>
     </div>
-    <template is="dom-if" if="[[expandDetails]]">
-      <div class="details">
-        <content select="data-table-row-detail"></content>
-      </div>
-    </template>
+    <div class="details">
+      <content select="data-table-row-detail"></content>
+    </div>
   </template>
   <script>
     Polymer({
@@ -52,8 +50,11 @@
       properties: {
         expandDetails: {
           type: Boolean,
+          notify: true,
           value: false
         },
+
+        rowDetailTemplate: Object,
 
         _static: {
           type: Object,
@@ -86,8 +87,9 @@
         } else {
           // TODO: fire event for customization WIP
           // var event = this.fire('iron-data-table-row-tap', this, { bubbles: true });
-          this.expandDetails = !this.expandDetails;
-          Polymer.dom(this).parentNode.notifyResize();
+          if (this.rowDetailTemplate) {
+            this.expandDetails = !this.expandDetails;
+          }
         }
       }
     });
