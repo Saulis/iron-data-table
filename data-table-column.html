@@ -182,6 +182,14 @@
         }
       },
 
+      _forwardInstanceProp: function(inst, prop, value) {
+        if (prop === 'selected' && inst.item) {
+          var table = Polymer.dom(this).parentNode;
+
+          table.fire('item-selected-changed', {item: inst.item, value: value});
+        }
+      },
+
       _forwardInstancePath: function(inst, path, value) {
         // prevent propagating column specific values to other columns.
         if (path.indexOf('column') === 0) {
