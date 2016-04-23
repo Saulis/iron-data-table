@@ -17,8 +17,10 @@
         <data-table-column name="First">
           <template>[[item.value]]</template>
         </data-table-column>
-        <data-table-column name="Second" disable-detail>
-          <template>[[item.value2]]</template>
+        <data-table-column name="Second">
+          <template>
+            <div ignore-row-tap>[[ item.value2 ]]</div>
+          </template>
         </data-table-column>
         <template is="row-detail">[[ item.value2 ]]</template>
       </iron-data-table>
@@ -53,9 +55,9 @@
           var rowDetail = firstRow.querySelector('data-table-row-detail');
           expect(rowDetail).to.exist;
           expect(rowDetail.hidden).to.be['false'];
-          var columns = firstRow.querySelector('.columns');
+          var columns = firstRow.querySelector('.cells');
           expect(firstRow.clientHeight).to.equal(columns.clientHeight + rowDetail.clientHeight);
-          expect(firstRow.querySelector('data-table-row').getAttribute('row-detail')).to.exist;
+          expect(firstRow.querySelector('data-table-row').getAttribute('expand-details')).to.exist;
 
           var secondRow = grid.querySelector('#items .item:nth-of-type(2)');
           expect(secondRow.style.transform).to.contain(firstRow.clientHeight + 'px');
@@ -65,12 +67,12 @@
 
       it('should not show row detail when row cell with disableDetail are clicked', function(done) {
         var firstRow = grid.querySelector('#items .item:nth-of-type(1)');
-        firstRow.querySelector('data-table-cell:nth-of-type(2)').click();
+        firstRow.querySelector('data-table-cell:nth-of-type(2) > *').click();
 
         setTimeout(function() {
           var rowDetail = firstRow.querySelector('data-table-row-detail');
           expect(!rowDetail || rowDetail.hidden).to.be['true'];
-          expect(firstRow.querySelector('data-table-row').getAttribute('row-detail')).to.not.exist;
+          expect(firstRow.querySelector('data-table-row').getAttribute('expand-details')).to.not.exist;
           done();
         }, 50);
       });
