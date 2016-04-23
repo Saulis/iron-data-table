@@ -61,6 +61,7 @@
       },
 
       properties: {
+        header: Boolean,
         expandDetails: {
           type: Boolean,
           notify: true,
@@ -95,20 +96,10 @@
       _onTap: function(e) {
         // Prevent item selection if row itself is not focused. This means that
         // an element inside the row has been focused.
-        if (Polymer.dom(document.activeElement) !== Polymer.dom(this)) {
+        if (!this.header && Polymer.dom(document.activeElement) !== Polymer.dom(this)) {
           e.stopPropagation();
-        } else {
-          //TODO: event should be fired only when template exists
-          var expandEvent = this.fire('iron-data-table-row-expanding', { row: this, target: e.target }, { bubbles: true, cancelable: true });
-          if (this.rowDetailTemplate && !expandEvent.defaultPrevented) {
+        } else if (this.rowDetailTemplate) {
             this.expandDetails = !this.expandDetails;
-          }
-
-          //TODO: event should be fired only when selection is enabled
-          var selectEvent = this.fire('iron-data-table-row-selecting', { row: this, target: e.target }, { bubbles: true, cancelable: true });
-          if (selectEvent.defaultPrevented) {
-            e.stopPropagation();
-          }
         }
       }
     });

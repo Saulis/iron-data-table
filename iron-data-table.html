@@ -179,10 +179,10 @@ inspired styles to your `iron-data-table`.
             <data-table-row tabindex$="[[tabIndex]]" selected$="[[_isSelected(selected, selectedItems.inverted)]]" even$="[[!_isEven(index)]]" row-detail-template="[[rowDetail]]" expand-details="{{item.__expandDetails__}}">
               <data-table-checkbox hidden$="[[!multiSelection]]" checked="[[_isSelected(selected, selectedItems.inverted)]]"></data-table-checkbox>
               <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
-                <data-table-cell column="[[column]]" bind="[[_bind(item, index, selected)]]"></data-table-cell>
+                <data-table-cell column="[[column]]" bind="[[_bind(item, index, selected, selectedItems.inverted)]]"></data-table-cell>
               </template>
               <template is="dom-if" if="[[item.__expandDetails__]]" on-dom-change="_updateSizeForItem">
-                <data-table-row-detail row-detail-template="[[rowDetail]]" bind="[[_bind(item, index, selected)]]"></data-table-row-detail>
+                <data-table-row-detail row-detail-template="[[rowDetail]]" bind="[[_bind(item, index, selected, selectedItems.inverted)]]"></data-table-row-detail>
               </template>
             </data-table-row>
           </div>
@@ -422,7 +422,11 @@ inspired styles to your `iron-data-table`.
        * @param {(Object|number)} item The item object or its index
        */
       selectItem: function(item) {
-        this.$.list.selectItem(item);
+        if (this.selectedItems && this.selectedItems.inverted) {
+          this.$.list.deselectItem(item);
+        } else {
+          this.$.list.selectItem(item);
+        }
       },
 
       _isSelected: function(selected, inverted) {
@@ -486,15 +490,19 @@ inspired styles to your `iron-data-table`.
        * @param {(Object|number)} item The item object or its index
        */
       deselectItem: function(item) {
-        this.$.list.deselectItem(item);
+        if (this.selectedItems && this.selectedItems.inverted) {
+          this.$.list.selectItem(item);
+        } else {
+          this.$.list.deselectItem(item);
+        }
       },
 
-      _bind: function(item, index, selected) {
+      _bind: function(item, index, selected, inverted) {
         if (index !== undefined && selected !== undefined) {
           return {
             item: item,
             index: index,
-            selected: selected
+            selected: inverted ? !selected : selected
           };
         } else {
           return {

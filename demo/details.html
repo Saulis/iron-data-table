@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script type="text/javascript" src="../../webcomponentsjs/webcomponents.js"></script>
+  <link rel="import" href="common.html">
+</head>
+
+<body unresolved>
+  <span id="forkongithub"><a href="https://github.com/Saulis/iron-data-table/">Fork me on GitHub</a></span>
+  <div class="vertical-section-container centered">
+    <nav class="vertical-section">
+      <ul class="layout horizontal wrap">
+        <li><a href="index.html">Data Binding</a></li>
+        <li><a href="templates.html">Templating</a></li>
+        <li><b>Row Details</b></li>
+        <li><a href="columns.html">Column Properties</a></li>
+        <li><a href="styling.html">Styling</a></li>
+        <li><a href="filtering.html">Filtering and Sorting</a></li>
+      </ul>
+    </nav>
+
+    <h3>Row Details</h3>
+    <demo-snippet>
+      <template>
+        <template is="dom-bind">
+          <style>
+            #grid1 data-table-row-detail {
+              height: 100px;
+            }
+
+            #grid1 .detail {
+              width: 100%;
+              display: flex;
+              justify-content: space-around;
+              align-items: center;
+              border: 2px solid #aaa;
+            }
+          </style>
+          <iron-ajax url="users.json" last-response="{{users}}" auto></iron-ajax>
+          <iron-data-table id="grid1" items="[[users.results]]">
+            <template is="row-detail">
+              <div class="detail">
+                <img src="[[item.user.picture.medium]]" />
+                <p>[[item.user.username]]</p>
+                <p>[[item.user.email]]</p>
+              </div>
+            </template>
+            <data-table-column name="First Name">
+              <template>[[item.user.name.first]]</template>
+            </data-table-column>
+            <data-table-column name="Last Name">
+              <template>[[item.user.name.last]]</template>
+            </data-table-column>
+          </iron-data-table>
+        </template>
+      </template>
+    </demo-snippet>
+
+    <h3>Using Selection and Row Details Simultaneously</h3>
+    <demo-snippet>
+      <template>
+        <template is="dom-bind">
+          <style>
+            iron-data-table data-table-row-detail {
+              height: 100px;
+            }
+
+            iron-data-table data-table-row-detail .detail {
+              width: 100%;
+              display: flex;
+              justify-content: space-around;
+              align-items: center;
+              border: 2px solid #aaa;
+            }
+          </style>
+          <iron-ajax url="users.json" last-response="{{users}}" auto></iron-ajax>
+          <iron-data-table id="grid2" items="[[users.results]]">
+            <template is="row-detail">
+              <div class="detail">
+                <img src="[[item.user.picture.medium]]" />
+                <p>[[item.user.username]]</p>
+                <p>[[item.user.email]]</p>
+              </div>
+            </template>
+            <data-table-column name="Selected" flex="0" width="30px">
+              <template>
+                <paper-checkbox checked="{{selected}}"></paper-checkbox>
+              </template>
+            </data-table-column>
+            <data-table-column name="First Name">
+              <template>[[item.user.name.first]]</template>
+            </data-table-column>
+            <data-table-column name="Last Name">
+              <template>[[item.user.name.last]]</template>
+            </data-table-column>
+          </iron-data-table>
+        </template>
+      </template>
+    </demo-snippet>
+  </div>
+</body>
+
+</html>
