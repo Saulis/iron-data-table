@@ -8,17 +8,36 @@
   <script src="../../test-fixture/test-fixture-mocha.js"></script>
   <link rel="import" href="../../iron-test-helpers/iron-test-helpers.html">
   <link rel="import" href="../iron-data-table.html">
+  <link rel="import" href="../../paper-checkbox/paper-checkbox.html">
 </head>
 
 <body>
   <test-fixture id="grid">
     <template>
-      <iron-data-table>
+      <iron-data-table details-enabled>
         <data-table-column name="First">
           <template>[[item.value]]</template>
         </data-table-column>
-        <data-table-column name="Second" disable-detail>
-          <template>[[item.value2]]</template>
+        <data-table-column name="Second">
+          <template>
+            <a href="#">[[ item.value2 ]]</a>
+          </template>
+        </data-table-column>
+        <template is="row-detail">[[ item.value2 ]]</template>
+      </iron-data-table>
+    </template>
+  </test-fixture>
+
+  <test-fixture id="grid2">
+    <template>
+      <iron-data-table>
+        <data-table-column>
+          <template>
+            <paper-checkbox checked="{{ expanded }}">Expand</paper-checkbox>
+          </template>
+        </data-table-column>
+        <data-table-column name="First">
+          <template>[[ item.value1 ]]</template>
         </data-table-column>
         <template is="row-detail">[[ item.value2 ]]</template>
       </iron-data-table>
@@ -27,52 +46,113 @@
 
   <script>
     describe('Row Detail', function() {
-      var grid;
-      beforeEach(function(done) {
-        grid = fixture('grid');
-        Polymer.dom.flush();
-        grid.items = [{
-          value: 'foo',
-          value2: 'fooz'
-        }, {
-          value: 'bar',
-          value2: 'bah'
-        }, {
-          value: 'qux',
-          value2: 'baz'
-        }];
 
-        Polymer.Base.async(done, 200);
+      describe('using details-enabled property', function() {
+
+        var grid;
+        beforeEach(function(done) {
+          grid = fixture('grid');
+          Polymer.dom.flush();
+          grid.items = [{
+            value: 'foo',
+            value2: 'fooz'
+          }, {
+            value: 'bar',
+            value2: 'bah'
+          }, {
+            value: 'qux',
+            value2: 'baz'
+          }];
+
+          Polymer.Base.async(done, 200);
+        });
+
+        it('should show row detail when row is clicked', function(done) {
+          var firstRow = grid.querySelector('#items .item data-table-row');
+          firstRow.focus();
+          firstRow.click();
+
+          setTimeout(function() {
+            var rowDetail = firstRow.querySelector('data-table-row-detail');
+            expect(rowDetail).to.exist;
+            expect(rowDetail.hidden).to.be['false'];
+            var columns = firstRow.querySelector('.cells');
+            expect(firstRow.clientHeight).to.equal(columns.clientHeight + rowDetail.clientHeight);
+            expect(firstRow.getAttribute('expanded')).to.exist;
+
+            var secondRow = grid.querySelector('#items .item:nth-of-type(2)');
+            expect(secondRow.style.transform).to.contain(firstRow.clientHeight + 'px');
+            done();
+          }, 50);
+        });
+
+        it('should not show row detail when row cell with a focusable element is clicked', function(done) {
+          var firstRow = grid.querySelector('#items .item data-table-row');
+          var focusableElement = firstRow.querySelector('data-table-cell:nth-of-type(2) > a');
+          focusableElement.focus();
+          focusableElement.click();
+
+          setTimeout(function() {
+            var rowDetail = firstRow.querySelector('data-table-row-detail');
+            expect(!rowDetail || rowDetail.hidden).to.be['true'];
+            expect(firstRow.getAttribute('expanded')).to.not.exist;
+            done();
+          }, 50);
+        });
       });
 
-      it('should show row detail when row cells are clicked', function(done) {
-        var firstRow = grid.querySelector('#items .item:nth-of-type(1)');
-        firstRow.querySelector('data-table-cell').click();
+      describe('using expanded property in column template model', function() {
 
-        setTimeout(function() {
-          var rowDetail = firstRow.querySelector('data-table-row-detail');
-          expect(rowDetail).to.exist;
-          expect(rowDetail.hidden).to.be['false'];
-          var columns = firstRow.querySelector('.columns');
-          expect(firstRow.clientHeight).to.equal(columns.clientHeight + rowDetail.clientHeight);
-          expect(firstRow.querySelector('data-table-row').getAttribute('row-detail')).to.exist;
+        var grid;
+        beforeEach(function(done) {
+          grid = fixture('grid2');
+          Polymer.dom.flush();
+          grid.items = [{
+            value: 'foo',
+            value2: 'fooz'
+          }, {
+            value: 'bar',
+            value2: 'bah'
+          }, {
+            value: 'qux',
+            value2: 'baz'
+          }];
 
-          var secondRow = grid.querySelector('#items .item:nth-of-type(2)');
-          expect(secondRow.style.transform).to.contain(firstRow.clientHeight + 'px');
-          done();
-        }, 50);
-      });
+          Polymer.Base.async(done, 200);
+        });
 
-      it('should not show row detail when row cell with disableDetail are clicked', function(done) {
-        var firstRow = grid.querySelector('#items .item:nth-of-type(1)');
-        firstRow.querySelector('data-table-cell:nth-of-type(2)').click();
+        it('should not show row detail when row is clicked', function(done) {
+          var firstRow = grid.querySelector('#items .item data-table-row');
+          firstRow.focus();
+          firstRow.click();
 
-        setTimeout(function() {
-          var rowDetail = firstRow.querySelector('data-table-row-detail');
-          expect(!rowDetail || rowDetail.hidden).to.be['true'];
-          expect(firstRow.querySelector('data-table-row').getAttribute('row-detail')).to.not.exist;
-          done();
-        }, 50);
+          setTimeout(function() {
+            var rowDetail = firstRow.querySelector('data-table-row-detail');
+            expect(!rowDetail || rowDetail.hidden).to.be['true'];
+            expect(firstRow.getAttribute('expanded')).to.not.exist;
+            done();
+          }, 50);
+        });
+
+        it('should show row detail when row cell with expanded property bound is activated', function(done) {
+          var firstRow = grid.querySelector('#items .item data-table-row');
+          var focusableElement = firstRow.querySelector('data-table-cell:nth-of-type(1) > paper-checkbox');
+          focusableElement.focus();
+          focusableElement.click();
+
+          setTimeout(function() {
+            var rowDetail = firstRow.querySelector('data-table-row-detail');
+            expect(rowDetail).to.exist;
+            expect(rowDetail.hidden).to.be['false'];
+            var columns = firstRow.querySelector('.cells');
+            expect(firstRow.clientHeight).to.equal(columns.clientHeight + rowDetail.clientHeight);
+            expect(firstRow.getAttribute('expanded')).to.exist;
+
+            var secondRow = grid.querySelector('#items .item:nth-of-type(2)');
+            expect(secondRow.style.transform).to.contain(firstRow.clientHeight + 'px');
+            done();
+          }, 50);
+        });
       });
     });
   </script>
