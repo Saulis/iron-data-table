@@ -26,6 +26,19 @@
         @apply(--iron-data-table-row-odd);
       }
 
+      :host(:focus) {
+        outline: none;
+        @apply(--iron-data-table-row-focused);
+      }
+
+      :host(:focus):after {
+        @apply(--iron-data-table-row-focused-after);
+      }
+
+      :host:after {
+        @apply(--iron-data-table-row-after);
+      }
+
       .cells {
         display: flex;
         flex-direction: row;
@@ -80,9 +93,9 @@
       },
 
       _onTap: function(e) {
-        var path = Polymer.dom(e).path;
-
-        if (path && path[0].tagName === "INPUT") {
+        // Prevent item selection if row itself is not focused. This means that
+        // an element inside the row has been focused.
+        if (Polymer.dom(document.activeElement) !== Polymer.dom(this)) {
           e.stopPropagation();
         } else {
           //TODO: event should be fired only when template exists
