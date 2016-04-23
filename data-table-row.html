@@ -51,7 +51,8 @@
         expandDetails: {
           type: Boolean,
           notify: true,
-          value: false
+          value: false,
+          reflectToAttribute: true
         },
 
         rowDetailTemplate: Object,
@@ -82,20 +83,33 @@
       _onTap: function(e) {
         var path = Polymer.dom(e).path;
 
-        if (path && path[0].tagName === "INPUT") {
-          e.stopPropagation();
-        } else {
-          //TODO: event should be fired only when template exists
-          var expandEvent = this.fire('iron-data-table-row-expanding', { row: this, target: e.target }, { bubbles: true, cancelable: true });
-          if (this.rowDetailTemplate && !expandEvent.defaultPrevented) {
-            this.expandDetails = !this.expandDetails;
-          }
-
-          //TODO: event should be fired only when selection is enabled
-          var selectEvent = this.fire('iron-data-table-row-selecting', { row: this, target: e.target }, { bubbles: true, cancelable: true });
-          if (selectEvent.defaultPrevented) {
+        if (path) {
+          if (path[0].tagName === 'INPUT') {
             e.stopPropagation();
+            return;
           }
+          var i;
+          for (i = 0; i < path.length; i++) {
+            if (path[i] === this) {
+              break;
+            }
+            if (path[i].getAttribute && path[i].getAttribute('ignore-row-tap') !== null) {
+              e.stopPropagation();
+              return;
+            }
+          }
+        }
+
+        //TODO: event should be fired only when template exists
+        var expandEvent = this.fire('iron-data-table-row-expanding', { row: this, target: e.target }, { bubbles: true, cancelable: true });
+        if (this.rowDetailTemplate && !expandEvent.defaultPrevented) {
+          this.expandDetails = !this.expandDetails;
+        }
+
+        //TODO: event should be fired only when selection is enabled
+        var selectEvent = this.fire('iron-data-table-row-selecting', { row: this, target: e.target }, { bubbles: true, cancelable: true });
+        if (selectEvent.defaultPrevented) {
+          e.stopPropagation();
         }
       }
     });
