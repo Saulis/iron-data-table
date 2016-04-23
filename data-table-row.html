@@ -62,10 +62,11 @@
 
       properties: {
         header: Boolean,
-        expandDetails: {
+        expanded: {
           type: Boolean,
           notify: true,
-          value: false
+          value: false,
+          reflectToAttribute: true
         },
 
         rowDetailTemplate: Object,
@@ -99,7 +100,7 @@
         if (!this.header && Polymer.dom(document.activeElement) !== Polymer.dom(this)) {
           e.stopPropagation();
         } else if (this.rowDetailTemplate && this.detailsEnabled) {
-            this.expandDetails = !this.expandDetails;
+            this.expanded = !this.expanded;
         }
       }
     });
