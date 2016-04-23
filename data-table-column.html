@@ -168,7 +168,8 @@
         if (prop.indexOf('item') === -1 &&
             prop.indexOf('selected') === -1 &&
             prop.indexOf('index') === -1 &&
-            prop.indexOf('column') === -1) {
+            prop.indexOf('column') === -1 &&
+            prop.indexOf('expanded') === -1) {
           this.set('_forwardedParentProps.' + prop, value);
         }
       },
@@ -179,6 +180,14 @@
           this._templateInstances.forEach(function(t) {
             t[prop] = changeRecord.base[prop];
           });
+        }
+      },
+
+      _forwardInstanceProp: function(inst, prop, value) {
+        if (prop === 'expanded' && inst.item && inst.item.__expanded !== value) {
+          var table = Polymer.dom(this).parentNode;
+
+          table.fire('item-expanded', {item: inst.item, value: value});
         }
       },
 
@@ -233,7 +242,8 @@
           item: true,
           index: true,
           selected: true,
-          column: true
+          column: true,
+          expanded: true
         };
 
         this.templatize(this.headerTemplate);

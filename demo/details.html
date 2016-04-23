@@ -38,7 +38,7 @@
             }
           </style>
           <iron-ajax url="users.json" last-response="{{users}}" auto></iron-ajax>
-          <iron-data-table id="grid1" items="[[users.results]]">
+          <iron-data-table id="grid1" details-enabled items="[[users.results]]">
             <template is="row-detail">
               <div class="detail">
                 <img src="[[item.user.picture.medium]]" />
@@ -57,7 +57,7 @@
       </template>
     </demo-snippet>
 
-    <h3>Using Selection and Row Details Simultaneously</h3>
+    <h3>Custom Expand Toggle</h3>
     <demo-snippet>
       <template>
         <template is="dom-bind">
@@ -75,7 +75,7 @@
             }
           </style>
           <iron-ajax url="users.json" last-response="{{users}}" auto></iron-ajax>
-          <iron-data-table id="grid2" items="[[users.results]]">
+          <iron-data-table id="grid2" multi-selection selection-enabled items="[[users.results]]">
             <template is="row-detail">
               <div class="detail">
                 <img src="[[item.user.picture.medium]]" />
@@ -83,16 +83,16 @@
                 <p>[[item.user.email]]</p>
               </div>
             </template>
-            <data-table-column name="Selected" flex="0" width="30px">
-              <template>
-                <paper-checkbox checked="{{selected}}"></paper-checkbox>
-              </template>
-            </data-table-column>
             <data-table-column name="First Name">
               <template>[[item.user.name.first]]</template>
             </data-table-column>
             <data-table-column name="Last Name">
               <template>[[item.user.name.last]]</template>
+            </data-table-column>
+            <data-table-column name="" flex="1" width="50px" align-right>
+              <template>
+                <paper-checkbox checked="{{expanded}}">Details</paper-checkbox>
+              </template>
             </data-table-column>
           </iron-data-table>
         </template>

@@ -98,7 +98,7 @@
         // an element inside the row has been focused.
         if (!this.header && Polymer.dom(document.activeElement) !== Polymer.dom(this)) {
           e.stopPropagation();
-        } else if (this.rowDetailTemplate) {
+        } else if (this.rowDetailTemplate && this.detailsEnabled) {
             this.expandDetails = !this.expandDetails;
         }
       }
