@@ -177,13 +177,13 @@ inspired styles to your `iron-data-table`.
       <iron-list id="list" as="item" items="[[_cachedItems]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" multi-selection="[[multiSelection]]" selected-item="{{selectedItem}}" on-selected-items-changed="_selectedItemsChanged">
         <template>
           <div class="item">
-            <data-table-row tabindex$="[[tabIndex]]" selected$="[[_isSelected(selected, selectedItems.inverted)]]" even$="[[!_isEven(index)]]" row-detail-template="[[rowDetail]]" details-enabled="[[detailsEnabled]]" expanded="{{item.__expanded__}}">
+            <data-table-row tabindex$="[[tabIndex]]" selected$="[[_isSelected(selected, selectedItems.inverted)]]" even$="[[!_isEven(index)]]" row-detail-template="[[rowDetail]]" details-enabled="[[detailsEnabled]]" on-expanded-changed="_itemExpanded">
               <data-table-checkbox hidden$="[[!multiSelection]]" checked="[[_isSelected(selected, selectedItems.inverted)]]"></data-table-checkbox>
               <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
-                <data-table-cell column="[[column]]" bind="[[_bind(item, index, selected, selectedItems.inverted)]]"></data-table-cell>
+                <data-table-cell column="[[column]]" bind="[[_bind(item, index, selected, selectedItems.inverted, _expandedItems)]]"></data-table-cell>
               </template>
-              <template is="dom-if" if="[[item.__expanded__]]" on-dom-change="_updateSizeForItem">
-                <data-table-row-detail row-detail-template="[[rowDetail]]" bind="[[_bind(item, index, selected, selectedItems.inverted)]]"></data-table-row-detail>
+              <template is="dom-if" if="[[_isExpanded(item, _expandedItems)]]" on-dom-change="_updateSizeForItem">
+                <data-table-row-detail row-detail-template="[[rowDetail]]" bind="[[_bind(item, index, selected, selectedItems.inverted, _expandedItems)]]"></data-table-row-detail>
               </template>
             </data-table-row>
           </div>
@@ -367,6 +367,13 @@ inspired styles to your `iron-data-table`.
         _currentPage: {
           type: Number,
           value: 0
+        },
+
+        _expandedItems: {
+          type: Array,
+          value: function() {
+            return [];
+          }
         }
       },
 
@@ -507,13 +514,15 @@ inspired styles to your `iron-data-table`.
         }
       },
 
-      _bind: function(item, index, selected, inverted) {
+      _bind: function(item, index, selected, inverted, expandedItems) {
         if (index !== undefined && selected !== undefined) {
           return {
             item: item,
             index: index,
             selected: inverted ? !selected : selected,
-            expanded: item.__expanded__
+            // store expanded twice to detect changes coming from inside the template.
+            __expanded__: this._isExpanded(item, expandedItems),
+            expanded: this._isExpanded(item, expandedItems)
           };
         } else {
           return {
@@ -722,13 +731,12 @@ inspired styles to your `iron-data-table`.
       },
 
       _itemExpanded: function(e) {
-        if (this.items) {
-          var index = this.items.indexOf(e.detail.item);
-          if (index >= 0) {
-            //TODO: this will also fire 'items-changed' which is not optimal because
-            // items haven't really changed from the users perspective.
-            this.set('items.' + index + '.__expanded__', e.detail.value);
-          }
+        var item = e.detail.item || e.model.item;
+
+        if (!this._isExpanded(item, this._expandedItems)) {
+          this.expandItem(item);
+        } else {
+          this.collapseItem(item);
         }
       },
 
@@ -843,6 +851,35 @@ inspired styles to your `iron-data-table`.
           // so this is more reliable.
           this.$.list.updateSizeForItem(event.model.get('item'));
         }
+      },
+
+      /**
+       * Expands the row details for this item, if available.
+       */
+      expandItem: function(item) {
+        if (this.rowDetail && this._expandedItems && !this._isExpanded(item, this._expandedItems)) {
+
+          // replacing the whole array here to simplify the obsevers.
+          this._expandedItems.push(item);
+          this._expandedItems = this._expandedItems.slice(0);
+        }
+      },
+
+      /**
+       * Collapses the row details for this item, if expanded.
+       */
+      collapseItem: function(item) {
+        if (this.rowDetail && this._expandedItems && this._isExpanded(item, this._expandedItems)) {
+          var index = this._expandedItems.indexOf(item);
+
+          // replacing the whole array here to simplify the obsevers.
+          this._expandedItems.splice(index, 1);
+          this._expandedItems = this._expandedItems.slice(0);
+        }
+      },
+
+      _isExpanded: function(item, items) {
+        return items && items.indexOf(item) > -1;
       }
     });
   </script>

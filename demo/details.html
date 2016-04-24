@@ -98,6 +98,53 @@
         </template>
       </template>
     </demo-snippet>
+
+    <h3>Styling Expand Indicator</h3>
+    <demo-snippet>
+      <template>
+        <template is="dom-bind">
+          <style>
+            iron-data-table data-table-row-detail {
+              height: 100px;
+            }
+
+            iron-data-table data-table-row-detail .detail {
+              width: 100%;
+              display: flex;
+              justify-content: space-around;
+              align-items: center;
+              border: 2px solid #aaa;
+            }
+          </style>
+          <iron-ajax url="users.json" last-response="{{users}}" auto></iron-ajax>
+          <iron-data-table id="grid2" details-enabled items="[[users.results]]">
+            <template is="row-detail">
+              <div class="detail">
+                <img src="[[item.user.picture.medium]]" />
+                <p>[[item.user.username]]</p>
+                <p>[[item.user.email]]</p>
+              </div>
+            </template>
+            <data-table-column name="First Name">
+              <template>[[item.user.name.first]]</template>
+            </data-table-column>
+            <data-table-column name="Last Name">
+              <template>[[item.user.name.last]]</template>
+            </data-table-column>
+            <data-table-column name="" width="20px" align-right flex="0">
+              <template>
+                <template is="dom-if" if="[[!expanded]]">
+                  <iron-icon icon="icons:expand-more"></iron-icon>
+                </template>
+                <template is="dom-if" if="[[expanded]]">
+                  <iron-icon icon="icons:expand-less"></iron-icon>
+                </template>
+              </template>
+            </data-table-column>
+          </iron-data-table>
+        </template>
+      </template>
+    </demo-snippet>
   </div>
 </body>
 
