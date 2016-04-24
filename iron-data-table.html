@@ -506,12 +506,12 @@ inspired styles to your `iron-data-table`.
         return Array.prototype.filter.call(items, function(item, index) {
           for (var i = 0; i < filter.length; i++) {
             var value = this.get(filter[i].path, item);
-
-            if (!value || value.toString().toLowerCase().indexOf(filter[i].filter.toString().toLowerCase()) === -1) {
+            if (!filter[i].filter) {
+              continue;
+            } else if (!value || value.toString().toLowerCase().indexOf(filter[i].filter.toString().toLowerCase()) === -1) {
               return false;
             }
           }
-
           return true;
         }.bind(this));
       },
