@@ -177,7 +177,7 @@ inspired styles to your `iron-data-table`.
       <iron-list id="list" as="item" items="[[_cachedItems]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" multi-selection="[[multiSelection]]" selected-item="{{selectedItem}}" on-selected-items-changed="_selectedItemsChanged">
         <template>
           <div class="item">
-            <data-table-row tabindex$="[[tabIndex]]" selected$="[[_isSelected(selected, selectedItems.inverted)]]" even$="[[!_isEven(index)]]" row-detail-template="[[rowDetail]]" details-enabled="[[detailsEnabled]]" on-expanded-changed="_itemExpanded">
+            <data-table-row tabindex$="[[tabIndex]]" selected$="[[_isSelected(selected, selectedItems.inverted)]]" even$="[[!_isEven(index)]]" row-detail-template="[[rowDetail]]" details-enabled="[[detailsEnabled]]" expanded="[[_isExpanded(item, _expandedItems)]]" on-item-expanded="_itemExpanded" on-item-collapsed="_itemCollapsed">
               <data-table-checkbox hidden$="[[!multiSelection]]" checked="[[_isSelected(selected, selectedItems.inverted)]]"></data-table-checkbox>
               <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
                 <data-table-cell column="[[column]]" bind="[[_bind(item, index, selected, selectedItems.inverted, _expandedItems)]]"></data-table-cell>
@@ -207,6 +207,7 @@ inspired styles to your `iron-data-table`.
         'iron-resize': '_resizeCellContainers',
         'item-changed': '_itemChanged',
         'item-expanded': '_itemExpanded',
+        'item-collapsed': '_itemCollapsed',
         'scroll': '_onHorizontalScroll'
       },
 
@@ -733,11 +734,13 @@ inspired styles to your `iron-data-table`.
       _itemExpanded: function(e) {
         var item = e.detail.item || e.model.item;
 
-        if (!this._isExpanded(item, this._expandedItems)) {
-          this.expandItem(item);
-        } else {
-          this.collapseItem(item);
-        }
+        this.expandItem(item);
+      },
+
+      _itemCollapsed: function(e) {
+        var item = e.detail.item || e.model.item;
+
+        this.collapseItem(item);
       },
 
       _currentPageChanged: function(dataSource, page) {

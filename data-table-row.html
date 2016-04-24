@@ -65,9 +65,10 @@
         header: Boolean,
         expanded: {
           type: Boolean,
-          notify: true,
+          notify: false,
           value: false,
-          reflectToAttribute: true
+          reflectToAttribute: true,
+          observer: '_expandedChanged'
         },
 
         rowDetailTemplate: Object,
@@ -102,6 +103,14 @@
           e.stopPropagation();
         } else if (this.rowDetailTemplate && this.detailsEnabled) {
             this.expanded = !this.expanded;
+        }
+      },
+
+      _expandedChanged: function(expanded) {
+        if (expanded) {
+          this.fire('item-expanded');
+        } else {
+          this.fire('item-collapsed');
         }
       }
     });
