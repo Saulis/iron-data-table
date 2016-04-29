@@ -11,7 +11,7 @@
   </style>
 
   <template>
-    <paper-input label="[[label]]" value="{{value}}" hidden=[[hidden]]></paper-input>
+    <paper-input label="[[label]]" value="[[value]]" on-value-changed="_valueChanged" hidden=[[hidden]]></paper-input>
   </template>
   <script>
     Polymer({
@@ -24,6 +24,12 @@
           notify: true
         },
         hidden: Boolean
+      },
+
+      _valueChanged: function(e) {
+        this.debounce('value', function() {
+          this.value = e.detail.value;
+        }.bind(this), 250);
       }
     });
   </script>
