@@ -43,7 +43,14 @@
          }
        },
 
-       // TODO: forwardInstanceProp to enable two-way binding selected
+       _forwardInstanceProp: function(inst, prop, value) {
+         if (prop === 'expanded' && inst.item && inst.__expanded__ !== value) {
+           var row = Polymer.dom(this).parentNode;
+           var table = Polymer.dom(row).parentNode;
+
+           table.fire(value ? 'item-expanded' : 'item-collapsed', {item: inst.item});
+         }
+       },
 
       _forwardInstancePath: function(inst, path, value) {
         if (path.indexOf('item') === 0) {

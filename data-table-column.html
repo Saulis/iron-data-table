@@ -187,7 +187,7 @@
         if (prop === 'expanded' && inst.item && inst.__expanded__ !== value) {
           var table = Polymer.dom(this).parentNode;
 
-          table.fire('item-expanded', {item: inst.item, value: value});
+          table.fire(value ? 'item-expanded' : 'item-collapsed', {item: inst.item});
         }
       },
 
