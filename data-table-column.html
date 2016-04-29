@@ -37,18 +37,13 @@
          * Path to a property that will be filtered by this column. If set, a filter input
          * will be automaticelly placed on the header cell of the column.
          */
-        filterBy: {
-          type: String
-        },
+        filterBy: String,
 
         /**
          * Filter value that will be used to filter the items using the property defined
          * in `filterBy` property.
          */
-        filterValue: {
-          type: String,
-          notify: true
-        },
+        filterValue: String,
 
         /**
          * Minimum width of the column
@@ -158,8 +153,13 @@
       },
 
       observers: ['_forwardedParentPropsChanged(_forwardedParentProps.*)',
-        '_templateInstancesChanged(_templateInstances.splices)'
+        '_templateInstancesChanged(_templateInstances.splices)',
+        '_filterValueChanged(filterValue, filterBy)'
       ],
+
+      _filterValueChanged: function(filterValue, filterBy) {
+        this.fire('column-filter-changed', {value: filterValue, filterBy: filterBy});
+      },
 
       _forwardParentProp: function(prop, value) {
         //TODO: Bug in Templatizer forwards also [[item]] etc. instance properties

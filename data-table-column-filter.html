@@ -11,7 +11,7 @@
   </style>
 
   <template>
-    <paper-input label="[[label]]" value="{{value}}" hidden=[[hidden]]></paper-input>
+    <paper-input label="[[label]]" value="[[value]]" on-value-changed="_valueChanged" hidden=[[hidden]]></paper-input>
   </template>
   <script>
     Polymer({
@@ -24,6 +24,15 @@
           notify: true
         },
         hidden: Boolean
+      },
+
+      _valueChanged: function(e) {
+        // store value in a variable, referring to e.detail.value inside the debounce
+        // function results in weird outcomes. event object might be reused by Polymer?
+        var value = e.detail.value;
+        this.debounce('value', function() {
+          this.value = value;
+        }.bind(this), 250);
       }
     });
   </script>
