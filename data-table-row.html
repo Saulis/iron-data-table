@@ -3,13 +3,14 @@
     <style is="custom-style">
       :host {
         display: flex;
-        justify-content: space-between;
+        flex-direction: column;
         opacity: 1;
         cursor: pointer;
+
         @apply(--iron-data-table-row);
       }
 
-      :host([selected]) {
+      :host([selected]) .cells {
         @apply(--iron-data-table-row-selected);
       }
 
@@ -24,14 +25,54 @@
       :host(:not([header]):not([even])) {
         @apply(--iron-data-table-row-odd);
       }
+
+      :host(:focus) {
+        outline: none;
+        @apply(--iron-data-table-row-focused);
+      }
+
+      :host(:focus):after {
+        @apply(--iron-data-table-row-focused-after);
+      }
+
+      :host:after {
+        @apply(--iron-data-table-row-after);
+      }
+
+      .cells {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+      }
     </style>
-    <content></content>
+    <div class="cells">
+      <content select="data-table-checkbox"></content>
+      <content select="data-table-cell"></content>
+    </div>
+    <div class="details">
+      <content select="data-table-row-detail"></content>
+    </div>
   </template>
   <script>
     Polymer({
       is: 'data-table-row',
 
+      listeners: {
+        'tap': '_onTap'
+      },
+
       properties: {
+        header: Boolean,
+        expanded: {
+          type: Boolean,
+          notify: false,
+          value: false,
+          reflectToAttribute: true,
+          observer: '_expandedChanged'
+        },
+
+        rowDetailTemplate: Object,
+
         _static: {
           type: Object,
           value: { id: 0 }
@@ -52,6 +93,24 @@
 
             Polymer.dom(this.domHost).appendChild(this);
           }
+        }
+      },
+
+      _onTap: function(e) {
+        // Prevent item selection if row itself is not focused. This means that
+        // an element inside the row has been focused.
+        if (!this.header && Polymer.dom(document.activeElement) !== Polymer.dom(this)) {
+          e.stopPropagation();
+        } else if (this.rowDetailTemplate && this.detailsEnabled) {
+            this.expanded = !this.expanded;
+        }
+      },
+
+      _expandedChanged: function(expanded) {
+        if (expanded) {
+          this.fire('item-expanded');
+        } else {
+          this.fire('item-collapsed');
         }
       }
     });

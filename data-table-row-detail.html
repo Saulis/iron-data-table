@@ -1,0 +1,93 @@
+<dom-module id="data-table-row-detail">
+  <template>
+    <style is="custom-style">
+      :host {
+        padding: 0 24px 0 24px;
+        display: flex;
+        align-items: center;
+      }
+    </style>
+    <content></content>
+  </template>
+  <script>
+    Polymer({
+      is: 'data-table-row-detail',
+
+      properties: {
+        bind: Object,
+
+        rowDetailTemplate: Object,
+
+        _instance: {
+          type: Object,
+          computed: '_templatize(rowDetailTemplate)'
+        }
+      },
+
+      behaviors: [
+        Polymer.Templatizer
+      ],
+
+      observers: ['_bindData(_instance, bind)'],
+
+      ready: function() {
+        // cell is supposed to be placed outside the local dom of iron-data-table.
+        Polymer.StyleTransformer.dom(this, 'iron-data-table', this._scopeCssViaAttr, true);
+      },
+
+       _forwardParentProp: function(prop, value) {
+         if (this._instance) {
+           // TODO: this doesn't work for some reason. Calling this._instance.bind(..) manually from console
+           // works though. Most likely same issue that #8 has.
+           this._instance.bind({prop: value});
+         }
+       },
+
+       // TODO: forwardInstanceProp to enable two-way binding selected
+
+      _forwardInstancePath: function(inst, path, value) {
+        if (path.indexOf('item') === 0) {
+
+          var row = Polymer.dom(this).parentNode;
+          var table = Polymer.dom(row).parentNode;
+
+          // instance.notifyPath above will call _forwardInstancePath recursively,
+          // so need to debounce to avoid firing the same event multiple times.
+          table.debounce('item-changed', function() {
+            // stripping 'item.' from path.
+            table.fire('item-changed', {item: inst.item, path: path.substring(5), value: value});
+          }.bind(this));
+        }
+      },
+
+      _bindData: function(instance, data) {
+        instance.bind(data);
+      },
+
+      _templatize: function(template) {
+        this._instanceProps = {
+          item: true,
+          index: true,
+          selected: true,
+          expanded: true
+        };
+
+        this.templatize(template);
+
+        var instance = this.stamp();
+
+        Polymer.dom(this).appendChild(instance.root);
+        Polymer.dom.flush();
+
+        return {
+          bind: function(data) {
+            for (var prop in data) {
+              instance[prop] = data[prop];
+            }
+          }
+        };
+      }
+
+    });
+  </script>
+</dom-module>
