@@ -586,7 +586,8 @@ inspired styles to your `iron-data-table`.
           };
         };
 
-        return Array.prototype.sort.call(items, multiSort(sortOrder).bind(this));
+        // make sure a copy is used so that original array is unaffected.
+        return Array.prototype.sort.call(items.slice(0), multiSort(sortOrder).bind(this));
       },
 
       _sortDirectionChanged: function(e) {
