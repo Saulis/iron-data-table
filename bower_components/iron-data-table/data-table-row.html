@@ -107,7 +107,8 @@
       _onTap: function(e) {
         // Prevent item selection if row itself is not focused. This means that
         // an element inside the row has been focused.
-        if (!this.header && Polymer.dom(document.activeElement) !== Polymer.dom(this)) {
+        // Mobile devices don't move focus from body unless it's an input element that is focused, so this element will never get focused.
+        if (!this.header && document.activeElement !== document.body && Polymer.dom(document.activeElement) !== Polymer.dom(this)) {
           e.stopPropagation();
         } else if (this.rowDetailTemplate && this.detailsEnabled) {
             this.expanded = !this.expanded;

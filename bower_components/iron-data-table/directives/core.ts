@@ -1,4 +1,4 @@
-import {Directive, ElementRef, TemplateRef, ViewContainerRef, Output, HostListener, EventEmitter} from 'angular2/core';
+import {Directive, ElementRef, TemplateRef, ViewContainerRef, Output, HostListener, EventEmitter} from '@angular/core';
 
 @Directive({ selector: 'iron-data-table' })
 export class IronDataTable {

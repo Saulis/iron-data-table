@@ -58,13 +58,14 @@
   "resolutions": {
     "iron-list": "^1.1.0"
   },
-  "_release": "4ee8f4d",
+  "_release": "aff6bdd77c",
   "_resolution": {
-    "type": "commit",
-    "commit": "4ee8f4d"
+    "type": "branch",
+    "branch": "master",
+    "commit": "aff6bdd77c1614a41389732c836ca53fdc833725"
   },
   "_source": "https://github.com/Saulis/iron-data-table.git",
-  "_target": "4ee8f4d",
+  "_target": "master",
   "_originalSource": "iron-data-table",
   "_direct": true
 }
