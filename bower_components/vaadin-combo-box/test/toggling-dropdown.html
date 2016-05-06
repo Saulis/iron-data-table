@@ -4,9 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <title>vaadin-combo basic tests</title>
-  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
   <script src="../../web-component-tester/browser.js"></script>
-  <script src="../../test-fixture/test-fixture-mocha.js"></script>
 
   <link rel="import" href="common.html">
   <script src="common.js"></script>
@@ -91,6 +89,31 @@
         expect(combobox.$.overlay.hidden).to.be.true;
       });
 
+      // When using Shadow DOM polyfill, the style scope of the combobox might
+      // not get removed from the overlay after it's moved to the body. The
+      // following test ensures that the overlay doesn't keep the style scope
+      // of the combobox when moved during open.
+      it('should not leak combobox style scope to the overlay', function() {
+        // Test only when style scope classes are used
+        if (combobox.$.overlay.classList.contains('style-scope') &&
+            combobox.$.overlay.classList.contains('vaadin-combo-box')) {
+          combobox.open();
+
+          expect(combobox.$.overlay.classList.contains('style-scope')).to.be.false;
+          expect(combobox.$.overlay.classList.contains('vaadin-combo-box')).to.be.false;
+        }
+      });
+
+      it('should not change combobox width', function() {
+        combobox.style.display = 'inline-block';
+        combobox.items = ['foo'];
+        combobox.value = 'foo';
+        var width = combobox.clientWidth;
+
+        combobox.open();
+        expect(combobox.clientWidth).to.equal(width);
+      });
+
       describe('after opening', function() {
         beforeEach(function() {
           combobox.open();
@@ -107,15 +130,6 @@
 
            var focusedInput = Polymer.dom(combobox.root).querySelector('input:focus');
 
-           expect(focusedInput).to.be.null;
-          });
-
-          it('should blur input on close', function() {
-           combobox.$.input.focus();
-
-           combobox.close();
-
-           var focusedInput = Polymer.dom(combobox.root).querySelector('input:focus');
            expect(focusedInput).to.be.null;
           });
         } else if (!safari) { // TODO: Sauce Labs bug doesn't allow Safari in OS X to focus.
@@ -165,22 +179,31 @@
         expect(combobox.opened).to.be.false;
       });
 
-      it('should close the overlay when focus is lost', function(done) {
-        var dummyInput = document.createElement('input');
-        document.body.appendChild(dummyInput);
-
+      it('should close the overlay when focus is lost', function() {
         combobox.open();
 
-        dummyInput.focus();
         combobox.$.input.fire('blur');
 
-        Polymer.Base.async(function() {
-          document.body.removeChild(dummyInput);
-
-          expect(combobox.opened).to.equal(false);
-          done();
-        }, 1);
+        expect(combobox.opened).to.equal(false);
       });
+
+      // When using Shadow DOM polyfill, the style scope of the combobox might
+      // not get added to the overlay after it's moved back to the combobox.
+      // The following test ensures that the overlay doesn't keep the style
+      // scope of the combobox when moved during close.
+      it('should add combobox style scope to the overlay', function() {
+        // Test only when style scope classes are used
+        if (combobox.$.overlay.classList.contains('style-scope') &&
+            combobox.$.overlay.classList.contains('vaadin-combo-box')) {
+          combobox.open();
+
+          combobox.close();
+
+          expect(combobox.$.overlay.classList.contains('style-scope')).to.be.true;
+          expect(combobox.$.overlay.classList.contains('vaadin-combo-box')).to.be.true;
+        }
+      });
+
     });
 
     describe('disabled', function() {

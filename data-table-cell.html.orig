@@ -1,0 +1,144 @@
+<dom-module id="data-table-cell">
+  <template>
+    <style is="custom-style">
+      :host {
+        flex: 1 0 100px;
+        padding: 0 24px 0 24px;
+        min-height: 10px; /* Prevent iron-list from looping when item height is really small */
+        height: 48px;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        transition: flex-basis 200ms, flex-grow 200ms;
+      }
+
+      :host([header]) {
+        height: 56px;
+      }
+    </style>
+    <content></content>
+  </template>
+  <script>
+    Polymer({
+      is: 'data-table-cell',
+
+      properties: {
+        templatizer: {
+          type: Object
+        },
+
+        bind: {
+          type: Object
+        },
+
+        column: {
+          type: Object,
+          observer: '_columnChanged'
+        },
+
+        _instance: {
+          type: Object,
+          computed: '_templatize(column, _content, templatizer)'
+        },
+
+        order: Number,
+        width: String
+      },
+
+<<<<<<< 54ac14c41697732653724bc5d5c1d6bbeb6523d8
+      observers: ['_bindData(_instance, bind)', '_render(_instance)'],
+=======
+      observers: ['_bindData(_instance, bind)'],
+
+      attached: function() {
+        var id = Polymer.IronDataTable.cell++;
+
+        this._contentElement = document.createElement('content');
+        this._contentElement.setAttribute('select', '#cell' + id);
+
+        this._content = document.createElement('div');
+        this._content.id = 'cell' + id;
+
+        Polymer.dom(this).insertBefore(this._contentElement, Polymer.dom(this).firstChild);
+        Polymer.dom(this.domHost).appendChild(this._content);
+        Polymer.dom.flush();
+      },
+
+      detached: function() {
+        // Polymer.dom(this._content.parentElement) has different childs depending if Shady or native Shadow DOM is used.
+        // TODO: see if there's a need to use Polymer.dom here and can it be done somehow.
+
+        if (this._content.parentElement) {
+          this._content.parentElement.removeChild(this._content);
+        }
+
+        if (this._contentElement.parentElement) {
+          Polymer.dom(this).removeChild(this._contentElement);
+          Polymer.dom.flush();
+        }
+      },
+>>>>>>> Encapsulate templating to be overridable.
+
+      _orderChanged: function(e) {
+        this.style.order = e.detail.value;
+      },
+
+      _widthChanged: function(e) {
+        this.style.flexBasis = e.detail.value;
+      },
+
+      _flexChanged: function(e) {
+        this.style.flexGrow = e.detail.value;
+      },
+
+      _hiddenChanged: function(e) {
+        this.hidden = e.detail.value;
+      },
+
+      _templatize: function(column, content, templatizer) {
+        return templatizer.bind(column)(content);
+      },
+
+      _bindData: function(instance, data) {
+        instance.bind(data);
+      },
+
+      _columnChanged: function(column, oldColumn) {
+        this.style.flexDirection = column.alignRight ? 'row-reverse' : 'row';
+
+        this.style.flexBasis = column.width;
+        this._addListener(column, oldColumn, 'width');
+
+        this.style.flexGrow = column.flex;
+        this._addListener(column, oldColumn, 'flex');
+
+        this.style.order = column.order;
+        this._addListener(column, oldColumn, 'order');
+
+        this.hidden = column.hidden;
+        this._addListener(column, oldColumn, 'hidden');
+      },
+
+      // Adding listeners manually *seems* to work better with forwarded parent props
+      // than normal data-binding. Something to do with notifying the paths correctly.
+      _addListener: function(column, oldColumn, prop) {
+        var eventName = prop + '-changed';
+        var observerName = '_' + prop + 'Changed';
+
+        if (oldColumn) {
+          this.unlisten(oldColumn, eventName);
+        }
+
+        this.listen(column, eventName, observerName);
+<<<<<<< 54ac14c41697732653724bc5d5c1d6bbeb6523d8
+      },
+
+      _render: function(instance) {
+        Polymer.dom(this).insertBefore(instance.root, Polymer.dom(this).firstElementChild);
+        Polymer.dom.flush();
+=======
+>>>>>>> Encapsulate templating to be overridable.
+      }
+    });
+  </script>
+</dom-module>

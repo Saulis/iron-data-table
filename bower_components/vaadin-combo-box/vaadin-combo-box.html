@@ -55,6 +55,7 @@ Custom property | Description | Default
   <style>
     :host {
        display: block;
+       padding: 8px 0;
     }
 
     :host > #overlay {
@@ -63,7 +64,7 @@ Custom property | Description | Default
 
     paper-input-container {
       position: relative;
-      padding-bottom: 0;
+      padding: 0;
     }
 
     paper-input-container[opened] {
@@ -72,19 +73,21 @@ Custom property | Description | Default
     }
 
     paper-input-container div[suffix] {
-      position: relative;
+      position: absolute;
+      bottom: -4px;
+      right: -4px;
+
       width: 24px;
       height: 24px;
+      padding: 4px;
       text-align: center;
     }
 
     paper-input-container iron-icon {
-      fill: rgba(0, 0, 0, .26);
+      fill: rgba(0, 0, 0, .38);
       cursor: pointer;
-      --iron-icon-width: 20px;
-      --iron-icon-height: 20px;
       margin-top: -1px;
-      transition: fill 0.2s;
+      transition: all 0.2s;
     }
 
     paper-input-container paper-ripple {
@@ -100,18 +103,48 @@ Custom property | Description | Default
       fill: rgba(0, 0, 0, .86);
     }
 
+    paper-input-container[opened] #toggleIcon iron-icon {
+      -webkit-transform: rotate(180deg);
+      transform: rotate(180deg);
+    }
+
     #clearIcon {
-      margin-right: 4px;
+      right: 28px;
+    }
+
+    #clearIcon iron-icon {
+      --iron-icon-width: 20px;
+      --iron-icon-height: 20px;
+    }
+
+    [hideclear] #clearIcon {
+      display: none;
     }
 
     #input::-ms-clear {
       display: none;
     }
 
+    #input {
+      box-sizing: border-box;
+      padding-right: 28px;
+    }
+
+    #inputContainer[opened]:not([hideclear]) #input {
+      padding-right: 60px;
+      margin-right: -32px;
+    }
+
   </style>
 
   <template>
-    <paper-input-container disabled$="[[disabled]]" class="dropdown-input" id="inputContainer" opened$="[[opened]]">
+    <paper-input-container
+        class="dropdown-input"
+        id="inputContainer"
+        disabled$="[[disabled]]"
+        opened$="[[opened]]"
+        hideclear$="[[_hideClearIcon(value, opened)]]"
+        on-down="_preventDefault">
       <label id="label" on-tap="open">[[label]]</label>
       <input
           is="iron-input"
@@ -131,12 +164,12 @@ Custom property | Description | Default
           on-blur="_onBlur"
           on-tap="open"
           key-event-target>
-      <div suffix id="clearIcon" on-tap="_clear" hidden$="[[_hideClearIcon(value, opened)]]">
+      <div suffix id="clearIcon" on-tap="_clear" on-touchend="_preventDefault">
         <iron-icon icon="clear"></iron-icon>
         <paper-ripple class="circle" center></paper-ripple>
       </div>
-      <div suffix id="toggleIcon" on-tap="_toggle" on-touchend="_preventDefault" hidden$="[[_hideToggleIcon(disabled, readonly)]]">
-        <iron-icon icon="menu" aria-controls="overlay"></iron-icon>
+      <div suffix id="toggleIcon" on-tap="_toggle" hidden$="[[_hideToggleIcon(disabled, readonly)]]" on-touchend="_preventDefault">
+        <iron-icon icon="arrow-drop-down" aria-controls="overlay"></iron-icon>
         <paper-ripple class="circle" center></paper-ripple>
       </div>
     </paper-input-container>
@@ -147,7 +180,7 @@ Custom property | Description | Default
         position-target="[[_positionTarget]]"
         _focused-index="[[_focusedIndex]]"
         _item-label-path="[[itemLabelPath]]"
-        on-down="_blurInput"
+        on-down="_onOverlayDown"
         vertical-offset="2">
     </vaadin-combo-box-overlay>
   </template>
@@ -270,11 +303,11 @@ Custom property | Description | Default
 
     listeners: {
       'vaadin-dropdown-opened': '_onOpened',
-      'vaadin-dropdown-closed': '_onClosed'
+      'vaadin-dropdown-closed': '_onClosed',
+      'keydown': '_onKeyDown'
     },
 
     ready: function() {
-      this._addKeyEventListeners();
       Polymer.IronA11yAnnouncer.requestAvailability();
     },
 
@@ -282,33 +315,22 @@ Custom property | Description | Default
      * Keyboard navigation
      */
 
-    // iron-dropdown locks scrolling outside the overlay and prevents all scrolling
-    // related events from propagating. So, we needed to either hack into the
-    // iron-dropdown or provide custom event handling.
-    _addKeyEventListeners: function() {
-      document.addEventListener('keydown', function(e) {
-        if (this._isEventKey(e, 'left right')) {
-          e.stopImmediatePropagation();
-        }
-      }.bind(this), true);
+    _onKeyDown: function(e) {
+      if (this._isEventKey(e, 'down')) {
+        this._onArrowDown();
 
-      this.addEventListener('keydown', function(e) {
-        if (this._isEventKey(e, 'down')) {
-          this._onArrowDown();
+        // prevent caret from moving
+        e.preventDefault();
+      } else if (this._isEventKey(e, 'up')) {
+        this._onArrowUp();
 
-          // prevent caret from moving
-          e.preventDefault();
-        } else if (this._isEventKey(e, 'up')) {
-          this._onArrowUp();
-
-          // prevent caret from moving
-          e.preventDefault();
-        } else if (this._isEventKey(e, 'enter')) {
-          this._onEnter(e);
-        } else if (this._isEventKey(e, 'esc')) {
-          this._onEscape();
-        }
-      }.bind(this));
+        // prevent caret from moving
+        e.preventDefault();
+      } else if (this._isEventKey(e, 'enter')) {
+        this._onEnter(e);
+      } else if (this._isEventKey(e, 'esc')) {
+        this._onEscape();
+      }
     },
 
     _isEventKey: function(e, k) {
@@ -388,20 +410,22 @@ Custom property | Description | Default
      */
 
     _onBlur: function() {
-      // Async needed to access the new activeElement reliably.
-      this.async(function() {
-        var focusInsideCombobox = this.contains(document.activeElement);
-
-        // When grabbing the scroll handle, the activeElement will become
-        // the body on some browsers, so check for it also.
-        if (!focusInsideCombobox && document.activeElement !== document.body) {
-          this.close();
-        }
-      }, 1);
+      if (!this._closeOnBlurIsPrevented) {
+        this.close();
+      }
     },
 
-    _blurInput: function() {
-      this.$.input.blur();
+    _onOverlayDown: function(event) {
+      // Prevent the focus transfer when user scrolls inside the overlay with mouse drag
+      event.preventDefault();
+
+      if (this.$.overlay.touchDevice && event.target !== this.$.overlay.$.scroller) {
+        // On touch devices, blur the input on touch start inside the overlay, in order to hide
+        // the virtual keyboard. But don't close the overlay on this blur.
+        this._closeOnBlurIsPrevented = true;
+        this.$.input.blur();
+        this._closeOnBlurIsPrevented = false;
+      }
     },
 
     /**
@@ -410,12 +434,6 @@ Custom property | Description | Default
     _toggle: function() {
       if (this.opened) {
         this.close();
-
-        // Refocus input field after clicking the toggle button, but not for touch devices,
-        // because we don't want to popup the virtual keyboard.
-        if (!this.$.overlay.touchDevice) {
-          this.$.input.focus();
-        }
       } else {
         this.open();
       }
@@ -437,16 +455,12 @@ Custom property | Description | Default
     },
 
     _onOpened: function() {
+      this.$.overlay.hidden = !this._hasItems(this.$.overlay._items);
       this.$.overlay.notifyResize();
-
-      this.async(function() {
-        this.$.overlay.hidden = (this.items === undefined || this.items === null);
-        this.$.overlay._scrollIntoView(this._focusedIndex);
-      });
+      this.$.overlay.adjustScrollPosition();
     },
 
     _onClosed: function() {
-
       if (this._focusedIndex > -1) {
         this.$.overlay._selectItem(this._focusedIndex);
         this.$.input.bindValue = this._getItemLabel(this.selectedItem);
@@ -481,7 +495,6 @@ Custom property | Description | Default
      */
 
     _inputValueChanged: function(e) {
-
       if (this._filter === this.$.input.bindValue) {
         // Filter and input value might get out of sync, while keyboard navigating for example.
         // Afterwards, input value might be changed to the same value as used in filtering.
@@ -569,7 +582,12 @@ Custom property | Description | Default
         this.$.overlay._selectItem(valueIndex);
       }
 
-      this.$.overlay.hidden = (items === undefined || items === null || items.length === 0);
+      this.$.overlay.hidden = !this._hasItems(items);
+      this.$.overlay.notifyResize();
+    },
+
+    _hasItems: function(array) {
+      return array && array.length;
     },
 
     _indexOfValue: function(value, items) {
@@ -599,10 +617,6 @@ Custom property | Description | Default
     },
 
     _valueChanged: function(value) {
-      if (value === undefined || value === null) {
-        this.value = '';
-      }
-
       var valueIndex = this._indexOfValue(value);
       var item = valueIndex > -1 && this.items[valueIndex];
       if (this.$.overlay._items && item && this.$.overlay._items.indexOf(item) > -1) {
@@ -618,7 +632,7 @@ Custom property | Description | Default
     },
 
     _hideClearIcon: function(value, opened) {
-      return this.$.overlay.touchDevice || value === '' || !opened;
+      return value === '' || !opened;
     },
 
     _hideToggleIcon: function(disabled, readonly) {

@@ -13,6 +13,7 @@
       <ul class="layout horizontal wrap">
         <li><a href="index.html">Data Binding</a></li>
         <li><a href="templates.html">Templating</a></li>
+        <li><a href="details.html">Row Details</a></li>
         <li><a href="columns.html">Column Properties</a></li>
         <li><b>Styling</b></li>
         <li><a href="filtering.html">Filtering and Sorting</a></li>
@@ -107,6 +108,45 @@
               <template>[[item.user.name.last]]</template>
             </data-table-column>
           </iron-data-table>
+        </template>
+      </template>
+    </demo-snippet>
+
+    <h3>Customizing Rows and Cells with Hooks</h3>
+    <demo-snippet>
+      <template>
+        <style is="custom-style">
+          #grid4 data-table-cell.index {
+            color: red;
+          }
+
+          #grid4 data-table-row.even {
+            background-color: #eee;
+          }
+        </style>
+        <template is="dom-bind" id="t1">
+          <iron-ajax url="users.json" last-response="{{users}}" auto></iron-ajax>
+          <iron-data-table id="grid4" items="[[users.results]]">
+            <data-table-column name="#" width="20px" flex="0">
+              <template>[[index]]</template>
+            </data-table-column>
+            <data-table-column name="First Name">
+              <template>
+                <div>[[item.user.name.first]]</div>
+              </template>
+            </data-table-column>
+            <data-table-column name="Last Name">
+              <template>[[item.user.name.last]]</template>
+            </data-table-column>
+          </iron-data-table>
+          <script>
+            document.querySelector('#grid4').beforeRowBind = function(data, row) {
+              row.toggleClass('even', data.index % 2 === 0);
+            }
+            document.querySelector('#grid4').beforeCellBind = function(data, cell) {
+              cell.toggleClass('index', cell.column.name === '#');
+            }
+          </script>
         </template>
       </template>
     </demo-snippet>

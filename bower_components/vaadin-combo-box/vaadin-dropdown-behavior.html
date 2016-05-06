@@ -80,7 +80,7 @@
     },
 
     _open: function() {
-      document.body.appendChild(this.$.overlay);
+      this.$.overlay._moveTo(document.body);
 
       this._addOutsideClickListener();
 
@@ -94,14 +94,9 @@
     },
 
     _close: function() {
-      Polymer.dom(this.root).appendChild(this.$.overlay);
+      this.$.overlay._moveTo(this.root);
 
       this._removeOutsideClickListener();
-
-      // For touch devices, we want to hide the virtual keyboard after closing the overlay.
-      if (this.$.overlay.touchDevice) {
-        this.$.input.blur();
-      }
 
       this.fire('vaadin-dropdown-closed');
     },

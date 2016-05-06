@@ -3,13 +3,14 @@
     <style is="custom-style">
       :host {
         display: flex;
-        justify-content: space-between;
+        flex-direction: column;
         opacity: 1;
         cursor: pointer;
+
         @apply(--iron-data-table-row);
       }
 
-      :host([selected]) {
+      :host([selected]) .cells {
         @apply(--iron-data-table-row-selected);
       }
 
@@ -24,33 +25,100 @@
       :host(:not([header]):not([even])) {
         @apply(--iron-data-table-row-odd);
       }
+
+      :host(:focus) {
+        outline: none;
+        @apply(--iron-data-table-row-focused);
+      }
+
+      :host(:focus):after {
+        @apply(--iron-data-table-row-focused-after);
+      }
+
+      :host:after {
+        @apply(--iron-data-table-row-after);
+      }
+
+      .cells {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+      }
     </style>
-    <content></content>
+    <div class="cells">
+      <content select="data-table-checkbox"></content>
+      <content select="data-table-cell"></content>
+    </div>
+    <div class="details">
+      <content select="data-table-row-detail"></content>
+    </div>
   </template>
   <script>
     Polymer({
       is: 'data-table-row',
 
+      listeners: {
+        'tap': '_onTap'
+      },
+
       properties: {
+        beforeBind: Object,
+        bind: Object,
+        header: Boolean,
+        expanded: {
+          type: Boolean,
+          notify: false,
+          value: false,
+          reflectToAttribute: true,
+          observer: '_expandedChanged'
+        },
+
+        rowDetailTemplate: Object,
+
         _static: {
           type: Object,
           value: { id: 0 }
         }
       },
 
+      observers: ['_bindChanged(bind, beforeBind)'],
+
       attached: function() {
-        if (this.domHost) {
+        if (this.domHost && this.domHost.tagName === 'IRON-DATA-TABLE') {
           var id = this._static.id++;
 
           var item = this.parentElement;
-          if (!item.container) {
+          if (!item._rowId) {
             this._contentElement = document.createElement('content');
             this._contentElement.setAttribute('select', '#item' + id);
             Polymer.dom(item).appendChild(this._contentElement);
-
             this.id = 'item' + id;
+            item._rowId = id;
+
             Polymer.dom(this.domHost).appendChild(this);
           }
+        }
+      },
+
+      _bindChanged: function(data, beforeBind) {
+        beforeBind(data, this);
+      },
+
+      _onTap: function(e) {
+        // Prevent item selection if row itself is not focused. This means that
+        // an element inside the row has been focused.
+        if (!this.header && Polymer.dom(document.activeElement) !== Polymer.dom(this)) {
+          e.stopPropagation();
+        } else if (this.rowDetailTemplate && this.detailsEnabled) {
+            this.expanded = !this.expanded;
+        }
+      },
+
+      _expandedChanged: function(expanded) {
+        if (expanded) {
+          this.fire('item-expanded');
+        } else {
+          this.fire('item-collapsed');
         }
       }
     });

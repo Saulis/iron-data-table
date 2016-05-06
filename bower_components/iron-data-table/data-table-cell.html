@@ -15,6 +15,10 @@
       :host([header]) {
         height: 56px;
       }
+
+      :host([hidden]) {
+        display: none;
+      }
     </style>
     <content></content>
   </template>
@@ -23,29 +27,37 @@
       is: 'data-table-cell',
 
       properties: {
-        templatizer: {
-          type: Object
-        },
-
-        bind: {
-          type: Object
-        },
+        bind: Object,
+        order: Number,
+        header: Boolean,
+        width: String,
 
         column: {
           type: Object,
           observer: '_columnChanged'
         },
 
-        _instance: {
+        beforeBind: {
           type: Object,
-          computed: '_templatize(column, templatizer)'
+          value: function() {
+            return function(data, cell) {};
+          }
         },
 
-        order: Number,
-        width: String
+        _instance: {
+          type: Object,
+          computed: '_templatize(column, _templatizer)'
+        },
+
+        _templatizer: Object
       },
 
       observers: ['_bindData(_instance, bind)'],
+
+      ready: function() {
+        // cell is supposed to be placed outside the local dom of iron-data-table.
+        Polymer.StyleTransformer.dom(this, 'iron-data-table', this._scopeCssViaAttr, true);
+      },
 
       _orderChanged: function(e) {
         this.style.order = e.detail.value;
@@ -63,11 +75,26 @@
         this.hidden = e.detail.value;
       },
 
+      _templatizeRowChanged: function(e) {
+        if (!this.header) {
+          this._templatizer = e.detail.value;
+        }
+      },
+
+      _templatizeHeaderChanged: function(e) {
+        if (this.header) {
+          this._templatizer = e.detail.value;
+        }
+      },
+
       _templatize: function(column, templatizer) {
         return templatizer.bind(column)(this);
       },
 
       _bindData: function(instance, data) {
+        if (!this.header) {
+          this.beforeBind(data, this);
+        }
         instance.bind(data);
       },
 
@@ -85,12 +112,20 @@
 
         this.hidden = column.hidden;
         this._addListener(column, oldColumn, 'hidden');
+
+        if (this.header && column.templatizeHeader) {
+          this._templatizer = column.templatizeHeader;
+        } else if (column.templatizeRow) {
+          this._templatizer = column.templatizeRow;
+        }
+        this._addListener(column, oldColumn, 'templatizeRow');
+        this._addListener(column, oldColumn, 'templatizeHeader');
       },
 
       // Adding listeners manually *seems* to work better with forwarded parent props
       // than normal data-binding. Something to do with notifying the paths correctly.
       _addListener: function(column, oldColumn, prop) {
-        var eventName = prop + '-changed';
+        var eventName = Polymer.CaseMap.camelToDashCase(prop) + '-changed';
         var observerName = '_' + prop + 'Changed';
 
         if (oldColumn) {

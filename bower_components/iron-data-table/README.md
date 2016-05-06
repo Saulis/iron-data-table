@@ -30,7 +30,8 @@ Column templates should bind to template models of the following structure:
 {
   index: 0,        // index in the item array
   selected: false, // true if the current item is selected
-  item: {}         // user data corresponding to items[index]
+  item: {}         // user data corresponding to items[index],
+  expanded: false  // true if row details have been expanded for the current item
 }
 ```
 For example, given the following `data` array:
@@ -75,6 +76,7 @@ bound from the model object provided to the template scope):
 - Lazy Loading
 - Data filtering
 - Data sorting
+- Multi-Column sorting (thanks to @userquin)
 - Item selection
 - Multi-Selection
 - Template support for each column
@@ -84,11 +86,12 @@ bound from the model object provided to the template scope):
 - Native Shadow DOM support
 - Column manipulation, resizing, hiding, reordering
 - Custom Header templates
+- Basic Angular 2 support with directives
+- Row Details (thanks to @gazal-k)
 
 ## Roadmap (1.1)
 In random order: (please let me know if something is missing or misplaced)
 - Frozen Columns
-- Row Details
 - Drag and Drop Column Resizing
 - Drag and Drop Column Reordering
 

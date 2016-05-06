@@ -15,9 +15,8 @@ layout: page
   <link rel="import" href="../../iron-form/iron-form.html">
 
   <style is="custom-style">
-    :root {
-      --default-primary-color: #2899f2;
-      --secondary-text-color: rgba(0,0,0,.12);
+    vaadin-combo-box {
+      --primary-color: #2899f2;
     }
   </style>
 </head>
@@ -87,7 +86,8 @@ layout: page
               // Prevents setting the value property automatically.
               e.preventDefault();
 
-              combobox.value = 'custom value "' + e.detail + '" set!';
+              combobox.value = e.detail;
+              document.querySelector('#selected-value2').innerHTML = 'custom value "' + e.detail + '" set!';
             });
 
             combobox.value = 'Carbon';

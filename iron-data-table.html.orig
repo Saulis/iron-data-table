@@ -1,0 +1,908 @@
+<!--
+@license
+Copyright 2016 Sauli Tähkäpää
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-list/iron-list.html">
+<link rel="import" href="../iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="../paper-spinner/paper-spinner-lite.html">
+
+<link rel="import" href="data-table-column.html">
+<link rel="import" href="data-table-column-sort.html">
+<link rel="import" href="data-table-cell.html">
+<link rel="import" href="data-table-row.html">
+<link rel="import" href="data-table-checkbox.html">
+<link rel="import" href="data-table-row-detail.html">
+
+<!--
+`iron-data-table` displays a table or a grid of data.
+It builds on top of `iron-list`, which provides the foundation for features like
+virtual scrolling and templating.
+
+It contains an array of `data-table-column` elements, which are used to define a template
+for the cells on each row item.
+
+Rows use flex layout which enables cells to fit the available space.
+
+Cell elements are placed outside the shadow root of the `iron-data-table` which
+allows them to be styled by the user.
+
+### Template model
+Column templates should bind to template models of the following structure:
+```js
+{
+  index: 0,        // index in the item array
+  selected: false, // true if the current item is selected
+  item: {},        // user data corresponding to items[index],
+  expanded: false  // true if row details have been expanded for the current item
+}
+```
+For example, given the following `data` array:
+##### data.json
+```js
+[
+  {"name": {
+    "title": "miss",
+    "first": "donna",
+    "last": "davis"
+  }},
+  {"name": {
+    "title": "mr",
+    "first": "samuel",
+    "last": "kelley"
+  }},
+  {"name": {
+    "title": "ms",
+    "first": "katie",
+    "last": "butler"
+  }}
+]
+```
+The following code would render the table (note the name and checked properties are
+bound from the model object provided to the template scope):
+```html
+<template is="dom-bind">
+  <iron-ajax url="data.json" last-response="{{data}}" auto></iron-ajax>
+  <iron-data-table items="[[data]]">
+    <data-table-column name="First Name">
+      <template>[[item.name.first]]</template>
+    </data-table-column>
+    <data-table-column name="Last Name">
+      <template>[[item.name.last]]</template>
+    </data-table-column>
+  </iron-data-table>
+</template>
+```
+
+### Styling
+There are several custom properties and mixins you can use to style the component:
+
+Custom property | Description
+----------------|-------------
+`--iron-data-table` | Mixin applied to the main element
+`--iron-data-table-header` | Mixin applied to the header element
+`--iron-data-table-row` | Mixin applied to the row item element
+`--iron-data-table-row-hover` | Mixin applied to the row item element when hovered on
+`--iron-data-table-row-selected` | Mixin applied to the selected row item elements
+`--iron-data-table-row-after` | Mixin applied to :after pseudoelement of the row item element
+`--iron-data-table-row-focused` | Mixin applied to the focused row item elements
+`--iron-data-table-row-focused-after` | Mixin applied to :after pseudoelement of the focused row item elements
+
+To get started, you can import `default-styles.html` which provides material design
+inspired styles to your `iron-data-table`.
+-->
+
+<dom-module id="iron-data-table">
+  <template>
+    <style is="custom-style">
+      :host {
+        display: block;
+        position: relative;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+
+        /* Default height just to help users get started in making stuff visible.  */
+        height: 400px;
+
+        @apply(--iron-data-table);
+      }
+
+      #container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+
+        display: flex;
+        flex-direction: column;
+      }
+
+      #header {
+        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+        transition: box-shadow 200ms;
+        -webkit-transition: box-shadow 200ms;
+        z-index: 1;
+        @apply(--iron-data-table-header);
+      }
+
+      #header.scrolled {
+        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 2px 0 rgba(0, 0, 0, 0.075), 0 3px 0 rgba(0, 0, 0, 0.05), 0 4px 0 rgba(0, 0, 0, 0.015);
+      }
+
+      #list {
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        flex: 1;
+        transition: opacity 200ms;
+        -webkit-transition: opacity 200ms;
+      }
+
+      :host[loading] #list {
+        opacity: 0.25;
+      }
+
+      :host[loading] paper-spinner-lite {
+        position: absolute;
+        top: 45%;
+        left: 50%;
+        --paper-spinner-color: var(--default-primary-color);
+      }
+    </style>
+    <div id="container">
+      <div id="header">
+        <data-table-row header>
+          <data-table-checkbox header hidden$="[[!multiSelection]]" on-tap="_toggleSelectAll" checked="[[_isSelectAllChecked(selectedItems.length, selectedItems.inverted)]]" indeterminate="[[_isSelectAllIndeterminate(selectedItems.length)]]"></data-table-checkbox>
+          <template is="dom-repeat" items="[[columns]]" as="column">
+            <data-table-cell header column="[[column]]" bind="[[_bind(column)]]">
+              <data-table-column-sort sort-order="[[sortOrder]]" path="[[column.sortBy]]" on-sort-direction-changed="_sortDirectionChanged" hidden$="[[!column.sortBy]]"></data-table-column-sort>
+            </data-table-cell>
+          </template>
+        </data-table-row>
+      </div>
+
+      <iron-list id="list" as="item" items="[[_cachedItems]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" multi-selection="[[multiSelection]]" selected-item="{{selectedItem}}" on-selected-items-changed="_selectedItemsChanged">
+        <template>
+          <div class="item">
+            <data-table-row tabindex$="[[tabIndex]]" selected$="[[_isSelected(selected, selectedItems.inverted)]]" even$="[[!_isEven(index)]]" row-detail-template="[[rowDetail]]" details-enabled="[[detailsEnabled]]" expanded="[[_isExpanded(item, _expandedItems)]]" on-item-expanded="_itemExpanded" on-item-collapsed="_itemCollapsed">
+              <data-table-checkbox hidden$="[[!multiSelection]]" checked="[[_isSelected(selected, selectedItems.inverted)]]"></data-table-checkbox>
+              <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
+<<<<<<< 62fe7e43598824c280a27ea74b2cbbc0d36d3248
+                <data-table-cell column="[[column]]" bind="[[_bind(item, index, selected, selectedItems.inverted, _expandedItems)]]"></data-table-cell>
+              </template>
+              <template is="dom-if" if="[[_isExpanded(item, _expandedItems)]]" on-dom-change="_updateSizeForItem">
+                <data-table-row-detail row-detail-template="[[rowDetail]]" bind="[[_bind(item, index, selected, selectedItems.inverted, _expandedItems)]]"></data-table-row-detail>
+=======
+                <data-table-cell column="[[column]]" bind="[[_bind(item, index, selected)]]" bind-hook="[[bindHook]]"></data-table-cell>
+>>>>>>> Add bind hook for customizing cells.
+              </template>
+            </data-table-row>
+          </div>
+        </template>
+      </iron-list>
+    </div>
+    <paper-spinner-lite active hidden=[[!loading]]></paper-spinner-lite>
+    <content select="data-table-column"></content>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'iron-data-table',
+
+      behaviors: [
+        Polymer.IronResizableBehavior
+      ],
+
+      listeners: {
+        'column-filter-changed': '_onColumnFilterChanged',
+        'iron-resize': '_resizeCellContainers',
+        'item-changed': '_itemChanged',
+        'item-expanded': '_itemExpanded',
+        'item-collapsed': '_itemCollapsed',
+        'scroll': '_onHorizontalScroll'
+      },
+
+      properties: {
+
+        /**
+         * A function that is called before data is bound to a row cell.
+         *
+         * Example: function(data, cell) {
+         *            cell.toggleClass('custom', data.useCustomClass);
+         *          }
+         */
+        bindHook: {
+          type: Object,
+          value: function() {
+            return function(data, cell) {};
+          }
+        },
+
+        /**
+         * An array containing the items which will be stamped to the column template
+         * instances.
+         */
+        items: {
+          type: Array
+        },
+
+        /**
+         * If `true`, tapping a row will expand the item details, if available.
+         */
+        detailsEnabled: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * An array containing path/filter value pairs that are used to filter the items
+         */
+        filter: {
+          type: Array,
+          notify: true,
+          value: function() {
+            return [];
+          }
+        },
+
+        /**
+         * When `true`, multiple items may be selected at once (in this case,
+         * `selected` is an array of currently selected items).  When `false`,
+         * only one item may be selected at a time.
+         */
+        multiSelection: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * Number of items fetched at a time from the datasource.
+         */
+        pageSize: {
+          type: Number,
+          value: 50
+        },
+
+        /**
+         * If `true`, tapping a row will select the item.
+         */
+        selectionEnabled: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * This is the currently selected item, or `null`
+         * if no item is selected.
+         */
+        selectedItem: {
+          type: Object,
+          notify: true
+        },
+
+        /**
+         * When `multiSelection` is true, this is an array that contains the selected items.
+         * If `selectedItems.inverted` is `true`, the array contains deselected items instead.
+         * `selectedItems.filters` contains an array of filters that were active when the selection changed.
+         */
+        selectedItems: {
+          type: Object,
+          notify: true,
+          value: function() {
+            var items = [];
+            items.filters = [];
+
+            return items;
+          }
+        },
+
+        /**
+         * Size of the data set.
+         */
+        size: {
+          type: Number,
+          notify: true,
+          value: 0
+        },
+
+        /**
+         * An array with a path/sortorder ('asc' or 'desc') pairs that are used to sort the items.
+         */
+        sortOrder: {
+          type: Array,
+          notify: true,
+          value: function() {
+            return [];
+          }
+        },
+
+        /**
+         * An array of `data-table-column` elements which contain the templates
+         * to be stamped with items.
+         */
+        columns: {
+          type: Array,
+          notify: true,
+          observer: '_columnsChanged'
+        },
+
+        /**
+         * Function that provides items lazily. Receives parameters `opts`, `callback`, `err`
+         *
+         * `opts.page` Requested page index
+         *
+         * `opts.pageSize` Current page size
+         *
+         * `opts.filter` Current filter parameters
+         *
+         * `opts.sortOrder` Current sorting parameters
+         */
+        dataSource: {
+          type: Object
+        },
+
+        _pagesLoading: {
+          type: Number,
+          observer: '_pagesLoadingChanged',
+          value: 0
+        },
+
+        /**
+         * `true` if the table is currently loading data from the data source.
+         */
+        loading: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true,
+          value: false
+        },
+
+        _cachedItems: {
+          type: Array,
+          value: function() {
+            return [];
+          }
+        },
+
+        _cachedPages: {
+          type: Array,
+          value: function() {
+            return [];
+          }
+        },
+
+        _currentPage: {
+          type: Number,
+          value: 0
+        },
+
+        _expandedItems: {
+          type: Array,
+          value: function() {
+            return [];
+          }
+        }
+      },
+
+     /**
+      * Fired before row details is expanded/collapsed.
+      *
+      * @event iron-data-table-row-expanding
+      * @param {Object} detail.row the data-table-row element being tapped
+      * @param {Object} detail.target the target element of the original tap event
+      */
+
+      /**
+       * Fired before row is selected/deselected.
+       *
+       * @event iron-data-table-row-selecting
+       * @param {Object} detail.row the data-table-row element being tapped
+       * @param {Object} detail.target the target element of the original tap event
+       */
+
+      observers: ['_itemsChanged(items.*)',
+        '_sizeChanged(size)',
+        '_currentPageChanged(dataSource, _currentPage)',
+        '_resetData(dataSource, filter.*, sortOrder.*)'
+      ],
+
+      created: function() {
+        this._observer = Polymer.dom(this).observeNodes(function(info) {
+          var hasColumns = function(node) {
+            return (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'DATA-TABLE-COLUMN');
+          };
+
+          if (info.addedNodes.filter(hasColumns).length > 0 ||
+            info.removedNodes.filter(hasColumns).length > 0) {
+            this.set('columns', this.getContentChildren('[select=data-table-column]'));
+            this.notifyResize();
+          }
+
+          this.set('rowDetail', Polymer.dom(this).querySelector('template[is=row-detail]'));
+        }.bind(this));
+      },
+
+      ready: function() {
+        this.$.list._selectionHandler = function(e) {
+          var first = Polymer.dom(e).event.path.filter(function(p) {
+            return this.modelForElement(p);
+          }.bind(this))[0];
+
+          var model = this.modelForElement(first);
+          if (model) {
+              this.toggleSelectionForItem(model[this.as]);
+          }
+        };
+      },
+
+      _stopPropagation: function(e) {
+        e.stopImmediatePropagation();
+      },
+
+      /**
+       * Select the list item at the given index.
+       *
+       * @method selectItem
+       * @param {(Object|number)} item The item object or its index
+       */
+      selectItem: function(item) {
+        if (this.selectedItems && this.selectedItems.inverted) {
+          this.$.list.deselectItem(item);
+        } else {
+          this.$.list.selectItem(item);
+        }
+      },
+
+      _isSelected: function(selected, inverted) {
+        return inverted ? !selected : selected;
+      },
+
+      /**
+       * Multi-Selection
+       */
+      _selectedItemsChanged: function(e) {
+        if (Array.isArray(e.detail.value)) {
+          var items = e.detail.value;
+          var inverted = (this.selectedItems && this.selectedItems.inverted) || false;
+
+          this.set('selectedItems', items);
+          this.set('selectedItems.inverted', inverted);
+          this.notifyPath('selectedItems.length', items.length);
+          this.set('selectedItems.filters', this.filter || []);
+        } else if (e.detail.path === 'selectedItems.splices') {
+          this.notifyPath('selectedItems.splices', e.detail.value);
+          this.notifyPath('selectedItems.length', this.selectedItems.length);
+        }
+      },
+
+      /*
+       * Selects all the items in the list.
+       */
+      selectAll: function() {
+        this.set('selectedItems.inverted', true);
+        this.$.list.clearSelection();
+      },
+
+      /**
+       * Clears the current selection state.
+       */
+      clearSelection: function() {
+        this.set('selectedItems.inverted', false);
+        this.$.list.clearSelection();
+      },
+
+      _toggleSelectAll: function() {
+        if (this._isSelectAllChecked(this.selectedItems.length, this.selectedItems.inverted)) {
+          this.clearSelection();
+        } else {
+          this.selectAll();
+        }
+      },
+
+      _isSelectAllChecked: function(selectedItemsLength, inverted) {
+        return selectedItemsLength === (inverted ? 0 : this.size);
+      },
+
+      _isSelectAllIndeterminate: function(selectedItemsLength) {
+        return selectedItemsLength > 0;
+      },
+
+      /**
+       * Deselects the given item list if it is already selected.
+       *
+       * @method deselect
+       * @param {(Object|number)} item The item object or its index
+       */
+      deselectItem: function(item) {
+        if (this.selectedItems && this.selectedItems.inverted) {
+          this.$.list.selectItem(item);
+        } else {
+          this.$.list.deselectItem(item);
+        }
+      },
+
+      _bind: function(item, index, selected, inverted, expandedItems) {
+        if (index !== undefined && selected !== undefined) {
+          return {
+            item: item,
+            index: index,
+            selected: inverted ? !selected : selected,
+            // store expanded twice to detect changes coming from inside the template.
+            __expanded__: this._isExpanded(item, expandedItems),
+            expanded: this._isExpanded(item, expandedItems)
+          };
+        } else {
+          return {
+            column: item
+          };
+        }
+      },
+
+      _isEven: function(index) {
+        return index % 2 === 0;
+      },
+
+      _filter: function(items, filter) {
+        if (filter.length === 0) {
+          return items;
+        }
+
+        return Array.prototype.filter.call(items, function(item, index) {
+          for (var i = 0; i < filter.length; i++) {
+            var value = this.get(filter[i].path, item);
+            if (!filter[i].filter) {
+              continue;
+            } else if (!value || value.toString().toLowerCase().indexOf(filter[i].filter.toString().toLowerCase()) === -1) {
+              return false;
+            }
+          }
+          return true;
+        }.bind(this));
+      },
+
+      _resetData: function(dataSource, filter, sortOrder) {
+        // Resetting scroll position and selection for consistency here. They are
+        // both reset implicitly when a new _cachedItems is set to iron-list, but
+        // that doesn't happen when size of the dataset changes only by a few items.
+        this.clearSelection();
+
+        this.debounce('reset', function() {
+          this.clearCache();
+          this.$.list.scrollToIndex(0);
+        }.bind(this), 100);
+      },
+
+      _sort: function(items, sortOrder) {
+        if (!sortOrder || sortOrder.length === 0) {
+          return items;
+        }
+
+        var multiSort = function() {
+          return function(a, b) {
+            return sortOrder.map(function(sort) {
+              if (sort.direction === 'asc') {
+                return this._compare(this.get(sort.path, a), this.get(sort.path, b));
+              } else if (sort.direction === 'desc') {
+                return this._compare(this.get(sort.path, b), this.get(sort.path, a));
+              }
+              return 0;
+            }.bind(this)).reduce(function firstNonZeroValue(p, n) {
+                return p ? p : n;
+              }, 0);
+          };
+        };
+
+        return Array.prototype.sort.call(items, multiSort(sortOrder).bind(this));
+      },
+
+      _sortDirectionChanged: function(e) {
+        for (var i = 0; i < this.sortOrder.length; i++) {
+          if (this.sortOrder[i].path === e.detail.path) {
+            if (e.detail.direction) {
+              this.set('sortOrder.' + i + '.direction', e.detail.direction);
+            } else {
+              this.splice('sortOrder', i, 1);
+            }
+            return;
+          }
+        }
+
+        this.push('sortOrder', {
+          path: e.detail.path,
+          direction: e.detail.direction
+        });
+      },
+
+      _compare: function(a, b) {
+        if (a < b) {
+          return -1;
+        }
+        if (a > b) {
+          return 1;
+        }
+        return 0;
+      },
+
+      _columnsChanged: function(columns, oldColumns) {
+        if (oldColumns) {
+          oldColumns.forEach(function(column) {
+            this.unlisten(column, 'filter-value-changed');
+          }.bind(this));
+        }
+
+        if (columns) {
+          columns.forEach(function(column) {
+            this.listen(column, 'filter-value-changed', '_onColumnFilterChanged');
+          }.bind(this));
+        }
+      },
+
+      _onColumnFilterChanged: function(e) {
+        for (var i = 0; i < this.filter.length; i++) {
+          if (this.filter[i].path === e.target.filterBy) {
+            this.set('filter.' + i + '.filter', e.detail.value);
+            this.set('selectedItems.filters.' + i + '.filter', e.detail.value);
+            return;
+          }
+        }
+
+        this.push('filter', {
+          path: e.target.filterBy,
+          filter: e.detail.value
+        });
+
+        this.push('selectedItems.filters', {
+          path: e.target.filterBy,
+          filter: e.detail.value
+        });
+      },
+
+      _resizeCellContainers: function() {
+        // reset header width first to make the cells and scroll width to reset their widths.
+        this.$.container.style.width = '';
+
+        this.async(function() {
+          this.$.container.style.width = Math.min(this.scrollWidth, this.clientWidth + this.scrollLeft) + 'px';
+        }.bind(this));
+      },
+
+      _onHorizontalScroll: function() {
+        if (!this.isDebouncerActive('scrolling')) {
+          this.$.container.style.width = this.scrollWidth + 'px';
+          this.debounce('scrolling', function() {
+            this.$.container.style.width = Math.min(this.scrollWidth, this.clientWidth + this.scrollLeft) + 'px';
+            // long timeout here to prevent jerkiness with the rubberband effect on iOS especially.
+          }, 1000);
+        }
+      },
+
+      _onVerticalScroll: function(e) {
+        // Toggle shadow when at the top
+        this.toggleClass("scrolled", this.$.list.scrollTop >= 1, this.$.header);
+
+        this._currentPage = Math.max(0, Math.floor(this.$.list.scrollTop / this.$.list._physicalAverage / this.pageSize));
+      },
+
+      /**
+       * Lazy loading
+       */
+      _itemsChanged: function(items) {
+        if ((items.path === 'items' || items.path === 'items.splices') && Array.isArray(items.base)) {
+          this.size = items.base.length;
+
+          this.dataSource = function(opts, cb, err) {
+            var filteredItems = this._filter(items.base, opts.filter);
+            this.size = filteredItems.length;
+
+            var sortedItems = this._sort(filteredItems, opts.sortOrder);
+
+            var start = opts.page * opts.pageSize;
+            var end = start + opts.pageSize;
+            var slice = sortedItems.slice(start, end);
+
+            cb(slice);
+          }.bind(this);
+        } else if (items.path.indexOf('items.#') === 0 && Array.isArray(items.base)) {
+          var index = items.path.split('.')[1].substring(1);
+          var item = this.items[index];
+
+          var cachedIndex = this._cachedItems.indexOf(item);
+
+          if (cachedIndex >= 0) {
+            for (var c = 0; c < this.columns.length; c++) {
+              var column = this.columns[c];
+
+              for (var t = 0; t < column._templateInstances.length; t++) {
+                var templateInstance = column._templateInstances[t];
+
+                if (templateInstance.item === item) {
+                  templateInstance.notifyPath(items.path.replace('items.', 'item.').replace('.#' + index, ''), items.value);
+                }
+              }
+            }
+
+            //TODO: row details template instances need to be notified also.
+
+            this.set(items.path.replace('items.', '_cachedItems.').replace('#' + index, cachedIndex), items.value);
+          }
+        }
+      },
+
+      _itemChanged: function(e) {
+        if (this.items) {
+          var index = this.items.indexOf(e.detail.item);
+          if (index >= 0) {
+            this.set('items.' + index + '.' + e.detail.path, e.detail.value);
+          }
+        }
+      },
+
+      _itemExpanded: function(e) {
+        var item = e.detail.item || e.model.item;
+
+        this.expandItem(item);
+      },
+
+      _itemCollapsed: function(e) {
+        var item = e.detail.item || e.model.item;
+
+        this.collapseItem(item);
+      },
+
+      _currentPageChanged: function(dataSource, page) {
+        if (this._cachedPages && this._cachedPages.indexOf(page) === -1) {
+          this.loading = true;
+        }
+
+        this.debounce('loading', function() {
+          this._loadPage(dataSource, page);
+
+          if (page + 1 < (this.size / this.pageSize)) {
+            this._loadPage(dataSource, page + 1);
+          }
+
+          if (page > 0) {
+            this._loadPage(dataSource, page - 1);
+          }
+        }.bind(this), 100);
+      },
+
+      _loadPage: function(dataSource, page) {
+        if (this._cachedPages && this._cachedPages.indexOf(page) === -1) {
+          this._pagesLoading++;
+          this.push('_cachedPages', page);
+
+          var success = function(items) {
+            var start = page * this.pageSize;
+
+            for (var i = 0; i < this.pageSize; i++) {
+              var index = start + i;
+              var item = items[i];
+
+              this.set('_cachedItems.' + index, item);
+
+              // TODO: send an issue/pr to iron-list, that makes sure the internal
+              // collection stays up-to-date when `items` change.
+              this.$.list._collection.store[index] = item;
+              if (item && typeof item == 'object') {
+                this.$.list._collection.omap.set(item, index);
+              } else {
+                this.$.list._collection.pmap[item] = index;
+              }
+            }
+
+            // resize required for variable row height items.
+            // debouncing for optimizing when multiple requests are running at
+            // the same time.
+            this.debounce('resizing', function() {
+              this.$.list.notifyResize();
+            }.bind(this), 100);
+
+            this._pagesLoading--;
+          }.bind(this);
+
+          var err = function() {
+            var index = this._cachedPages.indexOf(page);
+            this._cachedPages.splice(index, 1);
+
+            this._pagesLoading--;
+          }.bind(this);
+
+          dataSource({
+            page: page,
+            pageSize: this.pageSize,
+            filter: this.filter,
+            sortOrder: this.sortOrder
+          }, success, err);
+        }
+      },
+
+      _sizeChanged: function(size) {
+        // Optimization: Calling `set` on _cachedItems will reset the scroll position and selections,
+        // using `push` and `pop` with large changes (more than 1000 items) is a heavy operation
+        // that jams things up.
+        if (this._cachedItems && Math.abs(this._cachedItems.length - size) < this.pageSize * 2) {
+          while (this._cachedItems.length < size) {
+            this.push('_cachedItems', {});
+          }
+
+          while (this._cachedItems.length > size) {
+            this.pop('_cachedItems');
+          }
+        } else {
+          var items = [];
+
+          while (items.length < size) {
+            items.push({});
+          }
+
+          this.set('_cachedItems', items);
+        }
+      },
+
+      /**
+       * Clears the cached pages and reloads data from datasource when needed.
+       */
+      clearCache: function() {
+        this._cachedPages = [];
+
+        // Force reload on currently visible pages.
+        this._currentPageChanged(this.dataSource, this._currentPage);
+      },
+
+      _pagesLoadingChanged: function(pagesLoading) {
+        this.loading = pagesLoading > 0;
+      },
+
+      _updateSizeForItem: function(event) {
+        if (event.model.get('item')) {
+          // notifyResize() doesn't do anything on iOS if the viewport size hasn't changed
+          // so this is more reliable.
+          this.$.list.updateSizeForItem(event.model.get('item'));
+        }
+      },
+
+      /**
+       * Expands the row details for this item, if available.
+       */
+      expandItem: function(item) {
+        if (this.rowDetail && this._expandedItems && !this._isExpanded(item, this._expandedItems)) {
+
+          // replacing the whole array here to simplify the obsevers.
+          this._expandedItems.push(item);
+          this._expandedItems = this._expandedItems.slice(0);
+        }
+      },
+
+      /**
+       * Collapses the row details for this item, if expanded.
+       */
+      collapseItem: function(item) {
+        if (this.rowDetail && this._expandedItems && this._isExpanded(item, this._expandedItems)) {
+          var index = this._expandedItems.indexOf(item);
+
+          // replacing the whole array here to simplify the obsevers.
+          this._expandedItems.splice(index, 1);
+          this._expandedItems = this._expandedItems.slice(0);
+        }
+      },
+
+      _isExpanded: function(item, items) {
+        return items && items.indexOf(item) > -1;
+      }
+    });
+  </script>
+</dom-module>

@@ -37,18 +37,13 @@
          * Path to a property that will be filtered by this column. If set, a filter input
          * will be automaticelly placed on the header cell of the column.
          */
-        filterBy: {
-          type: String
-        },
+        filterBy: String,
 
         /**
          * Filter value that will be used to filter the items using the property defined
          * in `filterBy` property.
          */
-        filterValue: {
-          type: String,
-          notify: true
-        },
+        filterValue: String,
 
         /**
          * Minimum width of the column
@@ -134,15 +129,49 @@
           value: function() {
             return {};
           }
+        },
+
+        templatizeRow: {
+          type: Object,
+          notify: true,
+          value: function() {
+           return function(parentElement) {
+             return this._templatize(this.template, parentElement);
+           }.bind(this)
+          }
+        },
+
+        templatizeHeader: {
+          type: Object,
+          notify: true,
+          value: function() {
+           return function(parentElement) {
+             return this._templatize(this.headerTemplate, parentElement);
+           }.bind(this)
+          }
         }
       },
 
       observers: ['_forwardedParentPropsChanged(_forwardedParentProps.*)',
-        '_templateInstancesChanged(_templateInstances.splices)'
+        '_templateInstancesChanged(_templateInstances.splices)',
+        '_filterValueChanged(filterValue, filterBy)'
       ],
 
+      _filterValueChanged: function(filterValue, filterBy) {
+        this.fire('column-filter-changed', {value: filterValue, filterBy: filterBy});
+      },
+
       _forwardParentProp: function(prop, value) {
-        this.set('_forwardedParentProps.' + prop, value);
+        //TODO: Bug in Templatizer forwards also [[item]] etc. instance properties
+        // through this function when Shadow DOM is on AND iron-data-table is nested inside
+        // another Polymer element. Inside a dom-bind template everything seems to work...
+        if (prop.indexOf('item') === -1 &&
+            prop.indexOf('selected') === -1 &&
+            prop.indexOf('index') === -1 &&
+            prop.indexOf('column') === -1 &&
+            prop.indexOf('expanded') === -1) {
+          this.set('_forwardedParentProps.' + prop, value);
+        }
       },
 
       _forwardedParentPropsChanged: function(changeRecord) {
@@ -151,6 +180,14 @@
           this._templateInstances.forEach(function(t) {
             t[prop] = changeRecord.base[prop];
           });
+        }
+      },
+
+      _forwardInstanceProp: function(inst, prop, value) {
+        if (prop === 'expanded' && inst.item && inst.__expanded__ !== value) {
+          var table = Polymer.dom(this).parentNode;
+
+          table.fire(value ? 'item-expanded' : 'item-collapsed', {item: inst.item});
         }
       },
 
@@ -205,7 +242,8 @@
           item: true,
           index: true,
           selected: true,
-          column: true
+          column: true,
+          expanded: true
         };
 
         this.templatize(this.headerTemplate);
@@ -232,15 +270,8 @@
             }
           }
         };
-      },
-
-      templatizeRow: function(parentElement) {
-        return this._templatize(this.template, parentElement);
-      },
-
-      templatizeHeader: function(parentElement) {
-        return this._templatize(this.headerTemplate, parentElement);
       }
+
     });
   </script>
 </dom-module>

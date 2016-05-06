@@ -25,6 +25,7 @@ limitations under the License.
 <link rel="import" href="data-table-cell.html">
 <link rel="import" href="data-table-row.html">
 <link rel="import" href="data-table-checkbox.html">
+<link rel="import" href="data-table-row-detail.html">
 
 <!--
 `iron-data-table` displays a table or a grid of data.
@@ -45,7 +46,8 @@ Column templates should bind to template models of the following structure:
 {
   index: 0,        // index in the item array
   selected: false, // true if the current item is selected
-  item: {}         // user data corresponding to items[index]
+  item: {},        // user data corresponding to items[index],
+  expanded: false  // true if row details have been expanded for the current item
 }
 ```
 For example, given the following `data` array:
@@ -159,26 +161,13 @@ inspired styles to your `iron-data-table`.
         left: 50%;
         --paper-spinner-color: var(--default-primary-color);
       }
-
-      .item:focus {
-        outline: none;
-        @apply(--iron-data-table-row-focused);
-      }
-
-      .item:focus:after {
-        @apply(--iron-data-table-row-focused-after);
-      }
-
-      .item:after {
-        @apply(--iron-data-table-row-after);
-      }
     </style>
     <div id="container">
       <div id="header">
         <data-table-row header>
           <data-table-checkbox header hidden$="[[!multiSelection]]" on-tap="_toggleSelectAll" checked="[[_isSelectAllChecked(selectedItems.length, selectedItems.inverted)]]" indeterminate="[[_isSelectAllIndeterminate(selectedItems.length)]]"></data-table-checkbox>
           <template is="dom-repeat" items="[[columns]]" as="column">
-            <data-table-cell header column="[[column]]" templatizer="[[column.templatizeHeader]]" bind="[[_bind(column)]]">
+            <data-table-cell header column="[[column]]" bind="[[_bind(column)]]">
               <data-table-column-sort sort-order="[[sortOrder]]" path="[[column.sortBy]]" on-sort-direction-changed="_sortDirectionChanged" hidden$="[[!column.sortBy]]"></data-table-column-sort>
             </data-table-cell>
           </template>
@@ -187,11 +176,23 @@ inspired styles to your `iron-data-table`.
 
       <iron-list id="list" as="item" items="[[_cachedItems]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" multi-selection="[[multiSelection]]" selected-item="{{selectedItem}}" on-selected-items-changed="_selectedItemsChanged">
         <template>
-          <div class="item" tabindex$="[[tabIndex]]">
-            <data-table-row selected$="[[_isSelected(selected, selectedItems.inverted)]]" even$="[[!_isEven(index)]]">
+          <div class="item">
+            <data-table-row tabindex$="[[tabIndex]]"
+                            selected$="[[_isSelected(selected, selectedItems.inverted)]]"
+                            bind="[[_bind(item, index, selected, selectedItems.inverted, _expandedItems)]]"
+                            before-bind="[[beforeRowBind]]"
+                            even$="[[!_isEven(index)]]"
+                            row-detail-template="[[rowDetail]]"
+                            details-enabled="[[detailsEnabled]]"
+                            expanded="[[_isExpanded(item, _expandedItems)]]"
+                            on-item-expanded="_itemExpanded"
+                            on-item-collapsed="_itemCollapsed">
               <data-table-checkbox hidden$="[[!multiSelection]]" checked="[[_isSelected(selected, selectedItems.inverted)]]"></data-table-checkbox>
               <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
-                <data-table-cell column="[[column]]" templatizer="[[column.templatizeRow]]" bind="[[_bind(item, index, selected)]]"></data-table-cell>
+                <data-table-cell column="[[column]]" bind="[[_bind(item, index, selected, selectedItems.inverted, _expandedItems)]]" before-bind="[[beforeCellBind]]"></data-table-cell>
+              </template>
+              <template is="dom-if" if="[[_isExpanded(item, _expandedItems)]]" on-dom-change="_updateSizeForItem">
+                <data-table-row-detail row-detail-template="[[rowDetail]]" bind="[[_bind(item, index, selected, selectedItems.inverted, _expandedItems)]]"></data-table-row-detail>
               </template>
             </data-table-row>
           </div>
@@ -214,16 +215,56 @@ inspired styles to your `iron-data-table`.
         'column-filter-changed': '_onColumnFilterChanged',
         'iron-resize': '_resizeCellContainers',
         'item-changed': '_itemChanged',
+        'item-expanded': '_itemExpanded',
+        'item-collapsed': '_itemCollapsed',
         'scroll': '_onHorizontalScroll'
       },
 
       properties: {
+
+        /**
+         * A function that is called before data is bound to a row cell.
+         * Can be used to customize the cell element depending on the data.
+         * #### Example:
+         * ```js
+         * function(data, cell) {
+         *   cell.toggleClass('custom', data.useCustomClass);
+         * }
+         * ```
+         */
+        beforeCellBind: {
+          type: Object,
+          value: function() {
+            return function(data, cell) {};
+          }
+        },
+
+        /**
+         * A function that is called before data is bound to a row.
+         * Can be used to customize the row element depending on the data.
+         * #### Example:
+         * ```js
+         * function(data, row) {
+         *   row.toggleClass('custom', data.useCustomClass);
+         * }
+         * ```
+         */
+        beforeRowBind: Object,
+
         /**
          * An array containing the items which will be stamped to the column template
          * instances.
          */
         items: {
           type: Array
+        },
+
+        /**
+         * If `true`, tapping a row will expand the item details, if available.
+         */
+        detailsEnabled: {
+          type: Boolean,
+          value: false
         },
 
         /**
@@ -366,8 +407,31 @@ inspired styles to your `iron-data-table`.
         _currentPage: {
           type: Number,
           value: 0
+        },
+
+        _expandedItems: {
+          type: Array,
+          value: function() {
+            return [];
+          }
         }
       },
+
+     /**
+      * Fired before row details is expanded/collapsed.
+      *
+      * @event iron-data-table-row-expanding
+      * @param {Object} detail.row the data-table-row element being tapped
+      * @param {Object} detail.target the target element of the original tap event
+      */
+
+      /**
+       * Fired before row is selected/deselected.
+       *
+       * @event iron-data-table-row-selecting
+       * @param {Object} detail.row the data-table-row element being tapped
+       * @param {Object} detail.target the target element of the original tap event
+       */
 
       observers: ['_itemsChanged(items.*)',
         '_sizeChanged(size)',
@@ -383,9 +447,11 @@ inspired styles to your `iron-data-table`.
 
           if (info.addedNodes.filter(hasColumns).length > 0 ||
             info.removedNodes.filter(hasColumns).length > 0) {
-            this.set('columns', Polymer.dom(this).querySelectorAll('data-table-column'));
+            this.set('columns', this.getContentChildren('[select=data-table-column]'));
             this.notifyResize();
           }
+
+          this.set('rowDetail', Polymer.dom(this).querySelector('template[is=row-detail]'));
         }.bind(this));
       },
 
@@ -413,7 +479,11 @@ inspired styles to your `iron-data-table`.
        * @param {(Object|number)} item The item object or its index
        */
       selectItem: function(item) {
-        this.$.list.selectItem(item);
+        if (this.selectedItems && this.selectedItems.inverted) {
+          this.$.list.deselectItem(item);
+        } else {
+          this.$.list.selectItem(item);
+        }
       },
 
       _isSelected: function(selected, inverted) {
@@ -477,15 +547,22 @@ inspired styles to your `iron-data-table`.
        * @param {(Object|number)} item The item object or its index
        */
       deselectItem: function(item) {
-        this.$.list.deselectItem(item);
+        if (this.selectedItems && this.selectedItems.inverted) {
+          this.$.list.selectItem(item);
+        } else {
+          this.$.list.deselectItem(item);
+        }
       },
 
-      _bind: function(item, index, selected) {
+      _bind: function(item, index, selected, inverted, expandedItems) {
         if (index !== undefined && selected !== undefined) {
           return {
             item: item,
             index: index,
-            selected: selected
+            selected: inverted ? !selected : selected,
+            // store expanded twice to detect changes coming from inside the template.
+            __expanded__: this._isExpanded(item, expandedItems),
+            expanded: this._isExpanded(item, expandedItems)
           };
         } else {
           return {
@@ -506,12 +583,12 @@ inspired styles to your `iron-data-table`.
         return Array.prototype.filter.call(items, function(item, index) {
           for (var i = 0; i < filter.length; i++) {
             var value = this.get(filter[i].path, item);
-
-            if (value.toString().toLowerCase().indexOf(filter[i].filter.toString().toLowerCase()) === -1) {
+            if (!filter[i].filter) {
+              continue;
+            } else if (!value || value.toString().toLowerCase().indexOf(filter[i].filter.toString().toLowerCase()) === -1) {
               return false;
             }
           }
-
           return true;
         }.bind(this));
       },
@@ -548,7 +625,8 @@ inspired styles to your `iron-data-table`.
           };
         };
 
-        return Array.prototype.sort.call(items, multiSort(sortOrder).bind(this));
+        // make sure a copy is used so that original array is unaffected.
+        return Array.prototype.sort.call(items.slice(0), multiSort(sortOrder).bind(this));
       },
 
       _sortDirectionChanged: function(e) {
@@ -595,7 +673,7 @@ inspired styles to your `iron-data-table`.
 
       _onColumnFilterChanged: function(e) {
         for (var i = 0; i < this.filter.length; i++) {
-          if (this.filter[i].path === e.target.filterBy) {
+          if (this.filter[i].path === e.detail.filterBy) {
             this.set('filter.' + i + '.filter', e.detail.value);
             this.set('selectedItems.filters.' + i + '.filter', e.detail.value);
             return;
@@ -603,12 +681,12 @@ inspired styles to your `iron-data-table`.
         }
 
         this.push('filter', {
-          path: e.target.filterBy,
+          path: e.detail.filterBy,
           filter: e.detail.value
         });
 
         this.push('selectedItems.filters', {
-          path: e.target.filterBy,
+          path: e.detail.filterBy,
           filter: e.detail.value
         });
       },
@@ -676,6 +754,9 @@ inspired styles to your `iron-data-table`.
                 }
               }
             }
+
+            //TODO: row details template instances need to be notified also.
+
             this.set(items.path.replace('items.', '_cachedItems.').replace('#' + index, cachedIndex), items.value);
           }
         }
@@ -688,6 +769,18 @@ inspired styles to your `iron-data-table`.
             this.set('items.' + index + '.' + e.detail.path, e.detail.value);
           }
         }
+      },
+
+      _itemExpanded: function(e) {
+        var item = e.detail.item || e.model.item;
+
+        this.expandItem(item);
+      },
+
+      _itemCollapsed: function(e) {
+        var item = e.detail.item || e.model.item;
+
+        this.collapseItem(item);
       },
 
       _currentPageChanged: function(dataSource, page) {
@@ -793,6 +886,43 @@ inspired styles to your `iron-data-table`.
 
       _pagesLoadingChanged: function(pagesLoading) {
         this.loading = pagesLoading > 0;
+      },
+
+      _updateSizeForItem: function(event) {
+        if (event.model.get('item')) {
+          // notifyResize() doesn't do anything on iOS if the viewport size hasn't changed
+          // so this is more reliable.
+          this.$.list.updateSizeForItem(event.model.get('item'));
+        }
+      },
+
+      /**
+       * Expands the row details for this item, if available.
+       */
+      expandItem: function(item) {
+        if (this.rowDetail && this._expandedItems && !this._isExpanded(item, this._expandedItems)) {
+
+          // replacing the whole array here to simplify the obsevers.
+          this._expandedItems.push(item);
+          this._expandedItems = this._expandedItems.slice(0);
+        }
+      },
+
+      /**
+       * Collapses the row details for this item, if expanded.
+       */
+      collapseItem: function(item) {
+        if (this.rowDetail && this._expandedItems && this._isExpanded(item, this._expandedItems)) {
+          var index = this._expandedItems.indexOf(item);
+
+          // replacing the whole array here to simplify the obsevers.
+          this._expandedItems.splice(index, 1);
+          this._expandedItems = this._expandedItems.slice(0);
+        }
+      },
+
+      _isExpanded: function(item, items) {
+        return items && items.indexOf(item) > -1;
       }
     });
   </script>

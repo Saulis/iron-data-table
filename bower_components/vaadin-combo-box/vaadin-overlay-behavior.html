@@ -40,16 +40,39 @@
       this._boundSetPosition = this._setPosition.bind(this);
     },
 
-    attached: function() {
-      if (this.parentElement === document.body) {
-        this.style.position = this._isPositionFixed(this.positionTarget) ? 'fixed' : 'absolute';
-        window.addEventListener('scroll', this._boundSetPosition, true);
-        this._setPosition();
+    _processPendingMutationObserversFor: function(node) {
+      if (!Polymer.Settings.useNativeCustomElements) {
+        CustomElements.takeRecords(node);
       }
     },
 
-    detached: function() {
-      window.removeEventListener('scroll', this._boundSetPosition, true);
+    _moveTo: function(target) {
+      // `attached` and `detached` callbacks are unreliable with Shadow DOM polyfill. They are asynchonous and sometimes
+      // cancel each other. We need to process mutation observers synchonously after moving the overlay. :-(
+      var oldParentNode = this.parentNode;
+      Polymer.dom(target).appendChild(this);
+
+      if (oldParentNode) {
+        this._processPendingMutationObserversFor(oldParentNode);
+        if (oldParentNode.host) {
+          // When moving from local DOM, ensure to remove the old style scope
+          Polymer.StyleTransformer.dom(this, oldParentNode.host.is, this._scopeCssViaAttr, true);
+        }
+      }
+
+      this._processPendingMutationObserversFor(this);
+      if (target.host) {
+        // When moving to local DOM, ensure to add the new style scope
+        Polymer.StyleTransformer.dom(this, target.host.is, this._scopeCssViaAttr);
+      }
+
+      if (target === document.body) {
+        this.style.position = this._isPositionFixed(this.positionTarget) ? 'fixed' : 'absolute';
+        window.addEventListener('scroll', this._boundSetPosition, true);
+        this._setPosition();
+      } else {
+        window.removeEventListener('scroll', this._boundSetPosition, true);
+      }
     },
 
     _verticalOffset: function(overlayRect, targetRect) {
@@ -62,7 +85,7 @@
 
     _isPositionFixed: function(element) {
       var parentElement = element.parentElement || element.domHost;
-      return window.getComputedStyle(element).position === 'fixed' ||
+      return window.getComputedStyle(window.unwrap(element)).position === 'fixed' ||
         (parentElement && this._isPositionFixed(parentElement));
     },
 
@@ -78,8 +101,8 @@
       }
     },
 
-    _setPosition: function() {
-      if (this.parentElement === document.body) {
+    _setPosition: function(e) {
+      if ((!e || e.target.contains(this) || e.target.contains(this.positionTarget)) && unwrap(this.parentElement) === document.body) {
         var targetRect = this.positionTarget.getBoundingClientRect();
         this._alignedAbove = this._shouldAlignAbove();
 
@@ -90,14 +113,18 @@
         this.$.selector.style.maxHeight = this._maxHeight(targetRect);
 
         var overlayRect = this.getBoundingClientRect();
-
         this._translateX = targetRect.left - overlayRect.left + (this._translateX || 0);
         this._translateY = targetRect.top - overlayRect.top + (this._translateY || 0) +
           this._verticalOffset(overlayRect, targetRect);
 
+        var _devicePixelRatio = window.devicePixelRatio || 1;
+        this._translateX = Math.round(this._translateX * _devicePixelRatio) / _devicePixelRatio;
+        this._translateY = Math.round(this._translateY * _devicePixelRatio) / _devicePixelRatio;
         this.translate3d(this._translateX + 'px', this._translateY + 'px', '0');
 
         this.style.width = this.positionTarget.clientWidth + 'px';
+
+        this.updateViewportBoundaries();
       }
     },
 
