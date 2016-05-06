@@ -177,10 +177,19 @@ inspired styles to your `iron-data-table`.
       <iron-list id="list" as="item" items="[[_cachedItems]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" multi-selection="[[multiSelection]]" selected-item="{{selectedItem}}" on-selected-items-changed="_selectedItemsChanged">
         <template>
           <div class="item">
-            <data-table-row tabindex$="[[tabIndex]]" selected$="[[_isSelected(selected, selectedItems.inverted)]]" even$="[[!_isEven(index)]]" row-detail-template="[[rowDetail]]" details-enabled="[[detailsEnabled]]" expanded="[[_isExpanded(item, _expandedItems)]]" on-item-expanded="_itemExpanded" on-item-collapsed="_itemCollapsed">
+            <data-table-row tabindex$="[[tabIndex]]"
+                            selected$="[[_isSelected(selected, selectedItems.inverted)]]"
+                            bind="[[_bind(item, index, selected, selectedItems.inverted, _expandedItems)]]"
+                            before-bind="[[beforeRowBind]]"
+                            even$="[[!_isEven(index)]]"
+                            row-detail-template="[[rowDetail]]"
+                            details-enabled="[[detailsEnabled]]"
+                            expanded="[[_isExpanded(item, _expandedItems)]]"
+                            on-item-expanded="_itemExpanded"
+                            on-item-collapsed="_itemCollapsed">
               <data-table-checkbox hidden$="[[!multiSelection]]" checked="[[_isSelected(selected, selectedItems.inverted)]]"></data-table-checkbox>
               <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
-                <data-table-cell column="[[column]]" bind="[[_bind(item, index, selected, selectedItems.inverted, _expandedItems)]]"></data-table-cell>
+                <data-table-cell column="[[column]]" bind="[[_bind(item, index, selected, selectedItems.inverted, _expandedItems)]]" before-bind="[[beforeCellBind]]"></data-table-cell>
               </template>
               <template is="dom-if" if="[[_isExpanded(item, _expandedItems)]]" on-dom-change="_updateSizeForItem">
                 <data-table-row-detail row-detail-template="[[rowDetail]]" bind="[[_bind(item, index, selected, selectedItems.inverted, _expandedItems)]]"></data-table-row-detail>
@@ -212,6 +221,36 @@ inspired styles to your `iron-data-table`.
       },
 
       properties: {
+
+        /**
+         * A function that is called before data is bound to a row cell.
+         * Can be used to customize the cell element depending on the data.
+         * #### Example:
+         * ```js
+         * function(data, cell) {
+         *   cell.toggleClass('custom', data.useCustomClass);
+         * }
+         * ```
+         */
+        beforeCellBind: {
+          type: Object,
+          value: function() {
+            return function(data, cell) {};
+          }
+        },
+
+        /**
+         * A function that is called before data is bound to a row.
+         * Can be used to customize the row element depending on the data.
+         * #### Example:
+         * ```js
+         * function(data, row) {
+         *   row.toggleClass('custom', data.useCustomClass);
+         * }
+         * ```
+         */
+        beforeRowBind: Object,
+
         /**
          * An array containing the items which will be stamped to the column template
          * instances.
