@@ -152,7 +152,7 @@ inspired styles to your `iron-data-table`.
       }
 
       :host[loading] #list {
-        opacity: 0.25;
+        opacity: 0.05;
       }
 
       :host[loading] paper-spinner-lite {
@@ -195,6 +195,22 @@ inspired styles to your `iron-data-table`.
   </template>
 
   <script>
+    function FakeArray(length) {
+      this._size = length;
+
+      Object.defineProperty(this, 'length', {
+        get: function() {
+          return this._size;
+        },
+
+        set: function(l) {
+          this._size = l;
+        }
+      });
+    }
+
+    FakeArray.prototype = Array.prototype;
+
     Polymer({
       is: 'iron-data-table',
 
@@ -561,6 +577,7 @@ inspired styles to your `iron-data-table`.
         this.clearSelection();
 
         this.debounce('reset', function() {
+          this._cachedItems = new FakeArray(this.size);
           this.clearCache();
           this.$.list.scrollToIndex(0);
         }.bind(this), 100);
@@ -812,26 +829,38 @@ inspired styles to your `iron-data-table`.
       },
 
       _sizeChanged: function(size) {
+        console.log('size: ', size);
         // Optimization: Calling `set` on _cachedItems will reset the scroll position and selections,
         // using `push` and `pop` with large changes (more than 1000 items) is a heavy operation
         // that jams things up.
-        if (this._cachedItems && Math.abs(this._cachedItems.length - size) < this.pageSize * 2) {
-          while (this._cachedItems.length < size) {
-            this.push('_cachedItems', {});
-          }
-
-          while (this._cachedItems.length > size) {
-            this.pop('_cachedItems');
-          }
+        if (!this._cachedItems) {
+          this._cachedItems = new FakeArray(size);
         } else {
-          var items = [];
-
-          while (items.length < size) {
-            items.push({});
-          }
-
-          this.set('_cachedItems', items);
+          this.set('_cachedItems.length', size);
         }
+
+        // if (this._cachedItems && Math.abs(this._cachedItems.length - size) < this.pageSize * 2) {
+        //   // this._cachedItems.length = size;
+        //   this.set('_cachedItems.length', size);
+        //   // while (this._cachedItems.length < size) {
+        //   //   this.push('_cachedItems', {});
+        //   // }
+        //   //
+        //   // while (this._cachedItems.length > size) {
+        //   //   this.pop('_cachedItems');
+        //   // }
+        // } else {
+        //
+        //   var items = new FakeArray();
+        //
+        //   items.length = size;
+        //
+        //   // while (items.length < size) {
+        //   //   items.push({});
+        //   // }
+        //
+        //   this.set('_cachedItems', items);
+        // }
       },
 
       /**
