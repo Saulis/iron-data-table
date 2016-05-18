@@ -57,23 +57,9 @@
     Polymer({
       is: 'data-table-row',
 
-      listeners: {
-        'tap': '_onTap'
-      },
-
       properties: {
         beforeBind: Object,
         bind: Object,
-        header: Boolean,
-        expanded: {
-          type: Boolean,
-          notify: false,
-          value: false,
-          reflectToAttribute: true,
-          observer: '_expandedChanged'
-        },
-
-        rowDetailTemplate: Object,
 
         _static: {
           type: Object,
@@ -102,25 +88,6 @@
 
       _bindChanged: function(data, beforeBind) {
         beforeBind(data, this);
-      },
-
-      _onTap: function(e) {
-        // Prevent item selection if row itself is not focused. This means that
-        // an element inside the row has been focused.
-        // Mobile devices don't move focus from body unless it's an input element that is focused, so this element will never get focused.
-        if (!this.header && document.activeElement !== document.body && Polymer.dom(document.activeElement) !== Polymer.dom(this)) {
-          e.stopPropagation();
-        } else if (this.rowDetailTemplate && this.detailsEnabled) {
-            this.expanded = !this.expanded;
-        }
-      },
-
-      _expandedChanged: function(expanded) {
-        if (expanded) {
-          this.fire('item-expanded');
-        } else {
-          this.fire('item-collapsed');
-        }
       }
     });
   </script>
