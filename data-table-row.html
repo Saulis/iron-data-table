@@ -57,22 +57,9 @@
     Polymer({
       is: 'data-table-row',
 
-      listeners: {
-        'tap': '_onTap'
-      },
-
       properties: {
         beforeBind: Object,
         bind: Object,
-        header: Boolean,
-        expanded: {
-          type: Boolean,
-          notify: false,
-          value: false,
-          reflectToAttribute: true
-        },
-
-        rowDetailTemplate: Object,
 
         _static: {
           type: Object,
@@ -80,7 +67,7 @@
         }
       },
 
-      observers: ['_bindChanged(bind, beforeBind)', '_expandedChanged(expanded, bind)'],
+      observers: ['_bindChanged(bind, beforeBind)'],
 
       attached: function() {
         if (this.domHost && this.domHost.tagName === 'IRON-DATA-TABLE') {
@@ -104,28 +91,6 @@
 
       _bindChanged: function(data, beforeBind) {
         beforeBind(data, this);
-      },
-
-      _onTap: function(e) {
-        // Prevent item selection if row itself is not focused. This means that
-        // an element inside the row has been focused.
-        // Mobile devices don't move focus from body unless it's an input element that is focused, so this element will never get focused.
-        if (!this.header && document.activeElement !== document.body && Polymer.dom(document.activeElement) !== Polymer.dom(this)) {
-          e.stopPropagation();
-        } else if (this.rowDetailTemplate && this.detailsEnabled) {
-            this.expanded = !this.expanded;
-        }
-      },
-
-      // events can be fired also without the detail object, where the handler
-      // can get it using e.model.item property, but we still need to make sure
-      // bind has been set before firing the events.
-      _expandedChanged: function(expanded, bind) {
-        if (expanded) {
-          this.fire('item-expanded', {item: bind.item});
-        } else {
-          this.fire('item-collapsed', {item: bind.item});
-        }
       }
     });
   </script>

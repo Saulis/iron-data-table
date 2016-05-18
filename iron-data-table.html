@@ -116,10 +116,8 @@ inspired styles to your `iron-data-table`.
         overflow-x: auto;
         overflow-y: hidden;
         -webkit-overflow-scrolling: touch;
-
         /* Default height just to help users get started in making stuff visible.  */
         height: 400px;
-
         @apply(--iron-data-table);
       }
 
@@ -128,7 +126,6 @@ inspired styles to your `iron-data-table`.
         left: 0;
         top: 0;
         bottom: 0;
-
         display: flex;
         flex-direction: column;
       }
@@ -180,25 +177,16 @@ inspired styles to your `iron-data-table`.
         </data-table-row>
       </div>
 
-      <iron-list id="list" as="item" items="[[_cachedItems]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" multi-selection="[[multiSelection]]" selected-item="{{selectedItem}}" on-selected-items-changed="_selectedItemsChanged">
+      <iron-list id="list" as="item" items="[[_cachedItems]]" on-scroll="_onVerticalScroll">
         <template>
           <div class="item">
-            <data-table-row tabindex$="[[tabIndex]]"
-                            selected$="[[_isSelected(selected, selectedItems.inverted)]]"
-                            bind="[[_bind(item, index, selected, selectedItems.inverted, _expandedItems)]]"
-                            before-bind="[[beforeRowBind]]"
-                            even$="[[!_isEven(index)]]"
-                            row-detail-template="[[rowDetail]]"
-                            details-enabled="[[detailsEnabled]]"
-                            expanded="[[_isExpanded(item, _expandedItems)]]"
-                            on-item-expanded="_itemExpanded"
-                            on-item-collapsed="_itemCollapsed">
-              <data-table-checkbox hidden$="[[!multiSelection]]" checked="[[_isSelected(selected, selectedItems.inverted)]]"></data-table-checkbox>
+            <data-table-row tabindex$="[[tabIndex]]" bind="[[_bind(item, index, selectedItems, _expandedItems)]]" before-bind="[[beforeRowBind]]" even$="[[!_isEven(index)]]" selected$="[[_isSelected(item, selectedItems, selectedItems.*)]]">
+              <data-table-checkbox hidden$="[[!multiSelection]]" checked="[[_isSelected(item, selectedItems, selectedItems.*)]]" on-tap="_onCheckBoxTap"></data-table-checkbox>
               <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
-                <data-table-cell column="[[column]]" bind="[[_bind(item, index, selected, selectedItems.inverted, _expandedItems)]]" before-bind="[[beforeCellBind]]"></data-table-cell>
+                <data-table-cell column="[[column]]" bind="[[_bind(item, index, selectedItems, _expandedItems)]]" before-bind="[[beforeCellBind]]" on-tap="_onCellTap"></data-table-cell>
               </template>
               <template is="dom-if" if="[[_isExpanded(item, _expandedItems)]]" on-dom-change="_updateSizeForItem">
-                <data-table-row-detail row-detail-template="[[rowDetail]]" bind="[[_bind(item, index, selected, selectedItems.inverted, _expandedItems)]]"></data-table-row-detail>
+                <data-table-row-detail row-detail-template="[[rowDetail]]" bind="[[_bind(item, index, selectedItems, _expandedItems)]]"></data-table-row-detail>
               </template>
             </data-table-row>
           </div>
@@ -423,13 +411,13 @@ inspired styles to your `iron-data-table`.
         }
       },
 
-     /**
-      * Fired before row details is expanded/collapsed.
-      *
-      * @event iron-data-table-row-expanding
-      * @param {Object} detail.row the data-table-row element being tapped
-      * @param {Object} detail.target the target element of the original tap event
-      */
+      /**
+       * Fired before row details is expanded/collapsed.
+       *
+       * @event iron-data-table-row-expanding
+       * @param {Object} detail.row the data-table-row element being tapped
+       * @param {Object} detail.target the target element of the original tap event
+       */
 
       /**
        * Fired before row is selected/deselected.
@@ -442,7 +430,8 @@ inspired styles to your `iron-data-table`.
       observers: ['_itemsChanged(items.*)',
         '_sizeChanged(size)',
         '_currentPageChanged(dataSource, _currentPage)',
-        '_resetData(dataSource, filter.*, sortOrder.*)'
+        '_resetData(dataSource, filter.*, sortOrder.*)',
+        '_selectedItemsChanged(selectedItems.*)'
       ],
 
       created: function() {
@@ -469,7 +458,7 @@ inspired styles to your `iron-data-table`.
 
           var model = this.modelForElement(first);
           if (model) {
-              this.toggleSelectionForItem(model[this.as]);
+            this.toggleSelectionForItem(model[this.as]);
           }
         };
       },
@@ -485,32 +474,85 @@ inspired styles to your `iron-data-table`.
        * @param {(Object|number)} item The item object or its index
        */
       selectItem: function(item) {
-        if (this.selectedItems && this.selectedItems.inverted) {
-          this.$.list.deselectItem(item);
-        } else {
-          this.$.list.selectItem(item);
+        if (this.selectionEnabled) {
+          if (typeof item === 'number' && item >= 0 && this.items && this.items.length > item) {
+            this._selectItem(this.items[item]);
+          } else {
+            this._selectItem(item);
+          }
         }
       },
 
-      _isSelected: function(selected, inverted) {
-        return inverted ? !selected : selected;
+      _selectItem: function(item) {
+        this.selectedItem = item;
+
+        if (this.multiSelection) {
+          if (this.selectedItems.inverted) {
+            if ((index = this.selectedItems.indexOf(item)) > -1) {
+              this.splice('selectedItems', index, 1);
+            }
+          } else {
+            this.push('selectedItems', item);
+          }
+        } else {
+          this.splice('selectedItems', 0, this.selectedItems.length, item);
+        }
+      },
+
+      /**
+       * Deselects the given item list if it is already selected.
+       *
+       * @method deselect
+       * @param {(Object|number)} item The item object or its index
+       */
+      deselectItem: function(item) {
+        if (typeof item === 'number' && item >= 0 && this.items && this.items.length > item) {
+          this._deselectItem(this.items[item]);
+        } else {
+          this._deselectItem(item);
+        }
+      },
+
+      _deselectItem: function(item) {
+        this.selectedItem = null;
+
+        var index = this.selectedItems.indexOf(item);
+
+        if (this.selectedItems.inverted) {
+          if (index === -1) {
+            this.push('selectedItems', item);
+          }
+        } else {
+          if (index > -1) {
+            this.splice('selectedItems', index, 1);
+          }
+        }
+      },
+
+      _isSelected: function(item, selectedItems) {
+        var selected = selectedItems.indexOf(item) > -1;
+
+        return selectedItems.inverted ? !selected : selected;
       },
 
       /**
        * Multi-Selection
        */
       _selectedItemsChanged: function(e) {
-        if (Array.isArray(e.detail.value)) {
-          var items = e.detail.value;
-          var inverted = (this.selectedItems && this.selectedItems.inverted) || false;
+        if (e.path === 'selectedItems.splices') {
+          var splices = e.value.indexSplices[0];
 
-          this.set('selectedItems', items);
-          this.set('selectedItems.inverted', inverted);
-          this.notifyPath('selectedItems.length', items.length);
-          this.set('selectedItems.filters', this.filter || []);
-        } else if (e.detail.path === 'selectedItems.splices') {
-          this.notifyPath('selectedItems.splices', e.detail.value);
-          this.notifyPath('selectedItems.length', this.selectedItems.length);
+          Array.prototype.forEach.call(splices.object, function(item) {
+            this._templatesForItem(item).forEach(function(t) {
+              t.selected = e.base.inverted ? false : true;
+            });
+          }.bind(this));
+
+          Array.prototype.forEach.call(splices.removed, function(item) {
+            this._templatesForItem(item).forEach(function(t) {
+              t.selected = e.base.inverted ? true : false;
+            });
+          }.bind(this));
         }
       },
 
@@ -518,16 +560,22 @@ inspired styles to your `iron-data-table`.
        * Selects all the items in the list.
        */
       selectAll: function() {
-        this.set('selectedItems.inverted', true);
-        this.$.list.clearSelection();
+        var selectedItems = [];
+        selectedItems.inverted = true;
+        selectedItems.filters = this.filters;
+
+        this.set('selectedItems', selectedItems);
       },
 
       /**
        * Clears the current selection state.
        */
       clearSelection: function() {
-        this.set('selectedItems.inverted', false);
-        this.$.list.clearSelection();
+        var selectedItems = [];
+        selectedItems.inverted = false;
+        selectedItems.filters = this.filters;
+
+        this.set('selectedItems', selectedItems);
       },
 
       _toggleSelectAll: function() {
@@ -546,26 +594,13 @@ inspired styles to your `iron-data-table`.
         return selectedItemsLength > 0;
       },
 
-      /**
-       * Deselects the given item list if it is already selected.
-       *
-       * @method deselect
-       * @param {(Object|number)} item The item object or its index
-       */
-      deselectItem: function(item) {
-        if (this.selectedItems && this.selectedItems.inverted) {
-          this.$.list.selectItem(item);
-        } else {
-          this.$.list.deselectItem(item);
-        }
-      },
 
-      _bind: function(item, index, selected, inverted, expandedItems) {
-        if (index !== undefined && selected !== undefined) {
+      _bind: function(item, index, selectedItems, expandedItems) {
+        if (index !== undefined) {
           return {
             item: item,
             index: index,
-            selected: inverted ? !selected : selected,
+            selected: this._isSelected(item, selectedItems),
             // store expanded twice to detect changes coming from inside the template.
             __expanded__: this._isExpanded(item, expandedItems),
             expanded: this._isExpanded(item, expandedItems)
@@ -704,6 +739,18 @@ inspired styles to your `iron-data-table`.
         }
       },
 
+      _templatesForItem: function(item) {
+        return this.columns.map(function(col) {
+            return col._templateInstances;
+          })
+          .reduce(function(a, b) {
+            return a.concat(b);
+          }, [])
+          .filter(function(t) {
+            return t.item === item;
+          });
+      },
+
       _itemChanged: function(e) {
         if (this.items) {
           var index = this.items.indexOf(e.detail.item);
@@ -714,17 +761,13 @@ inspired styles to your `iron-data-table`.
       },
 
       _itemExpanded: function(e) {
-        var item = e.detail.item || e.model.item;
-
-        this.expandItem(item);
+        this.expandItem(e.detail.item);
       },
 
       _itemCollapsed: function(e) {
-        var item = e.detail.item || e.model.item;
-
-        this.collapseItem(item);
+        this.collapseItem(e.detail.item);
       },
-
+      
       _currentPageChanged: function(dataSource, page) {
         if (this._cachedPages && this._cachedPages.indexOf(page) === -1) {
           this.loading = true;
@@ -845,7 +888,7 @@ inspired styles to your `iron-data-table`.
       expandItem: function(item) {
         if (this.rowDetail && this._expandedItems && !this._isExpanded(item, this._expandedItems)) {
 
-          // replacing the whole array here to simplify the obsevers.
+          // replacing the whole array here to simplify the observers.
           this._expandedItems.push(item);
           this._expandedItems = this._expandedItems.slice(0);
         }
@@ -866,6 +909,34 @@ inspired styles to your `iron-data-table`.
 
       _isExpanded: function(item, items) {
         return items && items.indexOf(item) > -1;
+      },
+
+      _onCellTap: function(e) {
+        // Prevent item selection if row itself is not focused. This means that
+        // an element inside the row has been focused.
+        // Mobile devices don't move focus from body unless it's an input element that is focused, so this element will never get focused.
+        if (document.activeElement !== document.body &&
+            Polymer.dom(e).localTarget.contains(Polymer.dom(document.activeElement).node)) {
+          return;
+        } else {
+          if (this.rowDetail && this.detailsEnabled) {
+            if (this._isExpanded(e.model.item, this._expandedItems)) {
+              this.collapseItem(e.model.item);
+            } else {
+              this.expandItem(e.model.item);
+            }
+          }
+
+          if (this.selectionEnabled) {
+            this._isSelected(e.model.item, this.selectedItems) ? this.deselectItem(e.model.item) : this.selectItem(e.model.item);
+          }
+        }
+      },
+
+      _onCheckBoxTap: function(e) {
+        if (this.selectionEnabled) {
+          this._isSelected(e.model.item, this.selectedItems) ? this.deselectItem(e.model.item) : this.selectItem(e.model.item);
+        }
       }
     });
   </script>
