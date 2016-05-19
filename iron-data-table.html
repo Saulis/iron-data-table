@@ -304,6 +304,7 @@ inspired styles to your `iron-data-table`.
          */
         selectedItem: {
           type: Object,
+          readOnly: true,
           notify: true
         },
 
@@ -315,6 +316,7 @@ inspired styles to your `iron-data-table`.
         selectedItems: {
           type: Object,
           notify: true,
+          readOnly: true,
           value: function() {
             var items = [];
             items.filters = [];
@@ -350,6 +352,9 @@ inspired styles to your `iron-data-table`.
         columns: {
           type: Array,
           notify: true,
+          value: function() {
+            return [];
+          },
           observer: '_columnsChanged'
         },
 
@@ -484,7 +489,7 @@ inspired styles to your `iron-data-table`.
       },
 
       _selectItem: function(item) {
-        this.selectedItem = item;
+        this._setSelectedItem(item);
 
         if (this.multiSelection) {
           if (this.selectedItems.inverted) {
@@ -514,7 +519,7 @@ inspired styles to your `iron-data-table`.
       },
 
       _deselectItem: function(item) {
-        this.selectedItem = null;
+        this._setSelectedItem(null);
 
         var index = this.selectedItems.indexOf(item);
 
@@ -564,7 +569,7 @@ inspired styles to your `iron-data-table`.
         selectedItems.inverted = true;
         selectedItems.filters = this.filters;
 
-        this.set('selectedItems', selectedItems);
+        this._setSelectedItems(selectedItems);
       },
 
       /**
@@ -575,7 +580,7 @@ inspired styles to your `iron-data-table`.
         selectedItems.inverted = false;
         selectedItems.filters = this.filters;
 
-        this.set('selectedItems', selectedItems);
+        this._setSelectedItems(selectedItems);
       },
 
       _toggleSelectAll: function() {
@@ -767,7 +772,7 @@ inspired styles to your `iron-data-table`.
       _itemCollapsed: function(e) {
         this.collapseItem(e.detail.item);
       },
-      
+
       _currentPageChanged: function(dataSource, page) {
         if (this._cachedPages && this._cachedPages.indexOf(page) === -1) {
           this.loading = true;
@@ -800,15 +805,6 @@ inspired styles to your `iron-data-table`.
               var item = items[i];
 
               this.set('_cachedItems.' + index, item);
-
-              // TODO: send an issue/pr to iron-list, that makes sure the internal
-              // collection stays up-to-date when `items` change.
-              this.$.list._collection.store[index] = item;
-              if (item && typeof item == 'object') {
-                this.$.list._collection.omap.set(item, index);
-              } else {
-                this.$.list._collection.pmap[item] = index;
-              }
             }
 
             // resize required for variable row height items.

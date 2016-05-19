@@ -8,6 +8,7 @@
   <script src="../../test-fixture/test-fixture-mocha.js"></script>
   <link rel="import" href="../../iron-test-helpers/iron-test-helpers.html">
   <link rel="import" href="../iron-data-table.html">
+  <link rel="import" href="../../vaadin-combo-box/vaadin-combo-box.html">
 </head>
 
 <body>
@@ -27,7 +28,273 @@
     </template>
   </test-fixture>
 
+  <test-fixture id="table">
+    <template>
+      <iron-data-table selection-enabled>
+        <template is="row-details">
+          <div>[[selected]]</div>
+          <vaadin-combo-box items="[[items]]" selectedItem="{{selected}}"></vaadin-combo-box>
+        </template>
+        <data-table-column name="First">
+          <template>
+            <value-helper id="first" value="[[selected]]"></value-helper>
+          </template>
+        </data-table-column>
+        <data-table-column name="Second">
+          <template>
+            <value-helper id="second" value="[[selected]]"></value-helper>
+            <input id="input" type="text"></input>
+          </template>
+        </data-table-column>
+      </iron-data-table>
+    </template>
+  </test-fixture>
+
+  <dom-module id="value-helper">
+    <template>
+      <style>
+        :host {
+          display: block;
+        }
+      </style>
+      <div>[[value]]</div>
+    </template>
+    <script>
+      Polymer({
+        is: 'value-helper',
+
+        properties: {
+          value: {
+            type: Object,
+            notify: true
+          }
+        }
+      });
+    </script>
+  </dom-module>
+
   <script>
+    describe('selecting items', function() {
+      var table;
+      var first, second, input;
+
+      function tap(node) {
+        Polymer.Base.fire('tap', null, {
+          node: node
+        });
+      }
+
+      function waitUntil(fn, done) {
+        setTimeout(function() {
+          if (!fn()) {
+            waitUntil(fn, done);
+          } else {
+            done();
+          }
+        }, 10);
+      }
+
+      beforeEach(function(done) {
+        table = fixture('table');
+        table.items = ['foo', 'bar', 'baz'];
+        first = table.querySelector("#first");
+        second = table.querySelector("#second");
+        input = table.querySelector("#input");
+
+        //100ms to take into account the debounce on _loadPage.
+        table.async(done, 100);
+      });
+
+      function assertSelected(selected) {
+        expect(table.selectedItem).to.eql(selected);
+      }
+
+      describe('by using select functions', function() {
+        it('should update selectedItem(s) on select', function() {
+          table.selectItem('foo');
+
+          expect(table.selectedItem).to.eql('foo');
+          expect(table.selectedItems).to.have.members(['foo']);
+        });
+
+        it('should fire `selected-item-changed`', function(done) {
+          table.addEventListener('selected-item-changed', function(e) {
+            expect(e.detail.value).to.eql('foo');
+
+            done();
+          });
+
+          table.selectItem('foo');
+        });
+
+        it('should fire `selected-items-changed`', function(done) {
+          table.addEventListener('selected-items-changed', function(e) {
+            expect(e.detail.value.indexSplices[0].object[0]).to.eql('foo');
+
+            done();
+          });
+
+          table.selectItem('foo');
+        });
+
+        it('should update selectedItem(s) on second select', function() {
+          table.selectItem('foo');
+          table.selectItem('bar');
+
+          expect(table.selectedItem).to.eql('bar');
+          expect(table.selectedItems).to.have.members(['bar']);
+        });
+
+        it('should update selectedItem(s) on deselect', function() {
+          table.selectItem('foo');
+          table.deselectItem('foo');
+
+          expect(table.selectedItem).to.be.null;
+          expect(table.selectedItems).to.have.members([]);
+        });
+
+        it('should update selectedItem also on invalid deselect', function() {
+          table.selectItem('foo');
+          table.deselectItem('bar');
+
+          expect(table.selectedItem).to.be.null;
+          expect(table.selectedItems).to.have.members(['foo']);
+        });
+
+        it('should update [[selected]] on select', function(done) {
+          first.addEventListener('value-changed', function(e) {
+            expect(e.detail.value).to.eql(true);
+            done();
+          });
+
+          table.selectItem('foo');
+        });
+
+        it('should update [[selected]] on deselect', function(done) {
+          table.selectItem('foo');
+
+          first.addEventListener('value-changed', function(e) {
+            expect(e.detail.value).to.eql(false);
+            done();
+          });
+
+          table.deselectItem('foo');
+        });
+
+        describe('multi-select', function() {
+          beforeEach(function() {
+            table.multiSelection = true;
+          });
+
+          it('should update selectedItems on multiple select', function() {
+            table.selectItem('foo');
+            table.selectItem('bar');
+
+            expect(table.selectedItems).to.have.members(['foo', 'bar']);
+          });
+
+          it('should update selectedItems on deselect', function() {
+            table.selectItem('foo');
+            table.selectItem('bar');
+            table.deselectItem('foo');
+
+            expect(table.selectedItems).to.have.members(['bar']);
+          });
+        });
+      });
+
+      describe('by tapping on rows', function() {
+        it('should not select row when selection-enabled is false', function(done) {
+          table.selectionEnabled = false;
+
+          first.addEventListener('value-changed', function(e) {
+            done(new Error('Value should not change.'));
+          });
+
+          tap(first);
+
+          setTimeout(done, 250);
+        });
+
+        it('should select row when tapping', function(done) {
+          first.addEventListener('value-changed', function(e) {
+            expect(e.detail.value).to.eql(true);
+            done();
+          });
+
+          tap(first);
+        });
+
+        it('should deselect row when tapping again', function(done) {
+          tap(first);
+
+          first.addEventListener('value-changed', function(e) {
+            expect(e.detail.value).to.eql(false);
+            done();
+          });
+
+          tap(first);
+        });
+
+        // can't be tested reliably because focus can't be trusted when testing.
+        it.skip('should not select row when tapping on focusable child', function(done) {
+          tap(first);
+
+          var spy = sinon.spy();
+          first.addEventListener('value-changed', spy);
+
+          tap(input);
+
+          table.async(function() {
+            debugger;
+            expect(spy.callCount).to.eql(0);
+            done();
+          }, 250);
+        });
+
+        it('should update selectedItem(s)', function(done) {
+          first.addEventListener('value-changed', function(e) {
+            expect(table.selectedItem).to.eql('foo');
+            expect(table.selectedItems).to.have.members(['foo']);
+
+            done();
+          });
+
+          tap(first);
+        });
+        it('should update [[selected]] on template instances', function(done) {
+          second.addEventListener('value-changed', function(e) {
+            expect(e.detail.value).to.eql(true);
+            done();
+          });
+
+          tap(first);
+        });
+      });
+
+      describe('using two-way binding', function() {
+        it('should update [[selected]] on template instances with the same item', function() {
+          input.value = 'foo';
+
+          expect(first.innerHTML).to.eql('true');
+          expect(second.innerHTML).to.eql('true');
+        });
+
+        it('should update selectedItem(s)', function() {
+          input.value = 'bar';
+
+          expect(table.selectedItem).to.eql('bar');
+          expect(table.selectedItems).to.have.members(['bar']);
+        });
+      });
+
+      describe('using data-table-row selected property', function() {});
+
+      describe('using data-table-row selected attribute', function() {}
+
+      );
+    });
+
     describe('Selecting', function() {
       var grid;
       beforeEach(function(done) {
