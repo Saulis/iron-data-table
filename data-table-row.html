@@ -14,10 +14,6 @@
         @apply(--iron-data-table-row-selected);
       }
 
-      :host(:not([header]):hover) {
-        @apply(--iron-data-table-row-hover);
-      }
-
       :host(:not([header])[even]) {
         @apply(--iron-data-table-row-even);
       }
@@ -29,6 +25,10 @@
       :host(:focus) {
         outline: none;
         @apply(--iron-data-table-row-focused);
+      }
+
+      :host(:not([header]):hover) {
+        @apply(--iron-data-table-row-hover);
       }
 
       :host(:focus):after {
