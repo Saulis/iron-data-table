@@ -54,9 +54,14 @@
 
       observers: ['_bindData(_instance, bind)'],
 
-      ready: function() {
-        // cell is supposed to be placed outside the local dom of iron-data-table.
-        Polymer.StyleTransformer.dom(this, 'iron-data-table', this._scopeCssViaAttr, true);
+      attached: function() {
+        if (!Polymer.Settings.useNativeShadow) {
+          // cell is supposed to be placed outside the local dom of iron-data-table.
+          Polymer.StyleTransformer.dom(this, 'iron-data-table', this._scopeCssViaAttr, true);
+          if (this.domHost) {
+            Polymer.StyleTransformer.dom(this, this.domHost.tagName.toLowerCase(), this._scopeCssViaAttr, false);
+          }
+        }
       },
 
       _orderChanged: function(e) {
