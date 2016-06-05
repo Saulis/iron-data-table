@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../test-fixture/test-fixture-mocha.js"></script>
+  <link rel="import" href="../../iron-test-helpers/iron-test-helpers.html">
+  <link rel="import" href="../iron-data-table.html">
+  <link rel="import" href="../../paper-checkbox/paper-checkbox.html">
+</head>
+
+<body>
+  <test-fixture id="grid">
+    <template>
+      <iron-data-table>
+        <data-table-column name="First">
+          <template>[[item.col1]]</template>
+        </data-table-column>
+        <data-table-column name="Second">
+          <template>[[ item.col2 ]]</template>
+        </data-table-column>
+      </iron-data-table>
+    </template>
+  </test-fixture>
+
+  <script>
+    describe('Remote Data', function() {
+
+      var server;
+      var xhrSpy;
+
+      before(function() {
+        server = sinon.fakeServer.create({
+          autoRespond: true
+        });
+
+        xhrSpy = sinon.spy(server, 'handleRequest');
+
+        server.respondWith(/^\/items/, function(request) {
+          var page = parseInt(/page=(\d+)/.exec(request.url)[1], 10);
+          var size = parseInt(/size=(\d+)/.exec(request.url)[1], 10);
+
+          var items = [];
+          var total = 1000;
+          var i = page * size;
+          var limit = Math.min(i + size, total);
+          for (; i < limit; i += 1) {
+            items.push({
+              col1: 'foo' + i,
+              col2: 'bar' + i
+            });
+          }
+
+          request.respond(200, {
+            'Content-Type': 'application/hal+json'
+          }, JSON.stringify({
+            total: total,
+            items: items
+          }));
+        });
+      });
+
+      var grid;
+      beforeEach(function(done) {
+        grid = fixture('grid');
+        grid.dataSource = function(options, cb) {
+          var xhr = new XMLHttpRequest();
+          xhr.onreadystatechange = function() {
+            if (xhr.readyState == XMLHttpRequest.DONE) {
+              if (xhr.status == 200) {
+                var response = JSON.parse(xhr.responseText);
+                grid.size = response.total;
+                cb(response.items);
+                done();
+              }
+            }
+          };
+          xhr.open('GET', '/items?page=' + options.page + '&size=' + options.pageSize, true);
+          xhr.send();
+        };
+      });
+
+      it('should invoke dataSource function to fetch pages', function() {
+        expect(xhrSpy).to.be.calledOnce;
+        var request = xhrSpy.getCall(0).args[0];
+        expect(request.status).to.equal(200);
+        expect(request.url).to.match(/\/items\?page=0&size=\d+/);
+      });
+
+    });
+  </script>
+
+</body>
+</html>
