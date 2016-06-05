@@ -435,7 +435,8 @@ inspired styles to your `iron-data-table`.
 
       observers: ['_itemsChanged(items.*)',
         '_sizeChanged(size)',
-        '_resetData(dataSource, filter.*, sortOrder.*)'
+        '_resetData(dataSource)',
+        '_debounceThenResetData(filter.*, sortOrder.*)'
       ],
 
       created: function() {
@@ -592,15 +593,18 @@ inspired styles to your `iron-data-table`.
         }.bind(this));
       },
 
-      _resetData: function(dataSource, filter, sortOrder) {
+      _resetData: function(dataSource) {
         // Resetting scroll position and selection for consistency here. They are
         // both reset implicitly when a new _cachedItems is set to iron-list, but
         // that doesn't happen when size of the dataset changes only by a few items.
         this.clearSelection();
+        this.clearCache();
+        this.$.list.scrollToIndex(0);
+      },
 
+      _debounceThenResetData(filter, sortOrder) {
         this.debounce('reset', function() {
-          this.clearCache();
-          this.$.list.scrollToIndex(0);
+          this._resetData(this.dataSource);
         }.bind(this), 100);
       },
 
@@ -788,17 +792,15 @@ inspired styles to your `iron-data-table`.
           this.loading = true;
         }
 
-        this.debounce('loading', function() {
-          this._loadPage(dataSource, page);
+        this._loadPage(dataSource, page);
 
-          if (page + 1 < (this.size / this.pageSize)) {
-            this._loadPage(dataSource, page + 1);
-          }
+        if (page + 1 < (this.size / this.pageSize)) {
+          this._loadPage(dataSource, page + 1);
+        }
 
-          if (page > 0) {
-            this._loadPage(dataSource, page - 1);
-          }
-        }.bind(this), 100);
+        if (page > 0) {
+          this._loadPage(dataSource, page - 1);
+        }
       },
 
       _loadPage: function(dataSource, page) {
