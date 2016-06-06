@@ -69,8 +69,7 @@
           type: Boolean,
           notify: false,
           value: false,
-          reflectToAttribute: true,
-          observer: '_expandedChanged'
+          reflectToAttribute: true
         },
 
         rowDetailTemplate: Object,
@@ -81,7 +80,7 @@
         }
       },
 
-      observers: ['_bindChanged(bind, beforeBind)'],
+      observers: ['_bindChanged(bind, beforeBind)', '_expandedChanged(expanded, bind)'],
 
       attached: function() {
         if (this.domHost && this.domHost.tagName === 'IRON-DATA-TABLE') {
@@ -118,11 +117,14 @@
         }
       },
 
-      _expandedChanged: function(expanded) {
+      // events can be fired also without the detail object, where the handler
+      // can get it using e.model.item property, but we still need to make sure
+      // bind has been set before firing the events.
+      _expandedChanged: function(expanded, bind) {
         if (expanded) {
-          this.fire('item-expanded');
+          this.fire('item-expanded', {item: bind.item});
         } else {
-          this.fire('item-collapsed');
+          this.fire('item-collapsed', {item: bind.item});
         }
       }
     });
