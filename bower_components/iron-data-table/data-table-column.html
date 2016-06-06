@@ -259,9 +259,7 @@
         var instance = this.stamp();
 
         this.push('_templateInstances', instance);
-
         Polymer.dom(parentElement).insertBefore(instance.root, Polymer.dom(parentElement).firstElementChild);
-        Polymer.dom.flush();
 
         return {
           bind: function(data) {
@@ -271,7 +269,6 @@
           }
         };
       }
-
     });
   </script>
 </dom-module>

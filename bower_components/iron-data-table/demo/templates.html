@@ -93,7 +93,7 @@
           </style>
           <paper-input label="Foo" value="{{foo}}"></paper-input>
           <iron-ajax url="users.json" last-response="{{users}}" auto></iron-ajax>
-          <iron-data-table items="[[users.results]]">
+          <iron-data-table selection-enabled items="[[users.results]]">
             <data-table-column name="First Name">
               <template>
                 <paper-input value="{{item.user.name.first}}"></paper-input>
