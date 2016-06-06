@@ -155,6 +155,10 @@ inspired styles to your `iron-data-table`.
         opacity: 0.25;
       }
 
+      :host(:not([loading])) paper-spinner-lite {
+        display: none;
+      }
+
       :host[loading] paper-spinner-lite {
         position: absolute;
         top: 45%;
@@ -199,7 +203,7 @@ inspired styles to your `iron-data-table`.
         </template>
       </iron-list>
     </div>
-    <paper-spinner-lite active hidden=[[!loading]]></paper-spinner-lite>
+    <paper-spinner-lite active></paper-spinner-lite>
     <content select="data-table-column"></content>
   </template>
 

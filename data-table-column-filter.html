@@ -2,6 +2,10 @@
 
 <dom-module id="data-table-column-filter">
   <style is="custom-style">
+    :host([hidden]) {
+      display: none;
+    }
+
     paper-input {
       margin-bottom: 20px;
       --paper-input-container-label: {
@@ -11,7 +15,7 @@
   </style>
 
   <template>
-    <paper-input label="[[label]]" value="[[value]]" on-value-changed="_valueChanged" hidden=[[hidden]]></paper-input>
+    <paper-input label="[[label]]" value="[[value]]" on-value-changed="_valueChanged"></paper-input>
   </template>
   <script>
     Polymer({
