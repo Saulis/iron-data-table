@@ -627,10 +627,8 @@ inspired styles to your `iron-data-table`.
         // that doesn't happen when size of the dataset changes only by a few items.
         this.clearSelection();
 
-        this.debounce('reset', function() {
-          this.clearCache();
-          this.$.list.scrollToIndex(0);
-        }.bind(this), 50);
+        this.clearCache();
+        this.$.list.scrollToIndex(0);
       },
 
       _sortDirectionChanged: function(e) {
