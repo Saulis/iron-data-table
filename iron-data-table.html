@@ -180,10 +180,10 @@ inspired styles to your `iron-data-table`.
       <iron-list id="list" as="item" items="[[_cachedItems]]" on-scroll="_onVerticalScroll">
         <template>
           <div class="item">
-            <data-table-row tabindex$="[[tabIndex]]" bind="[[_bind(item, index, selectedItems, _expandedItems)]]" before-bind="[[beforeRowBind]]" even$="[[!_isEven(index)]]" selected$="[[_isSelected(item, selectedItems, selectedItems.*)]]">
-              <data-table-checkbox hidden$="[[!multiSelection]]" checked="[[_isSelected(item, selectedItems, selectedItems.*)]]" on-tap="_onCheckBoxTap"></data-table-checkbox>
+            <data-table-row on-click="_onRowClick" tabindex$="[[tabIndex]]" bind="[[_bind(item, index, selectedItems, _expandedItems)]]" before-bind="[[beforeRowBind]]" even$="[[!_isEven(index)]]" selected$="[[_isSelected(item, selectedItems, selectedItems.*)]]">
+              <data-table-checkbox hidden$="[[!multiSelection]]" tabindex="-1" checked="[[_isSelected(item, selectedItems, selectedItems.*)]]" on-tap="_onCheckBoxTap"></data-table-checkbox>
               <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
-                <data-table-cell column="[[column]]" bind="[[_bind(item, index, selectedItems, _expandedItems)]]" before-bind="[[beforeCellBind]]" on-tap="_onCellTap"></data-table-cell>
+                <data-table-cell column="[[column]]" bind="[[_bind(item, index, selectedItems, _expandedItems)]]" before-bind="[[beforeCellBind]]"></data-table-cell>
               </template>
               <template is="dom-if" if="[[_isExpanded(item, _expandedItems)]]" on-dom-change="_updateSizeForItem">
                 <data-table-row-detail row-detail-template="[[rowDetail]]" bind="[[_bind(item, index, selectedItems, _expandedItems)]]"></data-table-row-detail>
@@ -907,7 +907,10 @@ inspired styles to your `iron-data-table`.
         return items && items.indexOf(item) > -1;
       },
 
-      _onCellTap: function(e) {
+      // we need to listen to click instead of tap because on mobile safari, the
+      // document.activeElement has not been updated (focus has not been shifted)
+      // yet at the point when tap event is being executed.
+      _onRowClick: function(e) {
         // Prevent item selection if row itself is not focused. This means that
         // an element inside the row has been focused.
         // Mobile devices don't move focus from body unless it's an input element that is focused, so this element will never get focused.
