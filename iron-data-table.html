@@ -27,6 +27,8 @@ limitations under the License.
 <link rel="import" href="data-table-checkbox.html">
 <link rel="import" href="data-table-row-detail.html">
 
+<script src="array-datasource.js"></script>
+
 <!--
 `iron-data-table` displays a table or a grid of data.
 It builds on top of `iron-list`, which provides the foundation for features like
@@ -114,10 +116,8 @@ inspired styles to your `iron-data-table`.
         overflow-x: auto;
         overflow-y: hidden;
         -webkit-overflow-scrolling: touch;
-
         /* Default height just to help users get started in making stuff visible.  */
         height: 400px;
-
         @apply(--iron-data-table);
       }
 
@@ -126,7 +126,6 @@ inspired styles to your `iron-data-table`.
         left: 0;
         top: 0;
         bottom: 0;
-
         display: flex;
         flex-direction: column;
       }
@@ -178,25 +177,16 @@ inspired styles to your `iron-data-table`.
         </data-table-row>
       </div>
 
-      <iron-list id="list" as="item" items="[[_cachedItems]]" on-scroll="_onVerticalScroll" selection-enabled="[[selectionEnabled]]" multi-selection="[[multiSelection]]" selected-item="{{selectedItem}}" on-selected-items-changed="_selectedItemsChanged">
+      <iron-list id="list" as="item" items="[[_cachedItems]]" on-scroll="_onVerticalScroll">
         <template>
           <div class="item">
-            <data-table-row tabindex$="[[tabIndex]]"
-                            selected$="[[_isSelected(selected, selectedItems.inverted)]]"
-                            bind="[[_bind(item, index, selected, selectedItems.inverted, _expandedItems)]]"
-                            before-bind="[[beforeRowBind]]"
-                            even$="[[!_isEven(index)]]"
-                            row-detail-template="[[rowDetail]]"
-                            details-enabled="[[detailsEnabled]]"
-                            expanded="[[_isExpanded(item, _expandedItems)]]"
-                            on-item-expanded="_itemExpanded"
-                            on-item-collapsed="_itemCollapsed">
-              <data-table-checkbox hidden$="[[!multiSelection]]" checked="[[_isSelected(selected, selectedItems.inverted)]]"></data-table-checkbox>
+            <data-table-row on-click="_onRowClick" tabindex$="[[tabIndex]]" bind="[[_bind(item, index, selectedItems, _expandedItems)]]" before-bind="[[beforeRowBind]]" even$="[[!_isEven(index)]]" selected$="[[_isSelected(item, selectedItems, selectedItems.*)]]">
+              <data-table-checkbox hidden$="[[!multiSelection]]" tabindex="-1" checked="[[_isSelected(item, selectedItems, selectedItems.*)]]" on-tap="_onCheckBoxTap"></data-table-checkbox>
               <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
-                <data-table-cell column="[[column]]" bind="[[_bind(item, index, selected, selectedItems.inverted, _expandedItems)]]" before-bind="[[beforeCellBind]]"></data-table-cell>
+                <data-table-cell column="[[column]]" bind="[[_bind(item, index, selectedItems, _expandedItems)]]" before-bind="[[beforeCellBind]]"></data-table-cell>
               </template>
               <template is="dom-if" if="[[_isExpanded(item, _expandedItems)]]" on-dom-change="_updateSizeForItem">
-                <data-table-row-detail row-detail-template="[[rowDetail]]" bind="[[_bind(item, index, selected, selectedItems.inverted, _expandedItems)]]"></data-table-row-detail>
+                <data-table-row-detail row-detail-template="[[rowDetail]]" bind="[[_bind(item, index, selectedItems, _expandedItems)]]"></data-table-row-detail>
               </template>
             </data-table-row>
           </div>
@@ -314,6 +304,7 @@ inspired styles to your `iron-data-table`.
          */
         selectedItem: {
           type: Object,
+          readOnly: true,
           notify: true
         },
 
@@ -325,6 +316,7 @@ inspired styles to your `iron-data-table`.
         selectedItems: {
           type: Object,
           notify: true,
+          readOnly: true,
           value: function() {
             var items = [];
             items.filters = [];
@@ -360,6 +352,9 @@ inspired styles to your `iron-data-table`.
         columns: {
           type: Array,
           notify: true,
+          value: function() {
+            return [];
+          },
           observer: '_columnsChanged'
         },
 
@@ -421,13 +416,13 @@ inspired styles to your `iron-data-table`.
         }
       },
 
-     /**
-      * Fired before row details is expanded/collapsed.
-      *
-      * @event iron-data-table-row-expanding
-      * @param {Object} detail.row the data-table-row element being tapped
-      * @param {Object} detail.target the target element of the original tap event
-      */
+      /**
+       * Fired before row details is expanded/collapsed.
+       *
+       * @event iron-data-table-row-expanding
+       * @param {Object} detail.row the data-table-row element being tapped
+       * @param {Object} detail.target the target element of the original tap event
+       */
 
       /**
        * Fired before row is selected/deselected.
@@ -440,7 +435,8 @@ inspired styles to your `iron-data-table`.
       observers: ['_itemsChanged(items.*)',
         '_sizeChanged(size)',
         '_currentPageChanged(dataSource, _currentPage)',
-        '_resetData(dataSource, filter.*, sortOrder.*)'
+        '_resetData(dataSource, filter.*, sortOrder.*)',
+        '_selectedItemsChanged(selectedItems.*)'
       ],
 
       created: function() {
@@ -467,7 +463,7 @@ inspired styles to your `iron-data-table`.
 
           var model = this.modelForElement(first);
           if (model) {
-              this.toggleSelectionForItem(model[this.as]);
+            this.toggleSelectionForItem(model[this.as]);
           }
         };
       },
@@ -483,32 +479,85 @@ inspired styles to your `iron-data-table`.
        * @param {(Object|number)} item The item object or its index
        */
       selectItem: function(item) {
-        if (this.selectedItems && this.selectedItems.inverted) {
-          this.$.list.deselectItem(item);
-        } else {
-          this.$.list.selectItem(item);
+        if (this.selectionEnabled) {
+          if (typeof item === 'number' && item >= 0 && this.items && this.items.length > item) {
+            this._selectItem(this.items[item]);
+          } else {
+            this._selectItem(item);
+          }
         }
       },
 
-      _isSelected: function(selected, inverted) {
-        return inverted ? !selected : selected;
+      _selectItem: function(item) {
+        this._setSelectedItem(item);
+
+        if (this.multiSelection) {
+          if (this.selectedItems.inverted) {
+            if ((index = this.selectedItems.indexOf(item)) > -1) {
+              this.splice('selectedItems', index, 1);
+            }
+          } else {
+            this.push('selectedItems', item);
+          }
+        } else {
+          this.splice('selectedItems', 0, this.selectedItems.length, item);
+        }
+      },
+
+      /**
+       * Deselects the given item list if it is already selected.
+       *
+       * @method deselect
+       * @param {(Object|number)} item The item object or its index
+       */
+      deselectItem: function(item) {
+        if (typeof item === 'number' && item >= 0 && this.items && this.items.length > item) {
+          this._deselectItem(this.items[item]);
+        } else {
+          this._deselectItem(item);
+        }
+      },
+
+      _deselectItem: function(item) {
+        this._setSelectedItem(null);
+
+        var index = this.selectedItems.indexOf(item);
+
+        if (this.selectedItems.inverted) {
+          if (index === -1) {
+            this.push('selectedItems', item);
+          }
+        } else {
+          if (index > -1) {
+            this.splice('selectedItems', index, 1);
+          }
+        }
+      },
+
+      _isSelected: function(item, selectedItems) {
+        var selected = selectedItems.indexOf(item) > -1;
+
+        return selectedItems.inverted ? !selected : selected;
       },
 
       /**
        * Multi-Selection
        */
       _selectedItemsChanged: function(e) {
-        if (Array.isArray(e.detail.value)) {
-          var items = e.detail.value;
-          var inverted = (this.selectedItems && this.selectedItems.inverted) || false;
+        if (e.path === 'selectedItems.splices') {
+          var splices = e.value.indexSplices[0];
 
-          this.set('selectedItems', items);
-          this.set('selectedItems.inverted', inverted);
-          this.notifyPath('selectedItems.length', items.length);
-          this.set('selectedItems.filters', this.filter || []);
-        } else if (e.detail.path === 'selectedItems.splices') {
-          this.notifyPath('selectedItems.splices', e.detail.value);
-          this.notifyPath('selectedItems.length', this.selectedItems.length);
+          Array.prototype.forEach.call(splices.object, function(item) {
+            this._templatesForItem(item).forEach(function(t) {
+              t.selected = e.base.inverted ? false : true;
+            });
+          }.bind(this));
+
+          Array.prototype.forEach.call(splices.removed, function(item) {
+            this._templatesForItem(item).forEach(function(t) {
+              t.selected = e.base.inverted ? true : false;
+            });
+          }.bind(this));
         }
       },
 
@@ -516,16 +565,22 @@ inspired styles to your `iron-data-table`.
        * Selects all the items in the list.
        */
       selectAll: function() {
-        this.set('selectedItems.inverted', true);
-        this.$.list.clearSelection();
+        var selectedItems = [];
+        selectedItems.inverted = true;
+        selectedItems.filters = this.filters;
+
+        this._setSelectedItems(selectedItems);
       },
 
       /**
        * Clears the current selection state.
        */
       clearSelection: function() {
-        this.set('selectedItems.inverted', false);
-        this.$.list.clearSelection();
+        var selectedItems = [];
+        selectedItems.inverted = false;
+        selectedItems.filters = this.filters;
+
+        this._setSelectedItems(selectedItems);
       },
 
       _toggleSelectAll: function() {
@@ -544,26 +599,13 @@ inspired styles to your `iron-data-table`.
         return selectedItemsLength > 0;
       },
 
-      /**
-       * Deselects the given item list if it is already selected.
-       *
-       * @method deselect
-       * @param {(Object|number)} item The item object or its index
-       */
-      deselectItem: function(item) {
-        if (this.selectedItems && this.selectedItems.inverted) {
-          this.$.list.selectItem(item);
-        } else {
-          this.$.list.deselectItem(item);
-        }
-      },
 
-      _bind: function(item, index, selected, inverted, expandedItems) {
-        if (index !== undefined && selected !== undefined) {
+      _bind: function(item, index, selectedItems, expandedItems) {
+        if (index !== undefined) {
           return {
             item: item,
             index: index,
-            selected: inverted ? !selected : selected,
+            selected: this._isSelected(item, selectedItems),
             // store expanded twice to detect changes coming from inside the template.
             __expanded__: this._isExpanded(item, expandedItems),
             expanded: this._isExpanded(item, expandedItems)
@@ -579,24 +621,6 @@ inspired styles to your `iron-data-table`.
         return index % 2 === 0;
       },
 
-      _filter: function(items, filter) {
-        if (filter.length === 0) {
-          return items;
-        }
-
-        return Array.prototype.filter.call(items, function(item, index) {
-          for (var i = 0; i < filter.length; i++) {
-            var value = this.get(filter[i].path, item);
-            if (!filter[i].filter) {
-              continue;
-            } else if (!value || value.toString().toLowerCase().indexOf(filter[i].filter.toString().toLowerCase()) === -1) {
-              return false;
-            }
-          }
-          return true;
-        }.bind(this));
-      },
-
       _resetData: function(dataSource, filter, sortOrder) {
         // Resetting scroll position and selection for consistency here. They are
         // both reset implicitly when a new _cachedItems is set to iron-list, but
@@ -607,30 +631,6 @@ inspired styles to your `iron-data-table`.
           this.clearCache();
           this.$.list.scrollToIndex(0);
         }.bind(this), 100);
-      },
-
-      _sort: function(items, sortOrder) {
-        if (!sortOrder || sortOrder.length === 0) {
-          return items;
-        }
-
-        var multiSort = function() {
-          return function(a, b) {
-            return sortOrder.map(function(sort) {
-              if (sort.direction === 'asc') {
-                return this._compare(this.get(sort.path, a), this.get(sort.path, b));
-              } else if (sort.direction === 'desc') {
-                return this._compare(this.get(sort.path, b), this.get(sort.path, a));
-              }
-              return 0;
-            }.bind(this)).reduce(function firstNonZeroValue(p, n) {
-                return p ? p : n;
-              }, 0);
-          };
-        };
-
-        // make sure a copy is used so that original array is unaffected.
-        return Array.prototype.sort.call(items.slice(0), multiSort(sortOrder).bind(this));
       },
 
       _sortDirectionChanged: function(e) {
@@ -649,16 +649,6 @@ inspired styles to your `iron-data-table`.
           path: e.detail.path,
           direction: e.detail.direction
         });
-      },
-
-      _compare: function(a, b) {
-        if (a < b) {
-          return -1;
-        }
-        if (a > b) {
-          return 1;
-        }
-        return 0;
       },
 
       _columnsChanged: function(columns, oldColumns) {
@@ -727,19 +717,7 @@ inspired styles to your `iron-data-table`.
       _itemsChanged: function(items) {
         if ((items.path === 'items' || items.path === 'items.splices') && Array.isArray(items.base)) {
           this.size = items.base.length;
-
-          this.dataSource = function(opts, cb, err) {
-            var filteredItems = this._filter(items.base, opts.filter);
-            this.size = filteredItems.length;
-
-            var sortedItems = this._sort(filteredItems, opts.sortOrder);
-
-            var start = opts.page * opts.pageSize;
-            var end = start + opts.pageSize;
-            var slice = sortedItems.slice(start, end);
-
-            cb(slice);
-          }.bind(this);
+          this.dataSource = new ArrayDataSource(items.base);
         } else if (items.path.indexOf('items.#') === 0 && Array.isArray(items.base)) {
           var index = items.path.split('.')[1].substring(1);
           var item = this.items[index];
@@ -766,6 +744,18 @@ inspired styles to your `iron-data-table`.
         }
       },
 
+      _templatesForItem: function(item) {
+        return this.columns.map(function(col) {
+            return col._templateInstances;
+          })
+          .reduce(function(a, b) {
+            return a.concat(b);
+          }, [])
+          .filter(function(t) {
+            return t.item === item;
+          });
+      },
+
       _itemChanged: function(e) {
         if (this.items) {
           var index = this.items.indexOf(e.detail.item);
@@ -776,15 +766,11 @@ inspired styles to your `iron-data-table`.
       },
 
       _itemExpanded: function(e) {
-        var item = e.detail.item || e.model.item;
-
-        this.expandItem(item);
+        this.expandItem(e.detail.item);
       },
 
       _itemCollapsed: function(e) {
-        var item = e.detail.item || e.model.item;
-
-        this.collapseItem(item);
+        this.collapseItem(e.detail.item);
       },
 
       _currentPageChanged: function(dataSource, page) {
@@ -810,7 +796,8 @@ inspired styles to your `iron-data-table`.
           this._pagesLoading++;
           this.push('_cachedPages', page);
 
-          var success = function(items) {
+          var success = function(items, size) {
+            this.size = size || this.size;
             var start = page * this.pageSize;
 
             for (var i = 0; i < this.pageSize; i++) {
@@ -818,15 +805,6 @@ inspired styles to your `iron-data-table`.
               var item = items[i];
 
               this.set('_cachedItems.' + index, item);
-
-              // TODO: send an issue/pr to iron-list, that makes sure the internal
-              // collection stays up-to-date when `items` change.
-              this.$.list._collection.store[index] = item;
-              if (item && typeof item == 'object') {
-                this.$.list._collection.omap.set(item, index);
-              } else {
-                this.$.list._collection.pmap[item] = index;
-              }
             }
 
             // resize required for variable row height items.
@@ -906,7 +884,7 @@ inspired styles to your `iron-data-table`.
       expandItem: function(item) {
         if (this.rowDetail && this._expandedItems && !this._isExpanded(item, this._expandedItems)) {
 
-          // replacing the whole array here to simplify the obsevers.
+          // replacing the whole array here to simplify the observers.
           this._expandedItems.push(item);
           this._expandedItems = this._expandedItems.slice(0);
         }
@@ -927,6 +905,37 @@ inspired styles to your `iron-data-table`.
 
       _isExpanded: function(item, items) {
         return items && items.indexOf(item) > -1;
+      },
+
+      // we need to listen to click instead of tap because on mobile safari, the
+      // document.activeElement has not been updated (focus has not been shifted)
+      // yet at the point when tap event is being executed.
+      _onRowClick: function(e) {
+        // Prevent item selection if row itself is not focused. This means that
+        // an element inside the row has been focused.
+        // Mobile devices don't move focus from body unless it's an input element that is focused, so this element will never get focused.
+        if (document.activeElement !== document.body &&
+            Polymer.dom(e).localTarget.contains(Polymer.dom(document.activeElement).node)) {
+          return;
+        } else {
+          if (this.rowDetail && this.detailsEnabled) {
+            if (this._isExpanded(e.model.item, this._expandedItems)) {
+              this.collapseItem(e.model.item);
+            } else {
+              this.expandItem(e.model.item);
+            }
+          }
+
+          if (this.selectionEnabled) {
+            this._isSelected(e.model.item, this.selectedItems) ? this.deselectItem(e.model.item) : this.selectItem(e.model.item);
+          }
+        }
+      },
+
+      _onCheckBoxTap: function(e) {
+        if (this.selectionEnabled) {
+          this._isSelected(e.model.item, this.selectedItems) ? this.deselectItem(e.model.item) : this.selectItem(e.model.item);
+        }
       }
     });
   </script>
