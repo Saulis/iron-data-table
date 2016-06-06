@@ -567,7 +567,7 @@ inspired styles to your `iron-data-table`.
       selectAll: function() {
         var selectedItems = [];
         selectedItems.inverted = true;
-        selectedItems.filters = this.filters;
+        selectedItems.filters = this.filters || [];
 
         this._setSelectedItems(selectedItems);
       },
@@ -578,7 +578,7 @@ inspired styles to your `iron-data-table`.
       clearSelection: function() {
         var selectedItems = [];
         selectedItems.inverted = false;
-        selectedItems.filters = this.filters;
+        selectedItems.filters = this.filters || [];
 
         this._setSelectedItems(selectedItems);
       },
