@@ -216,16 +216,10 @@
               align-items: center;
               height: 80px;
             }
-
-            #grid3 div[selected] {
-              display: flex;
-              align-items: center;
-              height: 100px;
-            }
           </style>
 
           <iron-ajax url="users.json" last-response="{{users}}" auto></iron-ajax>
-          <iron-data-table id="grid3" items="[[users.results]]" selection-enabled>
+          <iron-data-table id="grid3" items="[[users.results]]">
             <data-table-column name="First Name">
               <template>[[item.user.name.first]]</template>
             </data-table-column>
@@ -234,7 +228,7 @@
             </data-table-column>
             <data-table-column name="State">
               <template>
-                <div class$="[[item.user.location.state]]" selected$="[[selected]]">[[item.user.location.state]]</div>
+                <div class$="[[item.user.location.state]]">[[item.user.location.state]]</div>
               </template>
             </data-table-column>
           </iron-data-table>
