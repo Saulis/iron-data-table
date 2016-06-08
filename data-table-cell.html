@@ -31,6 +31,7 @@
         order: Number,
         header: Boolean,
         width: String,
+        flex: Number,
 
         column: {
           type: Object,
@@ -62,6 +63,24 @@
             Polymer.StyleTransformer.dom(this, this.domHost.tagName.toLowerCase(), this._scopeCssViaAttr, false);
           }
         }
+
+        // in some cases the _columnChanged observer is run before the cell has
+        // been turned into a html element and the inline styles don't get applied.
+        // Applying them after attaching fixes makes sure they're applied.
+        this._setColumnStyleProperties(this.column);
+
+        // TODO: for some reason this needs to be done async to work with Shadow
+        // DOM. Left the sync call there also to prevent flickering with Shady DOM.
+        this.async(function() {
+          this._setColumnStyleProperties(this.column);
+        });
+      },
+
+      _setColumnStyleProperties: function(column) {
+        this.style.flexGrow = column.flex;
+        this.style.flexDirection = column.alignRight ? 'row-reverse' : 'row';
+        this.style.flexBasis = column.width;
+        this.style.flexGrow = column.flex;
       },
 
       _orderChanged: function(e) {
@@ -104,15 +123,10 @@
       },
 
       _columnChanged: function(column, oldColumn) {
-        this.style.flexDirection = column.alignRight ? 'row-reverse' : 'row';
+        this._setColumnStyleProperties(column);
 
-        this.style.flexBasis = column.width;
         this._addListener(column, oldColumn, 'width');
-
-        this.style.flexGrow = column.flex;
         this._addListener(column, oldColumn, 'flex');
-
-        this.style.order = column.order;
         this._addListener(column, oldColumn, 'order');
 
         this.hidden = column.hidden;
