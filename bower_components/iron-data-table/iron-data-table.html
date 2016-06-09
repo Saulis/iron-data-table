@@ -26,6 +26,7 @@ limitations under the License.
 <link rel="import" href="data-table-row.html">
 <link rel="import" href="data-table-checkbox.html">
 <link rel="import" href="data-table-row-detail.html">
+<link rel="import" href="detect-scrollbar-behavior.html">
 
 <script src="array-datasource.js"></script>
 
@@ -150,7 +151,7 @@ inspired styles to your `iron-data-table`.
         -webkit-transition: opacity 200ms;
       }
 
-      :host[loading] #list {
+      :host([loading]) #list {
         opacity: 0.25;
       }
 
@@ -158,7 +159,7 @@ inspired styles to your `iron-data-table`.
         display: none;
       }
 
-      :host[loading] paper-spinner-lite {
+      :host([loading]) paper-spinner-lite {
         position: absolute;
         top: 45%;
         left: 50%;
@@ -202,7 +203,8 @@ inspired styles to your `iron-data-table`.
       is: 'iron-data-table',
 
       behaviors: [
-        Polymer.IronResizableBehavior
+        Polymer.IronResizableBehavior,
+        DetectScrollBarBehavior
       ],
 
       listeners: {
@@ -686,6 +688,7 @@ inspired styles to your `iron-data-table`.
       _resizeCellContainers: function() {
         // reset header width first to make the cells and scroll width to reset their widths.
         this.$.container.style.width = '';
+        this.$.header.style.paddingRight = this._scrollBarWidth + 'px';
 
         this.async(function() {
           this.$.container.style.width = Math.min(this.scrollWidth, this.clientWidth + this.scrollLeft) + 'px';
@@ -913,7 +916,7 @@ inspired styles to your `iron-data-table`.
         // an element inside the row has been focused.
         // Mobile devices don't move focus from body unless it's an input element that is focused, so this element will never get focused.
         if (document.activeElement !== document.body &&
-            Polymer.dom(e).localTarget.contains(Polymer.dom(document.activeElement).node)) {
+          Polymer.dom(e).localTarget.contains(Polymer.dom(document.activeElement).node)) {
           return;
         } else {
           if (this.rowDetail && this.detailsEnabled) {

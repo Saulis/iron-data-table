@@ -147,17 +147,43 @@
           value: function() {
            return function(parentElement) {
              return this._templatize(this.headerTemplate, parentElement);
-           }.bind(this)
+           }.bind(this);
           }
         }
       },
 
       observers: ['_forwardedParentPropsChanged(_forwardedParentProps.*)',
         '_templateInstancesChanged(_templateInstances.splices)',
-        '_filterValueChanged(filterValue, filterBy)'
+        '_filterValueChanged(filterValue, filterBy)',
+        '_filterByChanged(filterBy)',
+        '_nameChanged(name)',
+        '_sortByChanged(sortBy)'
       ],
 
+      _nameChanged: function(name) {
+        this._updateTemplateProperty('column.name', name);
+      },
+
+      _sortByChanged: function(sortBy) {
+        // column.sortBy is currently used iron-data-table so we need to notify
+        // it for changes.
+        var table = Polymer.dom(this).parentNode;
+        if (table.columns) {
+          var index = table.columns.indexOf(this);
+          table.notifyPath('columns.' + index + '.sortBy', sortBy);
+        }
+
+        // someone might be binding to sortBy in the header template so let's
+        // update that just in case.
+        this._updateTemplateProperty('column.sortBy', sortBy);
+      },
+
+      _filterByChanged: function(filterBy) {
+        this._updateTemplateProperty('column.filterBy', filterBy);
+      },
+
       _filterValueChanged: function(filterValue, filterBy) {
+        this._updateTemplateProperty('column.filterValue', filterValue);
         this.fire('column-filter-changed', {value: filterValue, filterBy: filterBy});
       },
 
@@ -174,11 +200,19 @@
         }
       },
 
+      _updateTemplateProperty: function(prop, value) {
+        if (this._templateInstances) {
+          var changeRecord = {base: {}};
+          changeRecord.base[prop] = value;
+          this._forwardedParentPropsChanged(changeRecord);
+        }
+      },
+
       _forwardedParentPropsChanged: function(changeRecord) {
         // TODO: need to make sure this works with nested paths also. [[foo.bar]] etc.
         for (var prop in changeRecord.base) {
           this._templateInstances.forEach(function(t) {
-            t[prop] = changeRecord.base[prop];
+            t.set(prop, changeRecord.base[prop]);
           });
         }
       },

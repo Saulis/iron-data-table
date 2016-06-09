@@ -58,15 +58,15 @@
   "resolutions": {
     "iron-list": "^1.1.0"
   },
-  "version": "1.0.0-beta2",
-  "_release": "1.0.0-beta2",
+  "version": "1.0.0-beta3",
+  "_release": "1.0.0-beta3",
   "_resolution": {
     "type": "version",
-    "tag": "v1.0.0-beta2",
-    "commit": "0915c8ad3d03b79906b7d31bc5d2c7f7ff4b104f"
+    "tag": "v1.0.0-beta3",
+    "commit": "66796304a38bf6aa23b7b331d831dac970c86ed2"
   },
   "_source": "https://github.com/Saulis/iron-data-table.git",
-  "_target": "1.0.0-beta2",
+  "_target": "1.0.0-beta3",
   "_originalSource": "iron-data-table",
   "_direct": true
 }
