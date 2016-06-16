@@ -10,25 +10,33 @@
 </style>
 
 <script>
-    DetectScrollBarBehavior = {
-      properties: {
-        _scrollBarWidth: {
-          type: Number,
-          value: 0
-        }
-      },
+  /**
+   * Use `DetectScrollBarBehavior` to detect scrollbar width.
+   *
+   * @polymerBehavior
+   */
+  DetectScrollBarBehavior = {
+    properties: {
+      /**
+       * Automatically detected scroll bar width in px.
+       */
+      scrollBarWidth: {
+        type: Number,
+        value: 0
+      }
+    },
 
-      // registered would be optimal but this doesn't seem to work at that stage.
-      ready: function() {
-        var scrollDiv = document.createElement("div");
-        scrollDiv.className = "scrollbar-measure";
-        document.body.appendChild(scrollDiv);
+    // registered would be optimal but this doesn't seem to work at that stage.
+    ready: function() {
+      var scrollDiv = document.createElement("div");
+      scrollDiv.className = "scrollbar-measure";
+      document.body.appendChild(scrollDiv);
 
-        // Get the scrollbar width
-        this._scrollBarWidth = scrollDiv.offsetWidth - scrollDiv.clientWidth;
+      // Get the scrollbar width
+      this.scrollBarWidth = scrollDiv.offsetWidth - scrollDiv.clientWidth;
 
-        // Delete the DIV
-        document.body.removeChild(scrollDiv);
-      },
-    };
+      // Delete the DIV
+      document.body.removeChild(scrollDiv);
+    },
+  };
 </script>
