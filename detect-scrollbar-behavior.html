@@ -10,12 +10,14 @@
 </style>
 
 <script>
+  var vaadin = window.vaadin || {};
+  
   /**
    * Use `DetectScrollBarBehavior` to detect scrollbar width.
    *
    * @polymerBehavior
    */
-  DetectScrollBarBehavior = {
+  vaadin.DetectScrollBarBehavior = {
     properties: {
       /**
        * Automatically detected scroll bar width in px.
