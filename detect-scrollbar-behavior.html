@@ -10,12 +10,14 @@
 </style>
 
 <script>
+  var saulis = window.saulis || {};
+  
   /**
    * Use `DetectScrollBarBehavior` to detect scrollbar width.
    *
    * @polymerBehavior
    */
-  DetectScrollBarBehavior = {
+  saulis.DetectScrollBarBehavior = {
     properties: {
       /**
        * Automatically detected scroll bar width in px.
