@@ -494,7 +494,8 @@ inspired styles to your `iron-data-table`.
         this._setSelectedItem(item);
 
         if (this.multiSelection) {
-          if (this.selectedItems.inverted) {
+          if (this.selectedItems.inverted) 
+            var index;
             if ((index = this.selectedItems.indexOf(item)) > -1) {
               this.splice('selectedItems', index, 1);
             }
