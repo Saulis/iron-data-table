@@ -268,10 +268,7 @@
         }
       },
 
-      ready: function() {
-        // we need to templatize all user-provided templates asap to prevent [[item...]] from being
-        // bound to a parent dom-bind template or a parent web component.
-        // Note (Saulis): if the internal templates have something else than [[item..]] they will get screwed when setting properi
+      created: function() {
         this._instanceProps = {
           item: true,
           index: true,
@@ -279,7 +276,12 @@
           column: true,
           expanded: true
         };
+      },
 
+      ready: function() {
+        // we need to templatize all user-provided templates asap to prevent [[item...]] from being
+        // bound to a parent dom-bind template or a parent web component.
+        // Note (Saulis): if the internal templates have something else than [[item..]] they will get screwed when setting properi
         this.templatize(this.headerTemplate);
 
         // template not present in angular 2 at this point.
