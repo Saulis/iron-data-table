@@ -1,0 +1,78 @@
+<script>
+  var saulis = window.saulis || {};
+
+  saulis.Templatizer = Polymer({
+    is: 'iron-data-table-templatizer',
+
+    factoryImpl: function(column) {
+      this.column = column;
+    },
+
+    behaviors: [Polymer.Templatizer],
+
+    properties: {
+      column: Object
+    },
+
+    created: function() {
+      this._instanceProps = {
+        item: true,
+        index: true,
+        selected: true,
+        column: true,
+        expanded: true
+      };
+    },
+
+    _forwardParentProp: function(prop, value) {
+      //TODO: Bug in Templatizer forwards also [[item]] etc. instance properties
+      // through this function when Shadow DOM is on AND iron-data-table is nested inside
+      // another Polymer element. Inside a dom-bind template everything seems to work...
+      if (prop.indexOf('item') === -1 &&
+          prop.indexOf('selected') === -1 &&
+          prop.indexOf('index') === -1 &&
+          prop.indexOf('column') === -1 &&
+          prop.indexOf('expanded') === -1) {
+        this.column.set('_forwardedParentProps.' + prop, value);
+      }
+    },
+
+    _forwardInstanceProp: function(inst, prop, value) {
+      if (prop === 'expanded' && inst.item && inst.__expanded__ !== value) {
+        if (value) {
+          this.column.table.expandItem(inst.item);
+        } else {
+          this.column.table.collapseItem(inst.item);
+        }
+      }
+    },
+
+    _forwardInstancePath: function(inst, path, value) {
+      // prevent propagating column specific values to other columns.
+      if (path.indexOf('column') === 0) {
+        return;
+      }
+      var columns = this.column.table.columns;
+
+      for (var c = 0; c < columns.length; c++) {
+        var instances = columns[c]._templateInstances;
+
+        for (var i = 0; i < instances.length; i++) {
+          var instance = instances[i];
+          if (instance.index == inst.index) {
+            instance.notifyPath(path, value);
+          }
+        }
+      }
+
+      if (path.indexOf('item') === 0) {
+        // instance.notifyPath above will call _forwardInstancePath recursively,
+        // so need to debounce to avoid firing the same event multiple times.
+        this.debounce('item-changed', function() {
+          // stripping 'item.' from path.
+          this.column.table.fire('item-changed', {item: inst.item, path: path.substring(5), value: value});
+        }.bind(this));
+      }
+    },
+  });
+</script>

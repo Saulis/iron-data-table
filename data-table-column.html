@@ -1,4 +1,5 @@
 <link rel="import" href="data-table-column-filter.html">
+<link rel="import" href="templatizer.html">
 
 <dom-module id="data-table-column">
   <template>
@@ -191,19 +192,6 @@
         this.fire('column-filter-changed', {value: filterValue, filterBy: filterBy});
       },
 
-      _forwardParentProp: function(prop, value) {
-        //TODO: Bug in Templatizer forwards also [[item]] etc. instance properties
-        // through this function when Shadow DOM is on AND iron-data-table is nested inside
-        // another Polymer element. Inside a dom-bind template everything seems to work...
-        if (prop.indexOf('item') === -1 &&
-            prop.indexOf('selected') === -1 &&
-            prop.indexOf('index') === -1 &&
-            prop.indexOf('column') === -1 &&
-            prop.indexOf('expanded') === -1) {
-          this.set('_forwardedParentProps.' + prop, value);
-        }
-      },
-
       _updateTemplateProperty: function(prop, value) {
         if (this._templateInstances) {
           var changeRecord = {base: {}};
@@ -221,44 +209,6 @@
         }
       },
 
-      _forwardInstanceProp: function(inst, prop, value) {
-        if (prop === 'expanded' && inst.item && inst.__expanded__ !== value) {
-          if (value) {
-            this.table.expandItem(inst.item);
-          } else {
-            this.table.collapseItem(inst.item);
-          }
-        }
-      },
-
-      _forwardInstancePath: function(inst, path, value) {
-        // prevent propagating column specific values to other columns.
-        if (path.indexOf('column') === 0) {
-          return;
-        }
-        var columns = this.table.columns;
-
-        for (var c = 0; c < columns.length; c++) {
-          var instances = columns[c]._templateInstances;
-
-          for (var i = 0; i < instances.length; i++) {
-            var instance = instances[i];
-            if (instance.index == inst.index) {
-              instance.notifyPath(path, value);
-            }
-          }
-        }
-
-        if (path.indexOf('item') === 0) {
-          // instance.notifyPath above will call _forwardInstancePath recursively,
-          // so need to debounce to avoid firing the same event multiple times.
-          this.debounce('item-changed', function() {
-            // stripping 'item.' from path.
-            this.table.fire('item-changed', {item: inst.item, path: path.substring(5), value: value});
-          }.bind(this));
-        }
-      },
-
       _templateInstancesChanged: function(changeRecord) {
         // TODO: (Saulis) make sure _templateInstances length is correct. Earlier testing seems producing weird results.
         if (changeRecord && changeRecord.indexSplices) {
@@ -273,31 +223,11 @@
         }
       },
 
-      created: function() {
-        this._instanceProps = {
-          item: true,
-          index: true,
-          selected: true,
-          column: true,
-          expanded: true
-        };
-      },
-
-      ready: function() {
-        // we need to templatize all user-provided templates asap to prevent [[item...]] from being
-        // bound to a parent dom-bind template or a parent web component.
-        // Note (Saulis): if the internal templates have something else than [[item..]] they will get screwed when setting properi
-        this.templatize(this.headerTemplate);
-
-        // template not present in angular 2 at this point.
-        if (this.template) {
-          this.templatize(this.template);
-        }
-      },
-
       _templatize: function(template, parentElement) {
-        this.templatize(template);
-        var instance = this.stamp();
+        // TODO: extract and move template instances inside the templatizer element.
+        var t = new saulis.Templatizer(this);
+        t.templatize(template);
+        var instance = t.stamp();
 
         this.push('_templateInstances', instance);
         Polymer.dom(parentElement).insertBefore(instance.root, Polymer.dom(parentElement).firstElementChild);
