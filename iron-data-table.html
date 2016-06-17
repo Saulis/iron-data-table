@@ -874,8 +874,22 @@ inspired styles to your `iron-data-table`.
       _updateSizeForItem: function(event) {
         if (event.model.get('item')) {
           // notifyResize() doesn't do anything on iOS if the viewport size hasn't changed
-          // so this is more reliable.
-          this.$.list.updateSizeForItem(event.model.get('item'));
+          // so calling updateSizeForItem(item) is more reliable.
+
+          // TODO: However, since we're reusing the same items array in most cases,
+          // the _collection item map inside <iron-list> gets out of sync and
+          // that breaks things like selection and updateSizeForItem.
+          // To mitigate the issue, we'll update height of every row element.
+          // Can be optimized later if needed to update only the row that has
+          // expanded or collapsed.
+          var itemSet = [];
+          for(var i = 0; i < this.$.list._physicalItems.length; i++) {
+            itemSet.push(i);
+          }
+
+          // extracted from updateSizeFromItem(item) in <iron-list>
+          this.$.list._updateMetrics(itemSet);
+          this.$.list._positionItems();
         }
       },
 
