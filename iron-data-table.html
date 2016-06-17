@@ -212,8 +212,6 @@ inspired styles to your `iron-data-table`.
         'column-filter-changed': '_onColumnFilterChanged',
         'iron-resize': '_resizeCellContainers',
         'item-changed': '_itemChanged',
-        'item-expanded': '_itemExpanded',
-        'item-collapsed': '_itemCollapsed',
         'scroll': '_onHorizontalScroll'
       },
 
@@ -662,6 +660,7 @@ inspired styles to your `iron-data-table`.
 
         if (columns) {
           columns.forEach(function(column) {
+            column.table = this;
             this.listen(column, 'filter-value-changed', '_onColumnFilterChanged');
           }.bind(this));
         }
@@ -766,14 +765,6 @@ inspired styles to your `iron-data-table`.
             this.set('items.' + index + '.' + e.detail.path, e.detail.value);
           }
         }
-      },
-
-      _itemExpanded: function(e) {
-        this.expandItem(e.detail.item);
-      },
-
-      _itemCollapsed: function(e) {
-        this.collapseItem(e.detail.item);
       },
 
       _currentPageChanged: function(dataSource, page) {

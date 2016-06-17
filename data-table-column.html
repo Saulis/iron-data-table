@@ -107,6 +107,11 @@
         },
 
         /**
+         * Reference to the parent <iron-data-table> element.
+         */
+        table: Object,
+
+        /**
          * Template for the row item cell
          */
         template: {
@@ -157,17 +162,16 @@
         '_filterValueChanged(filterValue, filterBy)',
         '_filterByChanged(filterBy)',
         '_nameChanged(name)',
-        '_sortByChanged(sortBy)'
+        '_sortByChanged(table, sortBy)'
       ],
 
       _nameChanged: function(name) {
         this._updateTemplateProperty('column.name', name);
       },
 
-      _sortByChanged: function(sortBy) {
+      _sortByChanged: function(table, sortBy) {
         // column.sortBy is currently used iron-data-table so we need to notify
         // it for changes.
-        var table = Polymer.dom(this).parentNode;
         if (table.columns) {
           var index = table.columns.indexOf(this);
           table.notifyPath('columns.' + index + '.sortBy', sortBy);
@@ -219,9 +223,11 @@
 
       _forwardInstanceProp: function(inst, prop, value) {
         if (prop === 'expanded' && inst.item && inst.__expanded__ !== value) {
-          var table = Polymer.dom(this).parentNode;
-
-          table.fire(value ? 'item-expanded' : 'item-collapsed', {item: inst.item});
+          if (value) {
+            this.table.expandItem(inst.item);
+          } else {
+            this.table.collapseItem(inst.item);
+          }
         }
       },
 
@@ -230,8 +236,7 @@
         if (path.indexOf('column') === 0) {
           return;
         }
-        var table = Polymer.dom(this).parentNode;
-        var columns = table.columns;
+        var columns = this.table.columns;
 
         for (var c = 0; c < columns.length; c++) {
           var instances = columns[c]._templateInstances;
@@ -247,9 +252,9 @@
         if (path.indexOf('item') === 0) {
           // instance.notifyPath above will call _forwardInstancePath recursively,
           // so need to debounce to avoid firing the same event multiple times.
-          table.debounce('item-changed', function() {
+          this.debounce('item-changed', function() {
             // stripping 'item.' from path.
-            table.fire('item-changed', {item: inst.item, path: path.substring(5), value: value});
+            this.table.fire('item-changed', {item: inst.item, path: path.substring(5), value: value});
           }.bind(this));
         }
       },
