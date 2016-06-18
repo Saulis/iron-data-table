@@ -2,7 +2,7 @@
 
 <dom-module id="data-table-cell">
   <template>
-    <style is="custom-style">
+    <style>
       :host {
         flex: 1 0 100px;
         padding: 0 24px 0 24px;
@@ -105,48 +105,6 @@
         this.async(function() {
           instance.notifyPath(column.path, column.value);
         });
-      },
-
-      /** Templatizer */
-
-      _forwardParentProp: function(prop, value) {
-        //TODO: Bug in Polymer, seems to two-way bind any parent property only
-        //to the last template instance created. We need to push the property
-        //to all instances manually.
-        if (this._instance) {
-          console.log(this, prop, value);
-          this._instance.set(prop, value);
-          // this._instance[prop] = value;
-        }
-      },
-
-      _forwardInstanceProp: function(inst, prop, value) {
-        if (prop === 'expanded' && inst.item && this._expanded !== value) {
-          if (value) {
-            this.column.table.expandItem(inst.item);
-          } else {
-            this.column.table.collapseItem(inst.item);
-          }
-        }
-
-        if (prop === 'selected' && inst.item && this._selected !== value) {
-          if (value) {
-            this.column.table.selectItem(inst.item);
-          } else {
-            this.column.table.deselectItem(inst.item);
-          }
-        }
-      },
-
-      _forwardInstancePath: function(inst, path, value) {
-        if (path.indexOf('item') === 0) {
-          // instance.notifyPath above will call _forwardInstancePath recursively,
-          // so need to debounce to avoid firing the same event multiple times.
-          this.column.table.debounce('item-changed', function() {
-            // stripping 'item.' from path.
-            this.column.table.fire('item-changed', {item: inst.item, path: path.substring(5), value: value});
-          }.bind(this));
-        }
       }
     });
   </script>

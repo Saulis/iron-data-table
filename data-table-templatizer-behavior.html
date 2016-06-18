@@ -7,7 +7,14 @@
       index: Number,
       item: Object,
       selected: Boolean,
+      table: Object,
       template: Object,
+
+      //singleton
+      _instances: {
+        type: Array,
+        value: []
+      },
 
       _instance: {
         type: Object,
@@ -36,6 +43,7 @@
     _templatize: function(template) {
       this.templatize(template);
       var instance = this.stamp({});
+      this._instances.push(instance);
 
       Polymer.dom(this).insertBefore(instance.root, Polymer.dom(this).firstElementChild);
 
@@ -68,6 +76,45 @@
       this._selected = selected;
 
       instance.selected = selected;
+    },
+
+    /** templatizer */
+    _forwardParentProp: function(prop, value) {
+      //TODO: Bug in Polymer, seems to two-way bind any parent property only
+      //to the last template instance created. We need to push the property
+      //to all instances manually.
+      this._instances.forEach(function(inst) {
+        inst[prop] = value;
+      });
+    },
+
+    _forwardInstanceProp: function(inst, prop, value) {
+      if (prop === 'expanded' && inst.item && this._expanded !== value) {
+        if (value) {
+          this.table.expandItem(inst.item);
+        } else {
+          this.table.collapseItem(inst.item);
+        }
+      }
+
+      if (prop === 'selected' && inst.item && this._selected !== value) {
+        if (value) {
+          this.table.selectItem(inst.item);
+        } else {
+          this.table.deselectItem(inst.item);
+        }
+      }
+    },
+
+    _forwardInstancePath: function(inst, path, value) {
+      if (path.indexOf('item') === 0) {
+        // instance.notifyPath above will call _forwardInstancePath recursively,
+        // so need to debounce to avoid firing the same event multiple times.
+        this.table.debounce('item-changed', function() {
+          // stripping 'item.' from path.
+          this.table.fire('item-changed', {item: inst.item, path: path.substring(5), value: value});
+        }.bind(this));
+      }
     }
   };
 

@@ -177,6 +177,7 @@ inspired styles to your `iron-data-table`.
                              flex="[[column.flex]]"
                              hidden="[[column.hidden]]"
                              order="[[column.order]]"
+                             table="[[_this]]"
                              template="[[column.headerTemplate]]"
                              width="[[column.width]]">
               <data-table-column-sort sort-order="[[sortOrder]]" path="[[column.sortBy]]" on-sort-direction-changed="_sortDirectionChanged" hidden$="[[!column.sortBy]]"></data-table-column-sort>
@@ -192,6 +193,7 @@ inspired styles to your `iron-data-table`.
               <data-table-checkbox hidden$="[[!multiSelection]]" tabindex="-1" checked="[[_isSelected(item, selectedItems, selectedItems.*)]]" on-tap="_onCheckBoxTap"></data-table-checkbox>
               <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
                 <data-table-cell template="[[column.template]]"
+                                 table="[[_this]]"
                                  align-right="[[column.alignRight]]"
                                  column="[[column]]"
                                  expanded="[[_isExpanded(item, _expandedItems, _expandedItems.*)]]"
@@ -205,7 +207,12 @@ inspired styles to your `iron-data-table`.
                                  before-bind="[[beforeCellBind]]"></data-table-cell>
               </template>
               <template is="dom-if" if="[[_isExpanded(item, _expandedItems)]]" on-dom-change="_updateSizeForItem">
-                <data-table-row-detail row-detail-template="[[rowDetail]]" bind="[[_bind(item, index, selectedItems, _expandedItems)]]"></data-table-row-detail>
+                <data-table-row-detail index="[[index]]"
+                                       item="[[item]]"
+                                       expanded="[[_isExpanded(item, _expandedItems, _expandedItems.*)]]"
+                                       selected="[[_isSelected(item, selectedItems, selectedItems.*)]]"
+                                       table="[[_this]]"
+                                       template="[[rowDetail]]"></data-table-row-detail>
               </template>
             </data-table-row>
           </div>
@@ -432,6 +439,13 @@ inspired styles to your `iron-data-table`.
           type: Array,
           value: function() {
             return [];
+          }
+        },
+
+        _this: {
+          type: Object,
+          value: function() {
+            return this;
           }
         }
       },
