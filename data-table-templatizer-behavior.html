@@ -1,0 +1,76 @@
+<script>
+  var saulis = window.saulis || {};
+
+  saulis.DataTableTemplatizerBehaviorImpl = {
+    properties: {
+      expanded: Boolean,
+      index: Number,
+      item: Object,
+      selected: Boolean,
+      template: Object,
+
+      _instance: {
+        type: Object,
+        computed: '_templatize(template)'
+      }
+    },
+
+    observers: [
+      '_expandedChanged(_instance, expanded)',
+      '_indexChanged(_instance, index)',
+      '_itemChanged(_instance, item)',
+      '_itemPathChanged(_instance, item.*)',
+      '_selectedChanged(_instance, selected)'
+    ],
+
+    created: function() {
+      this._instanceProps = {
+        column: true,
+        expanded: true,
+        index: true,
+        item: true,
+        selected: true
+      };
+    },
+
+    _templatize: function(template) {
+      this.templatize(template);
+      var instance = this.stamp({});
+
+      Polymer.dom(this).insertBefore(instance.root, Polymer.dom(this).firstElementChild);
+
+      return instance;
+    },
+
+    _expandedChanged: function(instance, expanded) {
+      // store original expanded value to detect when value change has
+      // originated from within the template.
+      this._expanded = expanded;
+
+      instance.expanded = expanded;
+    },
+
+    _indexChanged: function(instance, index) {
+      instance.index = index;
+    },
+
+    _itemChanged: function(instance, item) {
+      instance.item = item;
+    },
+
+    _itemPathChanged: function(instance, item) {
+      instance.notifyPath(item.path, item.value);
+    },
+
+    _selectedChanged: function(instance, selected) {
+      // store original selected value to detect when value change has
+      // originated from within the template.
+      this._selected = selected;
+
+      instance.selected = selected;
+    }
+  };
+
+  saulis.DataTableTemplatizerBehavior =
+    [Polymer.Templatizer, saulis.DataTableTemplatizerBehaviorImpl];
+</script>

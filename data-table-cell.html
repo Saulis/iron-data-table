@@ -1,3 +1,5 @@
+<link rel="import" href="data-table-templatizer-behavior.html">
+
 <dom-module id="data-table-cell">
   <template>
     <style is="custom-style">
@@ -25,19 +27,15 @@
   <script>
     Polymer({
       is: 'data-table-cell',
-      behaviors: [Polymer.Templatizer],
+      behaviors: [saulis.DataTableTemplatizerBehavior],
 
       properties: {
         alignRight: Boolean,
         column: Object,
-        expanded: Boolean,
         flex: Number,
         header: Boolean,
         hidden: Boolean,
-        index: Number,
-        item: Object,
         order: Number,
-        selected: Boolean,
         template: Object,
         width: String,
 
@@ -46,11 +44,6 @@
           value: function() {
             return function(data, cell) {};
           }
-        },
-
-        _instance: {
-          type: Object,
-          computed: '_templatize(column, template)'
         }
       },
 
@@ -59,25 +52,10 @@
                   '_alignRightChanged(alignRight)',
                   '_columnChanged(_instance, column)',
                   '_columnPathChanged(_instance, column.*)',
-                  '_expandedChanged(_instance, expanded)',
                   '_flexChanged(flex)',
                   '_hiddenChanged(hidden)',
-                  '_indexChanged(_instance, index)',
-                  '_itemChanged(_instance, item)',
-                  '_itemPathChanged(_instance, item.*)',
                   '_orderChanged(order)',
-                  '_selectedChanged(_instance, selected)',
                   '_widthChanged(width)'],
-
-      created: function() {
-        this._instanceProps = {
-          column: true,
-          expanded: true,
-          index: true,
-          item: true,
-          selected: true
-        };
-      },
 
       attached: function() {
         if (!Polymer.Settings.useNativeShadow) {
@@ -118,15 +96,6 @@
         this.style.flexBasis = width;
       },
 
-      _templatize: function(column, template) {
-        this.templatize(template);
-        var instance = this.stamp({});
-
-        Polymer.dom(this).insertBefore(instance.root, Polymer.dom(this).firstElementChild);
-
-        return instance;
-      },
-
       _columnChanged: function(instance, column) {
         instance.column = column;
       },
@@ -136,34 +105,6 @@
         this.async(function() {
           instance.notifyPath(column.path, column.value);
         });
-      },
-
-      _expandedChanged: function(instance, expanded) {
-        // store original expanded value to detect when value change has
-        // originated from within the template.
-        this._expanded = expanded;
-
-        instance.expanded = expanded;
-      },
-
-      _indexChanged: function(instance, index) {
-        instance.index = index;
-      },
-
-      _itemChanged: function(instance, item) {
-        instance.item = item;
-      },
-
-      _itemPathChanged: function(instance, item) {
-        instance.notifyPath(item.path, item.value);
-      },
-
-      _selectedChanged: function(instance, selected) {
-        // store original selected value to detect when value change has
-        // originated from within the template.
-        this._selected = selected;
-
-        instance.selected = selected;
       },
 
       /** Templatizer */

@@ -563,18 +563,18 @@ inspired styles to your `iron-data-table`.
       _selectedItemsChanged: function(e) {
         if (e.path === 'selectedItems.splices') {
           var splices = e.value.indexSplices[0];
-
-          Array.prototype.forEach.call(splices.object, function(item) {
-            this._templatesForItem(item).forEach(function(t) {
-              t.selected = e.base.inverted ? false : true;
-            });
-          }.bind(this));
-
-          Array.prototype.forEach.call(splices.removed, function(item) {
-            this._templatesForItem(item).forEach(function(t) {
-              t.selected = e.base.inverted ? true : false;
-            });
-          }.bind(this));
+          // TODO: no longer needed because observers are used in the cells.
+          // Array.prototype.forEach.call(splices.object, function(item) {
+          //   this._templatesForItem(item).forEach(function(t) {
+          //     t.selected = e.base.inverted ? false : true;
+          //   });
+          // }.bind(this));
+          //
+          // Array.prototype.forEach.call(splices.removed, function(item) {
+          //   this._templatesForItem(item).forEach(function(t) {
+          //     t.selected = e.base.inverted ? true : false;
+          //   });
+          // }.bind(this));
         }
       },
 
@@ -747,13 +747,13 @@ inspired styles to your `iron-data-table`.
             for (var c = 0; c < this.columns.length; c++) {
               var column = this.columns[c];
 
-              for (var t = 0; t < column._templateInstances.length; t++) {
-                var templateInstance = column._templateInstances[t];
-
-                if (templateInstance.item === item) {
-                  // templateInstance.notifyPath(items.path.replace('items.', 'item.').replace('.#' + index, ''), items.value);
-                }
-              }
+              // for (var t = 0; t < column._templateInstances.length; t++) {
+              //   var templateInstance = column._templateInstances[t];
+              //
+              //   if (templateInstance.item === item) {
+              //     // templateInstance.notifyPath(items.path.replace('items.', 'item.').replace('.#' + index, ''), items.value);
+              //   }
+              // }
             }
 
             //TODO: row details template instances need to be notified also.
