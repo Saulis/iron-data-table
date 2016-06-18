@@ -183,7 +183,7 @@ inspired styles to your `iron-data-table`.
             <data-table-row on-click="_onRowClick" tabindex$="[[tabIndex]]" bind="[[_bind(item, index, selectedItems, _expandedItems)]]" before-bind="[[beforeRowBind]]" even$="[[!_isEven(index)]]" selected$="[[_isSelected(item, selectedItems, selectedItems.*)]]">
               <data-table-checkbox hidden$="[[!multiSelection]]" tabindex="-1" checked="[[_isSelected(item, selectedItems, selectedItems.*)]]" on-tap="_onCheckBoxTap"></data-table-checkbox>
               <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
-                <data-table-cell column="[[column]]" bind="[[_bind(item, index, selectedItems, _expandedItems)]]" before-bind="[[beforeCellBind]]"></data-table-cell>
+                <data-table-cell template="[[column.template]]" column="[[column]]" item="[[item]]" index="[[index]]" expanded="[[_isExpanded(item, _expandedItems, _expandedItems.*)]]" selected="[[_isSelected(item, selectedItems, selectedItems.*)]]" before-bind="[[beforeCellBind]]"></data-table-cell>
               </template>
               <template is="dom-if" if="[[_isExpanded(item, _expandedItems)]]" on-dom-change="_updateSizeForItem">
                 <data-table-row-detail row-detail-template="[[rowDetail]]" bind="[[_bind(item, index, selectedItems, _expandedItems)]]"></data-table-row-detail>
@@ -659,6 +659,7 @@ inspired styles to your `iron-data-table`.
 
         if (columns) {
           columns.forEach(function(column) {
+            column.table = this;
             this.listen(column, 'filter-value-changed', '_onColumnFilterChanged');
           }.bind(this));
         }
@@ -734,7 +735,7 @@ inspired styles to your `iron-data-table`.
                 var templateInstance = column._templateInstances[t];
 
                 if (templateInstance.item === item) {
-                  templateInstance.notifyPath(items.path.replace('items.', 'item.').replace('.#' + index, ''), items.value);
+                  // templateInstance.notifyPath(items.path.replace('items.', 'item.').replace('.#' + index, ''), items.value);
                 }
               }
             }
