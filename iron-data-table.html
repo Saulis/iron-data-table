@@ -188,7 +188,7 @@ inspired styles to your `iron-data-table`.
       <iron-list id="list" as="item" items="[[_cachedItems]]" on-scroll="_onVerticalScroll">
         <template>
           <div class="item">
-            <data-table-row on-click="_onRowClick" tabindex$="[[tabIndex]]" bind="[[_bind(item, index, selectedItems, _expandedItems)]]" before-bind="[[beforeRowBind]]" even$="[[!_isEven(index)]]" selected$="[[_isSelected(item, selectedItems, selectedItems.*)]]">
+            <data-table-row on-click="_onRowClick" tabindex$="[[tabIndex]]" before-bind="[[beforeRowBind]]" even$="[[!_isEven(index)]]" selected$="[[_isSelected(item, selectedItems, selectedItems.*)]]">
               <data-table-checkbox hidden$="[[!multiSelection]]" tabindex="-1" checked="[[_isSelected(item, selectedItems, selectedItems.*)]]" on-tap="_onCheckBoxTap"></data-table-checkbox>
               <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
                 <data-table-cell template="[[column.template]]"
@@ -234,8 +234,6 @@ inspired styles to your `iron-data-table`.
         'column-filter-changed': '_onColumnFilterChanged',
         'iron-resize': '_resizeCellContainers',
         'item-changed': '_itemChanged',
-        'item-expanded': '_itemExpanded',
-        'item-collapsed': '_itemCollapsed',
         'scroll': '_onHorizontalScroll'
       },
 
@@ -467,8 +465,7 @@ inspired styles to your `iron-data-table`.
       observers: ['_itemsChanged(items.*)',
         '_sizeChanged(size)',
         '_currentPageChanged(dataSource, _currentPage)',
-        '_resetData(dataSource, filter.*, sortOrder.*)',
-        '_selectedItemsChanged(selectedItems.*)'
+        '_resetData(dataSource, filter.*, sortOrder.*)'
       ],
 
       created: function() {
@@ -485,19 +482,6 @@ inspired styles to your `iron-data-table`.
 
           this.set('rowDetail', Polymer.dom(this).querySelector('template[is=row-detail]'));
         }.bind(this));
-      },
-
-      ready: function() {
-        this.$.list._selectionHandler = function(e) {
-          var first = Polymer.dom(e).event.path.filter(function(p) {
-            return this.modelForElement(p);
-          }.bind(this))[0];
-
-          var model = this.modelForElement(first);
-          if (model) {
-            this.toggleSelectionForItem(model[this.as]);
-          }
-        };
       },
 
       _stopPropagation: function(e) {
@@ -571,27 +555,6 @@ inspired styles to your `iron-data-table`.
         return selectedItems.inverted ? !selected : selected;
       },
 
-      /**
-       * Multi-Selection
-       */
-      _selectedItemsChanged: function(e) {
-        if (e.path === 'selectedItems.splices') {
-          var splices = e.value.indexSplices[0];
-          // TODO: no longer needed because observers are used in the cells.
-          // Array.prototype.forEach.call(splices.object, function(item) {
-          //   this._templatesForItem(item).forEach(function(t) {
-          //     t.selected = e.base.inverted ? false : true;
-          //   });
-          // }.bind(this));
-          //
-          // Array.prototype.forEach.call(splices.removed, function(item) {
-          //   this._templatesForItem(item).forEach(function(t) {
-          //     t.selected = e.base.inverted ? true : false;
-          //   });
-          // }.bind(this));
-        }
-      },
-
       /*
        * Selects all the items in the list.
        */
@@ -628,24 +591,6 @@ inspired styles to your `iron-data-table`.
 
       _isSelectAllIndeterminate: function(selectedItemsLength) {
         return selectedItemsLength > 0;
-      },
-
-
-      _bind: function(item, index, selectedItems, expandedItems) {
-        if (index !== undefined) {
-          return {
-            item: item,
-            index: index,
-            selected: this._isSelected(item, selectedItems),
-            // store expanded twice to detect changes coming from inside the template.
-            __expanded__: this._isExpanded(item, expandedItems),
-            expanded: this._isExpanded(item, expandedItems)
-          };
-        } else {
-          return {
-            column: item
-          };
-        }
       },
 
       _isEven: function(index) {
@@ -758,35 +703,9 @@ inspired styles to your `iron-data-table`.
           var cachedIndex = this._cachedItems.indexOf(item);
 
           if (cachedIndex >= 0) {
-            for (var c = 0; c < this.columns.length; c++) {
-              var column = this.columns[c];
-
-              // for (var t = 0; t < column._templateInstances.length; t++) {
-              //   var templateInstance = column._templateInstances[t];
-              //
-              //   if (templateInstance.item === item) {
-              //     // templateInstance.notifyPath(items.path.replace('items.', 'item.').replace('.#' + index, ''), items.value);
-              //   }
-              // }
-            }
-
-            //TODO: row details template instances need to be notified also.
-
             this.set(items.path.replace('items.', '_cachedItems.').replace('#' + index, cachedIndex), items.value);
           }
         }
-      },
-
-      _templatesForItem: function(item) {
-        return this.columns.map(function(col) {
-            return col._templateInstances;
-          })
-          .reduce(function(a, b) {
-            return a.concat(b);
-          }, [])
-          .filter(function(t) {
-            return t.item === item;
-          });
       },
 
       _itemChanged: function(e) {
@@ -796,14 +715,6 @@ inspired styles to your `iron-data-table`.
             this.set('items.' + index + '.' + e.detail.path, e.detail.value);
           }
         }
-      },
-
-      _itemExpanded: function(e) {
-        this.expandItem(e.detail.item);
-      },
-
-      _itemCollapsed: function(e) {
-        this.collapseItem(e.detail.item);
       },
 
       _currentPageChanged: function(dataSource, page) {
