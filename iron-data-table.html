@@ -499,12 +499,10 @@ inspired styles to your `iron-data-table`.
        * @param {(Object|number)} item The item object or its index
        */
       selectItem: function(item) {
-        if (this.selectionEnabled) {
-          if (typeof item === 'number' && item >= 0 && this.items && this.items.length > item) {
-            this._selectItem(this.items[item]);
-          } else {
-            this._selectItem(item);
-          }
+        if (typeof item === 'number' && item >= 0 && this.items && this.items.length > item) {
+          this._selectItem(this.items[item]);
+        } else {
+          this._selectItem(item);
         }
       },
 
