@@ -29,7 +29,6 @@
          */
         name: {
           type: String,
-          notify: true,
           value: ''
         },
 
@@ -88,6 +87,11 @@
         sortBy: {
           type: String
         },
+
+        /*
+         * Reference to the parent <iron-data-table> element.
+         */
+        table: Object,
 
         /**
          * Template for the header cell
@@ -156,12 +160,14 @@
         '_templateInstancesChanged(_templateInstances.splices)',
         '_filterValueChanged(filterValue, filterBy)',
         '_filterByChanged(filterBy)',
-        '_nameChanged(name)',
+        '_nameChanged(table, name)',
         '_sortByChanged(sortBy)'
       ],
 
-      _nameChanged: function(name) {
-        this._updateTemplateProperty('column.name', name);
+      _nameChanged: function(table, name) {
+        if (table.columns)
+        var index = table.columns.indexOf(this);
+        table.notifyPath('columns.' + index + '.name', name);
       },
 
       _sortByChanged: function(sortBy) {

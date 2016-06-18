@@ -25,6 +25,7 @@
   <script>
     Polymer({
       is: 'data-table-cell',
+      behaviors: [Polymer.Templatizer],
 
       properties: {
         bind: Object,
@@ -33,9 +34,14 @@
         width: String,
         flex: Number,
 
+        index: Number,
+        item: Object,
+        selected: Boolean,
+        expanded: Boolean,
+
         column: {
           type: Object,
-          observer: '_columnChanged'
+          observer: '_columnChanged2'
         },
 
         beforeBind: {
@@ -45,15 +51,34 @@
           }
         },
 
+        template: Object,
+
         _instance: {
           type: Object,
-          computed: '_templatize(column, _templatizer)'
+          computed: '_templatize(column, template)'
         },
 
         _templatizer: Object
       },
 
-      observers: ['_bindData(_instance, bind)'],
+      observers: ['_bindData(_instance, bind)',
+                  '_columnChanged(_instance, column)',
+                  '_columnPathChanged(_instance, column.*)',
+                  '_expandedChanged(_instance, expanded)',
+                  '_indexChanged(instance, index)',
+                  '_itemChanged(_instance, item)',
+                  '_itemPathChanged(_instance, item.*)',
+                  '_selectedChanged(_instance, selected)'],
+
+      created: function() {
+        this._instanceProps = {
+          column: true,
+          expanded: true,
+          index: true,
+          item: true,
+          selected: true
+        };
+      },
 
       attached: function() {
         if (!Polymer.Settings.useNativeShadow) {
@@ -111,8 +136,13 @@
         }
       },
 
-      _templatize: function(column, templatizer) {
-        return templatizer.bind(column)(this);
+      _templatize: function(column, template) {
+        this.templatize(template);
+        var instance = this.stamp({});
+
+        Polymer.dom(this).insertBefore(instance.root, Polymer.dom(this).firstElementChild);
+
+        return instance;
       },
 
       _bindData: function(instance, data) {
@@ -122,7 +152,44 @@
         instance.bind(data);
       },
 
-      _columnChanged: function(column, oldColumn) {
+      _columnChanged: function(instance, column) {
+        instance.column = column;
+      },
+
+      _columnPathChanged: function(instance, column) {
+        instance.notifyPath(column.path, column.value);
+      },
+
+      _expandedChanged: function(instance, expanded) {
+        // store original expanded value to detect when value change has
+        // originated from within the template.
+        this._expanded = expanded;
+
+        instance.expanded = expanded;
+      },
+
+      _indexChanged: function(instance, index) {
+        instance.index = index;
+      },
+
+      _itemChanged: function(instance, item) {
+        instance.item = item;
+      },
+
+      _itemPathChanged: function(instance, item) {
+        instance.notifyPath(item.path, item.value);
+      },
+
+      _selectedChanged: function(instance, selected) {
+        // store original selected value to detect when value change has
+        // originated from within the template.
+        this._selected = selected;
+
+        instance.selected = selected;
+      },
+
+      // TODO: try if declarative listeners work now?
+      _columnChanged2: function(column, oldColumn) {
         this._setColumnStyleProperties(column);
 
         this._addListener(column, oldColumn, 'width');
@@ -152,6 +219,59 @@
         }
 
         this.listen(column, eventName, observerName);
+      },
+
+      /** Templatizer */
+
+      _forwardInstanceProp: function(inst, prop, value) {
+        if (prop === 'expanded' && inst.item && this._expanded !== value) {
+          if (value) {
+            this.column.table.expandItem(inst.item);
+          } else {
+            this.column.table.collapseItem(inst.item);
+          }
+        }
+
+        if (prop === 'selected' && inst.item && this._selected !== value) {
+          if (value) {
+            this.column.table.selectItem(inst.item);
+          } else {
+            this.column.table.deselectItem(inst.item);
+          }
+        }
+      },
+
+      _forwardInstancePath: function(inst, path, value) {
+        // prevent propagating column specific values to other columns.
+        // if (path.indexOf('column') === 0) {
+        //   return;
+        // }
+        // var table = Polymer.dom(this).parentNode;
+        // var columns = table.columns;
+        //
+        // for (var c = 0; c < columns.length; c++) {
+        //   var instances = columns[c]._templateInstances;
+        //
+        //   for (var i = 0; i < instances.length; i++) {
+        //     var instance = instances[i];
+        //     if (instance.index == inst.index) {
+        //       instance.notifyPath(path, value);
+        //     }
+        //   }
+        // }
+
+        if (path.indexOf('column') === 0) {
+          console.log('todo');
+        }
+
+        if (path.indexOf('item') === 0) {
+          // instance.notifyPath above will call _forwardInstancePath recursively,
+          // so need to debounce to avoid firing the same event multiple times.
+          this.column.table.debounce('item-changed', function() {
+            // stripping 'item.' from path.
+            this.column.table.fire('item-changed', {item: inst.item, path: path.substring(5), value: value});
+          }.bind(this));
+        }
       }
     });
   </script>
