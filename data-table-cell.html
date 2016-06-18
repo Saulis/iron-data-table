@@ -28,21 +28,18 @@
       behaviors: [Polymer.Templatizer],
 
       properties: {
-        bind: Object,
-        order: Number,
-        header: Boolean,
-        width: String,
+        alignRight: Boolean,
+        column: Object,
+        expanded: Boolean,
         flex: Number,
-
+        header: Boolean,
+        hidden: Boolean,
         index: Number,
         item: Object,
+        order: Number,
         selected: Boolean,
-        expanded: Boolean,
-
-        column: {
-          type: Object,
-          observer: '_columnChanged2'
-        },
+        template: Object,
+        width: String,
 
         beforeBind: {
           type: Object,
@@ -51,24 +48,26 @@
           }
         },
 
-        template: Object,
-
         _instance: {
           type: Object,
           computed: '_templatize(column, template)'
-        },
-
-        _templatizer: Object
+        }
       },
 
-      observers: ['_bindData(_instance, bind)',
+      observers: [
+                  '_beforeBind(beforeBind, column.*, index, item.*, expanded, selected)',
+                  '_alignRightChanged(alignRight)',
                   '_columnChanged(_instance, column)',
                   '_columnPathChanged(_instance, column.*)',
                   '_expandedChanged(_instance, expanded)',
-                  '_indexChanged(instance, index)',
+                  '_flexChanged(flex)',
+                  '_hiddenChanged(hidden)',
+                  '_indexChanged(_instance, index)',
                   '_itemChanged(_instance, item)',
                   '_itemPathChanged(_instance, item.*)',
-                  '_selectedChanged(_instance, selected)'],
+                  '_orderChanged(order)',
+                  '_selectedChanged(_instance, selected)',
+                  '_widthChanged(width)'],
 
       created: function() {
         this._instanceProps = {
@@ -88,52 +87,35 @@
             Polymer.StyleTransformer.dom(this, this.domHost.tagName.toLowerCase(), this._scopeCssViaAttr, false);
           }
         }
+      },
 
-        // in some cases the _columnChanged observer is run before the cell has
-        // been turned into a html element and the inline styles don't get applied.
-        // Applying them after attaching fixes makes sure they're applied.
-        this._setColumnStyleProperties(this.column);
+      _alignRightChanged: function(alignRight) {
+        this.style.flexDirection = alignRight ? 'row-reverse' : 'row';
+      },
 
-        // TODO: for some reason this needs to be done async to work with Shadow
-        // DOM. Left the sync call there also to prevent flickering with Shady DOM.
-        this.async(function() {
-          this._setColumnStyleProperties(this.column);
+      // TODO:
+      _beforeBind: function(column, index) {
+        // lots of changes coming at the same time from column.* and item.*,
+        // debounce to minimize repeating calls.
+        this.debounce('before bind', function() {
+          // console.log('before bind: ', this.column.name, index);
         });
       },
 
-      _setColumnStyleProperties: function(column) {
-        this.style.flexGrow = column.flex;
-        this.style.flexDirection = column.alignRight ? 'row-reverse' : 'row';
-        this.style.flexBasis = column.width;
-        this.style.flexGrow = column.flex;
+      _hiddenChanged: function(hidden) {
+        this.toggleAttribute('hidden', hidden);
       },
 
-      _orderChanged: function(e) {
-        this.style.order = e.detail.value;
+      _orderChanged: function(order) {
+        this.style.order = order;
       },
 
-      _widthChanged: function(e) {
-        this.style.flexBasis = e.detail.value;
+      _flexChanged: function(flex) {
+        this.style.flexGrow = flex;
       },
 
-      _flexChanged: function(e) {
-        this.style.flexGrow = e.detail.value;
-      },
-
-      _hiddenChanged: function(e) {
-        this.hidden = e.detail.value;
-      },
-
-      _templatizeRowChanged: function(e) {
-        if (!this.header) {
-          this._templatizer = e.detail.value;
-        }
-      },
-
-      _templatizeHeaderChanged: function(e) {
-        if (this.header) {
-          this._templatizer = e.detail.value;
-        }
+      _widthChanged: function(width) {
+        this.style.flexBasis = width;
       },
 
       _templatize: function(column, template) {
@@ -145,19 +127,15 @@
         return instance;
       },
 
-      _bindData: function(instance, data) {
-        if (!this.header) {
-          this.beforeBind(data, this);
-        }
-        instance.bind(data);
-      },
-
       _columnChanged: function(instance, column) {
         instance.column = column;
       },
 
       _columnPathChanged: function(instance, column) {
-        instance.notifyPath(column.path, column.value);
+        // sometimes instance isn't ready to be notified yet and throws an error.
+        this.async(function() {
+          instance.notifyPath(column.path, column.value);
+        });
       },
 
       _expandedChanged: function(instance, expanded) {
@@ -188,40 +166,18 @@
         instance.selected = selected;
       },
 
-      // TODO: try if declarative listeners work now?
-      _columnChanged2: function(column, oldColumn) {
-        this._setColumnStyleProperties(column);
-
-        this._addListener(column, oldColumn, 'width');
-        this._addListener(column, oldColumn, 'flex');
-        this._addListener(column, oldColumn, 'order');
-
-        this.hidden = column.hidden;
-        this._addListener(column, oldColumn, 'hidden');
-
-        if (this.header && column.templatizeHeader) {
-          this._templatizer = column.templatizeHeader;
-        } else if (column.templatizeRow) {
-          this._templatizer = column.templatizeRow;
-        }
-        this._addListener(column, oldColumn, 'templatizeRow');
-        this._addListener(column, oldColumn, 'templatizeHeader');
-      },
-
-      // Adding listeners manually *seems* to work better with forwarded parent props
-      // than normal data-binding. Something to do with notifying the paths correctly.
-      _addListener: function(column, oldColumn, prop) {
-        var eventName = Polymer.CaseMap.camelToDashCase(prop) + '-changed';
-        var observerName = '_' + prop + 'Changed';
-
-        if (oldColumn) {
-          this.unlisten(oldColumn, eventName);
-        }
-
-        this.listen(column, eventName, observerName);
-      },
-
       /** Templatizer */
+
+      _forwardParentProp: function(prop, value) {
+        //TODO: Bug in Polymer, seems to two-way bind any parent property only
+        //to the last template instance created. We need to push the property
+        //to all instances manually.
+        if (this._instance) {
+          console.log(this, prop, value);
+          this._instance.set(prop, value);
+          // this._instance[prop] = value;
+        }
+      },
 
       _forwardInstanceProp: function(inst, prop, value) {
         if (prop === 'expanded' && inst.item && this._expanded !== value) {
@@ -242,28 +198,6 @@
       },
 
       _forwardInstancePath: function(inst, path, value) {
-        // prevent propagating column specific values to other columns.
-        // if (path.indexOf('column') === 0) {
-        //   return;
-        // }
-        // var table = Polymer.dom(this).parentNode;
-        // var columns = table.columns;
-        //
-        // for (var c = 0; c < columns.length; c++) {
-        //   var instances = columns[c]._templateInstances;
-        //
-        //   for (var i = 0; i < instances.length; i++) {
-        //     var instance = instances[i];
-        //     if (instance.index == inst.index) {
-        //       instance.notifyPath(path, value);
-        //     }
-        //   }
-        // }
-
-        if (path.indexOf('column') === 0) {
-          console.log('todo');
-        }
-
         if (path.indexOf('item') === 0) {
           // instance.notifyPath above will call _forwardInstancePath recursively,
           // so need to debounce to avoid firing the same event multiple times.
