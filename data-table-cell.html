@@ -71,13 +71,16 @@
         this.style.flexDirection = alignRight ? 'row-reverse' : 'row';
       },
 
-      // TODO:
-      _beforeBind: function(column, index) {
-        // lots of changes coming at the same time from column.* and item.*,
-        // debounce to minimize repeating calls.
-        this.debounce('before bind', function() {
-          // console.log('before bind: ', this.column.name, index);
-        });
+      _beforeBind: function(beforeBind, column, index, item, expanded, selected) {
+        var data = {
+          column: column.base,
+          index: index,
+          item: item.base,
+          expanded: expanded,
+          selected: selected
+        };
+
+        beforeBind(data, this);
       },
 
       _hiddenChanged: function(hidden) {

@@ -189,7 +189,14 @@ inspired styles to your `iron-data-table`.
       <iron-list id="list" as="item" items="[[_cachedItems]]" on-scroll="_onVerticalScroll">
         <template>
           <div class="item">
-            <data-table-row on-click="_onRowClick" tabindex$="[[tabIndex]]" before-bind="[[beforeRowBind]]" even$="[[!_isEven(index)]]" selected$="[[_isSelected(item, selectedItems, selectedItems.*)]]">
+            <data-table-row on-click="_onRowClick"
+                            tabindex$="[[tabIndex]]"
+                            before-bind="[[beforeRowBind]]"
+                            even$="[[!_isEven(index)]]"
+                            expanded="[[_isExpanded(item, _expandedItems, _expandedItems.*)]]"
+                            index="[[index]]"
+                            item="[[item]]"
+                            selected="[[_isSelected(item, selectedItems, selectedItems.*)]]">
               <data-table-checkbox hidden$="[[!multiSelection]]" tabindex="-1" checked="[[_isSelected(item, selectedItems, selectedItems.*)]]" on-tap="_onCheckBoxTap"></data-table-checkbox>
               <template is="dom-repeat" items="[[columns]]" as="column" index-as="colIndex">
                 <data-table-cell template="[[column.template]]"
@@ -251,12 +258,7 @@ inspired styles to your `iron-data-table`.
          * }
          * ```
          */
-        beforeCellBind: {
-          type: Object,
-          value: function() {
-            return function(data, cell) {};
-          }
-        },
+        beforeCellBind: Object,
 
         /**
          * A function that is called before data is bound to a row.
