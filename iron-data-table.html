@@ -217,6 +217,7 @@ inspired styles to your `iron-data-table`.
                                        item="[[item]]"
                                        expanded="[[_isExpanded(item, _expandedItems, _expandedItems.*)]]"
                                        selected="[[_isSelected(item, selectedItems, selectedItems.*)]]"
+                                       before-bind="[[beforeDetailsBind]]"
                                        table="[[_this]]"
                                        template="[[rowDetail]]"></data-table-row-detail>
               </template>
@@ -257,6 +258,18 @@ inspired styles to your `iron-data-table`.
          * ```
          */
         beforeCellBind: Object,
+
+        /**
+         * A function that is called before data is bound to a row details element.
+         * Can be used to customize the element depending on the data.
+         * #### Example:
+         * ```js
+         * function(data, details) {
+         *   details.toggleClass('custom', data.useCustomClass);
+         * }
+         * ```
+         */
+        beforeDetailsBind: Object,
 
         /**
          * A function that is called before data is bound to a row.
