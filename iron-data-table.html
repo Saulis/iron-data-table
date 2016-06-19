@@ -189,7 +189,6 @@ inspired styles to your `iron-data-table`.
         <template>
           <div class="item">
             <data-table-row on-click="_onRowClick"
-                            tabindex$="[[tabIndex]]"
                             before-bind="[[beforeRowBind]]"
                             even$="[[!_isEven(index)]]"
                             expanded="[[_isExpanded(item, _expandedItems, _expandedItems.*)]]"
@@ -881,6 +880,18 @@ inspired styles to your `iron-data-table`.
         return items && items.indexOf(item) > -1;
       },
 
+      _isFocusable: function(target) {
+        if (Polymer.Settings.useNativeShadow) {
+          // https://nemisj.com/focusable/
+          // tabIndex is not reliable in IE.
+          return target.tabIndex >= 0;
+        } else {
+          // unreliable with Shadow, document.activeElement doesn't go inside
+          // the shadow root.
+          return target.contains(Polymer.dom(document.activeElement).node);
+        }
+      },
+
       // we need to listen to click instead of tap because on mobile safari, the
       // document.activeElement has not been updated (focus has not been shifted)
       // yet at the point when tap event is being executed.
@@ -888,8 +899,7 @@ inspired styles to your `iron-data-table`.
         // Prevent item selection if row itself is not focused. This means that
         // an element inside the row has been focused.
         // Mobile devices don't move focus from body unless it's an input element that is focused, so this element will never get focused.
-        if (document.activeElement !== document.body &&
-          Polymer.dom(e).localTarget.contains(Polymer.dom(document.activeElement).node)) {
+        if (this._isFocusable(Polymer.dom(e).localTarget)) {
           return;
         } else {
           if (this.rowDetail && this.detailsEnabled) {
