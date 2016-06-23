@@ -43,11 +43,25 @@
     _templatize: function(template) {
       this.templatize(template);
       var instance = this.stamp({});
+
+      // fix _rootDataHost to the context where template has been defined
+      if (template._parentDataHost) {
+        instance._rootDataHost = this._findRootDataHost(template._parentDataHost);
+      }
+
       this._instances.push(instance);
 
       Polymer.dom(this).insertBefore(instance.root, Polymer.dom(this).firstElementChild);
 
       return instance;
+    },
+
+    _findRootDataHost: function(parentDataHost) {
+      if (parentDataHost.dataHost) {
+        return this._findRootDataHost(parentDataHost.dataHost);
+      } else {
+        return parentDataHost;
+      }
     },
 
     _expandedChanged: function(instance, expanded) {
