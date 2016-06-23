@@ -43,6 +43,8 @@
     _templatize: function(template) {
       this.templatize(template);
       var instance = this.stamp({});
+      // fix _rootDataHost to the context where template has been defined
+      instance._rootDataHost = template._rootDataHost || instance._rootDataHost;
       this._instances.push(instance);
 
       Polymer.dom(this).insertBefore(instance.root, Polymer.dom(this).firstElementChild);
