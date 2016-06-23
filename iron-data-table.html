@@ -489,13 +489,27 @@ inspired styles to your `iron-data-table`.
             return (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'DATA-TABLE-COLUMN');
           };
 
+          var hasDetails = function(node) {
+            return (node.nodeType === Node.ELEMENT_NODE &&
+              node.tagName === 'TEMPLATE' && node.hasAttribute('is') &&
+              node.getAttribute('is') === 'row-detail');
+          };
+
           if (info.addedNodes.filter(hasColumns).length > 0 ||
             info.removedNodes.filter(hasColumns).length > 0) {
             this.set('columns', this.getContentChildren('[select=data-table-column]'));
             this.notifyResize();
           }
 
-          this.set('rowDetail', this.getContentChildren('[select="template[is=row-detail]"]')[0]);
+          if (info.addedNodes.filter(hasDetails).length > 0) {
+            this.set('rowDetail', this.getContentChildren('[select="template[is=row-detail]"]')[0]);
+
+            // assuming parent element is always a Polymer element.
+            // set dataHost to the same context the template was declared in
+            var parent = Polymer.dom(this.rowDetail).parentNode;
+            this.rowDetail._rootDataHost = parent.dataHost._rootDataHost || parent.dataHost || parent;
+          }
+
         }.bind(this));
       },
 

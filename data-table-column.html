@@ -96,6 +96,9 @@
             var custom = Polymer.dom(this).querySelector('template[is=header]');
 
             if (custom) {
+              // set dataHost to the context where template has been defined
+              var column = custom.parentElement;
+              custom._rootDataHost = column.dataHost._rootDataHost || column.dataHost;
               return custom;
             }
 
@@ -110,7 +113,12 @@
           type: Object,
           readOnly: true,
           value: function() {
-            return Polymer.dom(this).querySelector('template:not([is=header])');
+            var template = Polymer.dom(this).querySelector('template:not([is=header])');
+
+            // set dataHost to the context where template has been defined
+            var column = template.parentElement;
+            template._rootDataHost = column.dataHost._rootDataHost || column.dataHost;
+            return template;
           }
         }
       },
