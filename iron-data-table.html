@@ -172,6 +172,7 @@ inspired styles to your `iron-data-table`.
           <template is="dom-repeat" items="[[columns]]" as="column">
             <data-table-cell header
                              align-right="[[column.alignRight]]"
+                             before-bind="[[beforeCellBind]]"
                              column="[[column]]"
                              flex="[[column.flex]]"
                              hidden="[[column.hidden]]"

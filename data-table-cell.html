@@ -49,6 +49,7 @@
 
       observers: [
                   '_beforeBind(beforeBind, column.*, index, item.*, expanded, selected)',
+                  '_beforeBindHeader(beforeBind, column.*)',
                   '_alignRightChanged(alignRight)',
                   '_columnChanged(_instance, column)',
                   '_columnPathChanged(_instance, column.*)',
@@ -81,6 +82,18 @@
         };
 
         beforeBind(data, this);
+      },
+
+      // header cells aren't bound with item, index etc. so _beforeBind is never
+      // called for them so we need a separate observer.
+      _beforeBindHeader: function(beforeBind, column) {
+        if (this.header) {
+          var data = {
+            column: column.base
+          };
+
+          beforeBind(data, this);
+        }
       },
 
       _hiddenChanged: function(hidden) {
