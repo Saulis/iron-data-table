@@ -25,6 +25,10 @@
       <template>
         <template is="dom-bind">
           <style is="custom-style">
+            #grid1 data-table-row:not([header]) data-table-cell {
+              height: 60px;
+            }
+
             #grid1 {
               --default-primary-color: red;
               font-family: 'Roboto', 'Noto', sans-serif;
