@@ -142,10 +142,10 @@
           <script>
             document.querySelector('#grid4').beforeRowBind = function(data, row) {
               row.toggleClass('even', data.index % 2 === 0);
-            }
+            };
             document.querySelector('#grid4').beforeCellBind = function(data, cell) {
-              cell.toggleClass('index', cell.column.name === '#');
-            }
+              cell.toggleClass('index', data.column.name === '#');
+            };
           </script>
         </template>
       </template>
