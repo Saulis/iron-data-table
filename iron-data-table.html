@@ -765,6 +765,17 @@ inspired styles to your `iron-data-table`.
               var item = items[i];
 
               this.set('_cachedItems.' + index, item);
+
+              // TODO: send an issue/pr to iron-list, that makes sure the internal
+              // collection stays up-to-date when `items` change.
+              // When _collection gets out-of-sync things like selection and
+              // notifying [[item]] bindings break.
+              this.$.list._collection.store[index] = item;
+              if (item && typeof item == 'object') {
+                this.$.list._collection.omap.set(item, index);
+              } else {
+                this.$.list._collection.pmap[item] = index;
+              }
             }
 
             // resize required for variable row height items.
