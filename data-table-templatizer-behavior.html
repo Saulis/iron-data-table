@@ -1,6 +1,7 @@
 <script>
   var saulis = window.saulis || {};
 
+  /** @polymerBehavior */
   saulis.DataTableTemplatizerBehaviorImpl = {
     properties: {
       expanded: Boolean,
@@ -141,6 +142,7 @@
     }
   };
 
+  /** @polymerBehavior */
   saulis.DataTableTemplatizerBehavior =
     [Polymer.Templatizer, saulis.DataTableTemplatizerBehaviorImpl];
 </script>
