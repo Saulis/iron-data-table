@@ -49,12 +49,14 @@
 
     _templatize: function(template) {
       this.templatize(template);
-      var instance = this.stamp({});
 
       // fix _rootDataHost to the context where template has been defined
       if (template._rootDataHost) {
-        instance._rootDataHost = template._rootDataHost;
+        this._getRootDataHost = function() { return template._rootDataHost; };
       }
+
+      var instance = this.stamp({});
+
 
       // initializing new template instance with previously forwarded parent props.
       // could be done with observers, but this is simpler.
