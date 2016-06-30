@@ -6,6 +6,8 @@
 
 [Demos](https://saulis.github.io/iron-data-table/demo/) and [API Documentation](https://saulis.github.io/iron-data-table/)
 
+For *Angular 2* support, see [angular2-iron-data-table](https://github.com/Saulis/angular2-iron-data-table/blob/master/README.md)
+
 To install, run: `bower install iron-data-table`
 
 ![](https://github.com/Saulis/iron-data-table/raw/master/iron-data-table.png)
