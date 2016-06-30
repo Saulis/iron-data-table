@@ -115,12 +115,12 @@
           value: function() {
             var template = Polymer.dom(this).querySelector('template:not([is=header])');
 
-            if (template && template.parentElement) {
+            if (template && this.dataHost) {
               // set dataHost to the context where template has been defined
-              var column = template.parentElement;
-              template._rootDataHost = column.dataHost._rootDataHost || column.dataHost;
-              return template;
+              template._rootDataHost = this.dataHost._rootDataHost || this.dataHost;
             }
+
+            return template;
           }
         }
       },
