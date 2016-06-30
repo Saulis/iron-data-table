@@ -842,7 +842,8 @@ inspired styles to your `iron-data-table`.
       },
 
       _updateSizeForItem: function(event) {
-        if (event.model.get('item')) {
+        var item;
+        if ((item = event.model.get('item'))) {
           // notifyResize() doesn't do anything on iOS if the viewport size hasn't changed
           // so calling updateSizeForItem(item) is more reliable.
 
@@ -860,6 +861,8 @@ inspired styles to your `iron-data-table`.
           // extracted from updateSizeFromItem(item) in <iron-list>
           this.$.list._updateMetrics(itemSet);
           this.$.list._positionItems();
+
+          this.fire('item-expanded', {item: item, expanded: this._isExpanded(item, this._expandedItems)});
         }
       },
 
