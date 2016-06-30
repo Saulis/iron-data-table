@@ -37,7 +37,8 @@
     "iron-resizable-behavior": "polymerelements/iron-resizable-behavior#^1.0.2",
     "paper-input": "polymerelements/paper-input#^1.1.5",
     "paper-spinner": "polymerelements/paper-spinner#^1.1.1",
-    "paper-icon-button": "polymerelements/paper-icon-button#^1.0.7"
+    "paper-icon-button": "polymerelements/paper-icon-button#^1.0.7",
+    "iron-iconset-svg": "polymerelements/iron-iconset-svg#^1.0.9"
   },
   "devDependencies": {
     "webcomponentsjs": "^0.7.20",
