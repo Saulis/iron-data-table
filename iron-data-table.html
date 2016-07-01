@@ -577,7 +577,9 @@ inspired styles to your `iron-data-table`.
       selectAll: function() {
         var selectedItems = [];
         selectedItems.inverted = true;
-        selectedItems.filters = this.filters || [];
+        // use a copy of filter so that we can safely send separate changed
+        // notifications for both filter and selectedItems.filter
+        selectedItems.filters = this.filter.slice(0) || [];
 
         this._setSelectedItems(selectedItems);
       },
@@ -588,7 +590,9 @@ inspired styles to your `iron-data-table`.
       clearSelection: function() {
         var selectedItems = [];
         selectedItems.inverted = false;
-        selectedItems.filters = this.filters || [];
+        // use a copy of filter so that we can safely send separate changed
+        // notifications for both filter and selectedItems.filter
+        selectedItems.filters = this.filter.slice(0) || [];
 
         this._setSelectedItems(selectedItems);
       },
@@ -660,6 +664,9 @@ inspired styles to your `iron-data-table`.
         for (var i = 0; i < this.filter.length; i++) {
           if (this.filter[i].path === e.detail.filterBy) {
             this.set('filter.' + i + '.filter', e.detail.value);
+
+            // selectedItems.filter is actually already set at this point when
+            // clearSelection is called after filter is set.
             this.set('selectedItems.filters.' + i + '.filter', e.detail.value);
             return;
           }
