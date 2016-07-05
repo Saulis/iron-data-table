@@ -606,7 +606,7 @@ inspired styles to your `iron-data-table`.
       },
 
       _isSelectAllChecked: function(selectedItemsLength, inverted) {
-        return selectedItemsLength === (inverted ? 0 : this.size);
+        return selectedItemsLength === (inverted ? 0 : this.size ? this.size : -1);
       },
 
       _isSelectAllIndeterminate: function(selectedItemsLength) {
