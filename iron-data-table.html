@@ -930,7 +930,14 @@ inspired styles to your `iron-data-table`.
           }
 
           if (this.selectionEnabled) {
-            this._isSelected(e.model.item, this.selectedItems) ? this.deselectItem(e.model.item) : this.selectItem(e.model.item);
+            // when multi-select is enabled, behave like single selection when
+            // clicking on the rows.
+            if (this._isSelected(e.model.item, this.selectedItems) && this.selectedItems.length === 1) {
+              this.clearSelection();
+            } else {
+              this.clearSelection();
+              this.selectItem(e.model.item);
+            }
           }
         }
       },
