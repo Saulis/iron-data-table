@@ -168,7 +168,7 @@ inspired styles to your `iron-data-table`.
     <div id="container">
       <div id="header">
         <data-table-row header>
-          <data-table-checkbox header hidden$="[[!multiSelection]]" on-tap="_toggleSelectAll" checked="[[_isSelectAllChecked(selectedItems.length, selectedItems.inverted)]]" indeterminate="[[_isSelectAllIndeterminate(selectedItems.length)]]"></data-table-checkbox>
+          <data-table-checkbox header hidden$="[[!multiSelection]]" on-tap="_toggleSelectAll" checked="[[_isSelectAllChecked(selectedItems.length, selectedItems.inverted, size)]]" indeterminate="[[_isSelectAllIndeterminate(selectedItems.length)]]"></data-table-checkbox>
           <template is="dom-repeat" items="[[columns]]" as="column">
             <data-table-cell header
                              align-right="[[column.alignRight]]"
@@ -598,15 +598,15 @@ inspired styles to your `iron-data-table`.
       },
 
       _toggleSelectAll: function() {
-        if (this._isSelectAllChecked(this.selectedItems.length, this.selectedItems.inverted)) {
+        if (this._isSelectAllChecked(this.selectedItems.length, this.selectedItems.inverted, this.size)) {
           this.clearSelection();
         } else {
           this.selectAll();
         }
       },
 
-      _isSelectAllChecked: function(selectedItemsLength, inverted) {
-        return selectedItemsLength === (inverted ? 0 : this.size ? this.size : -1);
+      _isSelectAllChecked: function(selectedItemsLength, inverted, size) {
+        return size > 0 && selectedItemsLength === (inverted ? 0 : size);
       },
 
       _isSelectAllIndeterminate: function(selectedItemsLength) {

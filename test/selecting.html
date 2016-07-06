@@ -387,6 +387,15 @@
 
             expect(grid.$.header.querySelector('data-table-checkbox').checked).to.be.true;
           });
+
+          it('should be unchecked when items is empty', function(done) {
+            grid.items = [];
+
+            grid.async(function() {
+              expect(grid.$.header.querySelector('data-table-checkbox').checked).to.be.false;
+              done();
+            });
+          });
         });
       });
     });
