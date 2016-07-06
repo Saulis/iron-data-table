@@ -170,6 +170,7 @@
 
       _hiddenChanged: function(table, hidden) {
         this._notifyTable(table, 'hidden', hidden);
+        table.notifyResize();
       },
 
       _orderChanged: function(table, order) {
