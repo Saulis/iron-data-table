@@ -145,10 +145,10 @@
         });
 
         it('should be called with sort order', function(done) {
-          table.sortOrder = {
+          table.sortOrder = [{
             path: 'foo',
             sortOrder: 'asc'
-          };
+          }];
 
           table.clearCache();
           table.async(function() {
@@ -172,11 +172,11 @@
           table._currentPage = 10;
 
           table.async(function() {
-            expect(table._cachedPages.indexOf(10)).to.eql(0);
+            expect(table._cachedPages).to.contain.members([10]);
 
             table.clearCache();
 
-            expect(table._cachedPages.indexOf(10)).to.eql(-1);
+            expect(table._cachedPages).not.to.contain.members([10]);
             done();
           }, 250);
         });

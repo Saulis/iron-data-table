@@ -20,7 +20,7 @@
         </data-table-column>
         <data-table-column name="Second">
           <template>
-            <a href="#">[[ item.value2 ]]</a>
+            <a href="#" id="link">[[ item.value2 ]]</a>
           </template>
         </data-table-column>
         <template is="row-detail">[[ item.value2 ]]</template>
@@ -68,8 +68,7 @@
         });
 
         it('should show row detail when row is clicked', function(done) {
-          var firstRow = grid.querySelector('#items .item data-table-row');
-          firstRow.focus();
+          var firstRow = grid.querySelector('data-table-row:not([header])');
           firstRow.click();
 
           setTimeout(function() {
@@ -87,9 +86,8 @@
         });
 
         it('should not show row detail when row cell with a focusable element is clicked', function(done) {
-          var firstRow = grid.querySelector('#items .item data-table-row');
-          var focusableElement = firstRow.querySelector('data-table-cell:nth-of-type(2) > a');
-          focusableElement.focus();
+          var firstRow = grid.querySelector('data-table-row:not([header])');
+          var focusableElement = firstRow.querySelector('#link');
           focusableElement.click();
 
           setTimeout(function() {
@@ -122,8 +120,7 @@
         });
 
         it('should not show row detail when row is clicked', function(done) {
-          var firstRow = grid.querySelector('#items .item data-table-row');
-          firstRow.focus();
+          var firstRow = grid.querySelector('data-table-row:not([header])');
           firstRow.click();
 
           setTimeout(function() {
@@ -135,9 +132,8 @@
         });
 
         it('should show row detail when row cell with expanded property bound is activated', function(done) {
-          var firstRow = grid.querySelector('#items .item data-table-row');
-          var focusableElement = firstRow.querySelector('data-table-cell:nth-of-type(1) > paper-checkbox');
-          focusableElement.focus();
+          var firstRow = grid.querySelector('data-table-row:not([header])');
+          var focusableElement = firstRow.querySelector('paper-checkbox');
           focusableElement.click();
 
           setTimeout(function() {

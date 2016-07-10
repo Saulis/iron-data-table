@@ -9,6 +9,7 @@
   <link rel="import" href="../../iron-test-helpers/iron-test-helpers.html">
   <link rel="import" href="../iron-data-table.html">
   <link rel="import" href="../../vaadin-combo-box/vaadin-combo-box.html">
+  <link rel="import" href="../../paper-input/paper-input.html">
 </head>
 
 <body>
@@ -43,7 +44,7 @@
         <data-table-column name="Second">
           <template>
             <value-helper id="second" value="[[selected]]"></value-helper>
-            <input id="input" type="text"></input>
+            <paper-input id="third" value="{{selected}}"></paper-input>
           </template>
         </data-table-column>
       </iron-data-table>
@@ -60,6 +61,7 @@
       <div>[[value]]</div>
     </template>
     <script>
+    document.addEventListener('WebComponentsReady', function() {
       Polymer({
         is: 'value-helper',
 
@@ -70,6 +72,7 @@
           }
         }
       });
+    });
     </script>
   </dom-module>
 
@@ -77,12 +80,6 @@
     describe('selecting items', function() {
       var table;
       var first, second, input;
-
-      function tap(node) {
-        Polymer.Base.fire('tap', null, {
-          node: node
-        });
-      }
 
       function waitUntil(fn, done) {
         setTimeout(function() {
@@ -99,7 +96,7 @@
         table.items = ['foo', 'bar', 'baz'];
         first = table.querySelector("#first");
         second = table.querySelector("#second");
-        input = table.querySelector("#input");
+        input = table.querySelector("#third");
 
         //100ms to take into account the debounce on _loadPage.
         table.async(done, 100);
@@ -203,7 +200,7 @@
         });
       });
 
-      describe('by tapping on rows', function() {
+      describe('by clicking on rows', function() {
         it('should not select row when selection-enabled is false', function(done) {
           table.selectionEnabled = false;
 
@@ -211,42 +208,41 @@
             done(new Error('Value should not change.'));
           });
 
-          tap(first);
+          first.click();
 
           setTimeout(done, 250);
         });
 
-        it('should select row when tapping', function(done) {
+        it('should select row when clicking', function(done) {
           first.addEventListener('value-changed', function(e) {
             expect(e.detail.value).to.eql(true);
             done();
           });
 
-          tap(first);
+          first.click();
         });
 
-        it('should deselect row when tapping again', function(done) {
-          tap(first);
+        it('should deselect row when clicking again', function(done) {
+          first.click();
 
           first.addEventListener('value-changed', function(e) {
             expect(e.detail.value).to.eql(false);
             done();
           });
 
-          tap(first);
+          first.click();
         });
 
         // can't be tested reliably because focus can't be trusted when testing.
-        it.skip('should not select row when tapping on focusable child', function(done) {
-          tap(first);
+        it.skip('should not select row when clicking on focusable child', function(done) {
+          first.click();
 
           var spy = sinon.spy();
           first.addEventListener('value-changed', spy);
 
-          tap(input);
+          input.click();
 
           table.async(function() {
-            debugger;
             expect(spy.callCount).to.eql(0);
             done();
           }, 250);
@@ -260,7 +256,7 @@
             done();
           });
 
-          tap(first);
+          first.click();
         });
         it('should update [[selected]] on template instances', function(done) {
           second.addEventListener('value-changed', function(e) {
@@ -268,7 +264,7 @@
             done();
           });
 
-          tap(first);
+          first.click();
         });
       });
 
@@ -276,18 +272,17 @@
         it('should update [[selected]] on template instances with the same item', function() {
           input.value = 'foo';
 
-          expect(first.innerHTML).to.eql('true');
-          expect(second.innerHTML).to.eql('true');
+          expect(first.children[0].innerHTML).to.eql('true');
+          expect(second.children[0].innerHTML).to.eql('true');
         });
 
         it('should update selectedItem(s)', function() {
-          input.value = 'bar';
+          input.value = 'foo';
 
-          expect(table.selectedItem).to.eql('bar');
-          expect(table.selectedItems).to.have.members(['bar']);
+          expect(table.selectedItem).to.eql('foo');
+          expect(table.selectedItems).to.have.members(['foo']);
         });
       });
-
       describe('using data-table-row selected property', function() {});
 
       describe('using data-table-row selected attribute', function() {}
@@ -312,12 +307,6 @@
         }];
 
         Polymer.Base.async(done, 200);
-      });
-
-      it('should bind selection enabled property', function() {
-        grid.selectionEnabled = true;
-
-        expect(grid.$.list.selectionEnabled).to.be.true;
       });
 
       it('should select item', function() {
@@ -346,10 +335,6 @@
       describe('multi-select', function() {
         beforeEach(function() {
           grid.multiSelection = true;
-        });
-
-        it('should be bound to iron-list', function() {
-          expect(grid.$.list.multiSelection).to.be.true;
         });
 
         it('should select all', function() {

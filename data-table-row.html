@@ -59,7 +59,10 @@
 
       properties: {
         beforeBind: Object,
-        expanded: Boolean,
+        expanded: {
+          type: Boolean,
+          reflectToAttribute: true
+        },
         index: Number,
         item: Object,
         selected: {
