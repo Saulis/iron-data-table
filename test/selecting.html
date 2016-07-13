@@ -266,6 +266,52 @@
 
           first.click();
         });
+
+        it('should fire `selecting-item` event', function(done) {
+          table.addEventListener('selecting-item', function(e) {
+            done();
+          });
+
+          first.click();
+        });
+
+        it('should not select when `selecting-item` is cancelled', function(done) {
+          table.addEventListener('selecting-item', function(e) {
+            e.preventDefault();
+
+            table.async(function() {
+              expect(table.selectedItem).to.be.undefined;
+              done();
+            });
+          });
+
+          first.click();
+        });
+
+        it('should fire `deselecting-item` event', function(done) {
+          first.click();
+
+          table.addEventListener('deselecting-item', function(e) {
+            done();
+          });
+
+          first.click();
+        });
+
+        it('should not deselect when `deselecting-item` is cancelled', function(done) {
+          first.click();
+
+          table.addEventListener('deselecting-item', function(e) {
+            e.preventDefault();
+
+            table.async(function() {
+              expect(table.selectedItem).to.eql('foo');
+              done();
+            });
+          });
+
+          first.click();
+        });
       });
 
       describe('using two-way binding', function() {

@@ -911,6 +911,24 @@ inspired styles to your `iron-data-table`.
         }
       },
 
+      /**
+       * Fired when user clicks on a item to select it. Note that this event is
+       * not fired when user clicks on a multi-selection checkbox.
+       *
+       * @event selecting-item
+       * @param {Object} detail
+       * @param {Object} detail.item item to be selected
+       */
+
+       /**
+        * Fired when user clicks on a item to deselect it. Note that this event is
+        * not fired when user clicks on a multi-selection checkbox.
+        *
+        * @event deselecting-item
+        * @param {Object} detail
+        * @param {Object} detail.item item to be deselected
+        */
+
       // we need to listen to click instead of tap because on mobile safari, the
       // document.activeElement has not been updated (focus has not been shifted)
       // yet at the point when tap event is being executed.
@@ -930,7 +948,17 @@ inspired styles to your `iron-data-table`.
           }
 
           if (this.selectionEnabled) {
-            this._isSelected(e.model.item, this.selectedItems) ? this.deselectItem(e.model.item) : this.selectItem(e.model.item);
+            if (this._isSelected(e.model.item, this.selectedItems)) {
+              var event = this.fire('deselecting-item', {item: e.model.item}, {cancelable: true});
+              if (!event.defaultPrevented) {
+                this.deselectItem(e.model.item);
+              }
+            } else {
+              var event = this.fire('selecting-item', {item: e.model.item}, {cancelable: true});
+              if (!event.defaultPrevented) {
+                this.selectItem(e.model.item);
+              }
+            }
           }
         }
       },
