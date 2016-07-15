@@ -381,6 +381,17 @@
               done();
             });
           });
+
+          it('should be unchecked when all items are deselected manually', function() {
+            grid.selectAll();
+
+            grid.deselectItem(0);
+            grid.deselectItem(1);
+            grid.deselectItem(2);
+
+            expect(grid.$.header.querySelector('data-table-checkbox').checked).to.be.false;
+            expect(grid.$.header.querySelector('data-table-checkbox').indeterminate).to.be.false;
+          });
         });
       });
     });
