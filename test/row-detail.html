@@ -50,7 +50,7 @@
       describe('using details-enabled property', function() {
 
         var grid;
-        var firstRow;
+        var firstRow, firstCell;
         beforeEach(function(done) {
           grid = fixture('grid');
           Polymer.dom.flush();
@@ -66,11 +66,12 @@
           }];
 
           firstRow = grid.querySelector('data-table-row:not([header])');
+          firstCell = firstRow.querySelector('data-table-cell');
           Polymer.Base.async(done, 200);
         });
 
-        it('should show row detail when row is clicked', function(done) {
-          firstRow.click();
+        it('should show row detail when cell is clicked', function(done) {
+          firstCell.click();
 
           setTimeout(function() {
             var rowDetail = firstRow.querySelector('data-table-row-detail');
@@ -103,7 +104,7 @@
             done();
           });
 
-          firstRow.click();
+          firstCell.click();
         });
 
         it('should not expand when `expanding-item` is cancelled', function(done) {
@@ -116,21 +117,21 @@
             });
           });
 
-          firstRow.click();
+          firstCell.click();
         });
 
         it('should fire `collapsing-item` event', function(done) {
-          firstRow.click();
+          firstCell.click();
 
           grid.addEventListener('collapsing-item', function(e) {
             done();
           });
 
-          firstRow.click();
+          firstCell.click();
         });
 
         it('should not collapse when `collapsing-item` is cancelled', function(done) {
-          firstRow.click();
+          firstCell.click();
 
           grid.addEventListener('collapsing-item', function(e) {
             e.preventDefault();
@@ -141,7 +142,7 @@
             });
           });
 
-          firstRow.click();
+          firstCell.click();
         });
       });
 
@@ -167,7 +168,7 @@
 
         it('should not show row detail when row is clicked', function(done) {
           var firstRow = grid.querySelector('data-table-row:not([header])');
-          firstRow.click();
+          firstCell.click();
 
           setTimeout(function() {
             var rowDetail = firstRow.querySelector('data-table-row-detail');
