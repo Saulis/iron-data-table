@@ -864,9 +864,13 @@ inspired styles to your `iron-data-table`.
             itemSet.push(i);
           }
 
-          // extracted from updateSizeFromItem(item) in <iron-list>
-          this.$.list._updateMetrics(itemSet);
-          this.$.list._positionItems();
+          // _updateMetrics will eventually fire dom-change event which be handled
+          // by this function so we need to debounce to prevent infinite looping.
+          this.debounce('resize', function() {
+            // extracted from updateSizeFromItem(item) in <iron-list>
+            this.$.list._updateMetrics(itemSet);
+            this.$.list._positionItems();
+          }.bind(this));
         }
       },
 
