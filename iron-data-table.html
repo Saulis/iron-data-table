@@ -920,13 +920,29 @@ inspired styles to your `iron-data-table`.
        * @param {Object} detail.item item to be selected
        */
 
+      /**
+       * Fired when user clicks on a item to deselect it. Note that this event is
+       * not fired when user clicks on a multi-selection checkbox.
+       *
+       * @event deselecting-item
+       * @param {Object} detail
+       * @param {Object} detail.item item to be deselected
+       */
+
+      /**
+       * Fired when user clicks on a item to expand it.
+       *
+       * @event expanding-item
+       * @param {Object} detail
+       * @param {Object} detail.item item to be expanded
+       */
+
        /**
-        * Fired when user clicks on a item to deselect it. Note that this event is
-        * not fired when user clicks on a multi-selection checkbox.
+        * Fired when user clicks on a item to collapse it.
         *
-        * @event deselecting-item
+        * @event collapsing-item
         * @param {Object} detail
-        * @param {Object} detail.item item to be deselected
+        * @param {Object} detail.item item to be collapsed
         */
 
       // we need to listen to click instead of tap because on mobile safari, the
@@ -939,25 +955,26 @@ inspired styles to your `iron-data-table`.
         if (this._isFocusable(Polymer.dom(e).localTarget)) {
           return;
         } else {
+          var fireEvent = function(eventName, item, defaultAction) {
+            var e = this.fire(eventName, {item: item}, {cancelable: true});
+            if (!e.defaultPrevented) {
+              defaultAction.call(this, item);
+            }
+          }.bind(this);
+
           if (this.rowDetail && this.detailsEnabled) {
             if (this._isExpanded(e.model.item, this._expandedItems)) {
-              this.collapseItem(e.model.item);
+              fireEvent('collapsing-item', e.model.item, this.collapseItem);
             } else {
-              this.expandItem(e.model.item);
+              fireEvent('expanding-item', e.model.item, this.expandItem);
             }
           }
 
           if (this.selectionEnabled) {
             if (this._isSelected(e.model.item, this.selectedItems)) {
-              var event = this.fire('deselecting-item', {item: e.model.item}, {cancelable: true});
-              if (!event.defaultPrevented) {
-                this.deselectItem(e.model.item);
-              }
+              fireEvent('deselecting-item', e.model.item, this.deselectItem);
             } else {
-              var event = this.fire('selecting-item', {item: e.model.item}, {cancelable: true});
-              if (!event.defaultPrevented) {
-                this.selectItem(e.model.item);
-              }
+              fireEvent('selecting-item', e.model.item, this.selectItem);
             }
           }
         }
