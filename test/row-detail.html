@@ -50,6 +50,7 @@
       describe('using details-enabled property', function() {
 
         var grid;
+        var firstRow;
         beforeEach(function(done) {
           grid = fixture('grid');
           Polymer.dom.flush();
@@ -64,11 +65,11 @@
             value2: 'baz'
           }];
 
+          firstRow = grid.querySelector('data-table-row:not([header])');
           Polymer.Base.async(done, 200);
         });
 
         it('should show row detail when row is clicked', function(done) {
-          var firstRow = grid.querySelector('data-table-row:not([header])');
           firstRow.click();
 
           setTimeout(function() {
@@ -86,7 +87,6 @@
         });
 
         it('should not show row detail when row cell with a focusable element is clicked', function(done) {
-          var firstRow = grid.querySelector('data-table-row:not([header])');
           var focusableElement = firstRow.querySelector('#link');
           focusableElement.click();
 
@@ -96,6 +96,52 @@
             expect(firstRow.getAttribute('expanded')).to.not.exist;
             done();
           }, 50);
+        });
+
+        it('should fire `expanding-item` event', function(done) {
+          grid.addEventListener('expanding-item', function(e) {
+            done();
+          });
+
+          firstRow.click();
+        });
+
+        it('should not expand when `expanding-item` is cancelled', function(done) {
+          grid.addEventListener('expanding-item', function(e) {
+            e.preventDefault();
+
+            grid.async(function() {
+              expect(grid._expandedItems).to.be.empty;
+              done();
+            });
+          });
+
+          firstRow.click();
+        });
+
+        it('should fire `collapsing-item` event', function(done) {
+          firstRow.click();
+
+          grid.addEventListener('collapsing-item', function(e) {
+            done();
+          });
+
+          firstRow.click();
+        });
+
+        it('should not collapse when `collapsing-item` is cancelled', function(done) {
+          firstRow.click();
+
+          grid.addEventListener('collapsing-item', function(e) {
+            e.preventDefault();
+
+            grid.async(function() {
+              expect(grid._expandedItems).to.have.members([grid.items[0]]);
+              done();
+            });
+          });
+
+          firstRow.click();
         });
       });
 
