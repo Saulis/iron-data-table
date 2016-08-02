@@ -12,6 +12,7 @@
     <nav class="vertical-section">
       <ul class="layout horizontal wrap">
         <li><a href="index.html">Data Binding</a></li>
+        <li><a href="selecting.html">Selecting Items</a></li>
         <li><a href="templates.html">Templating</a></li>
         <li><b>Row Details</b></li>
         <li><a href="columns.html">Column Properties</a></li>
@@ -143,6 +144,65 @@
             </data-table-column>
           </iron-data-table>
         </template>
+      </template>
+    </demo-snippet>
+
+    <h3>Customizing Expansion - Single Item Expanded</h3>
+    <demo-snippet>
+      <template>
+        <template is="dom-bind">
+          <style>
+            iron-data-table data-table-row-detail {
+              height: 100px;
+            }
+
+            iron-data-table data-table-row-detail .detail {
+              width: 100%;
+              display: flex;
+              justify-content: space-around;
+              align-items: center;
+              border: 2px solid #aaa;
+            }
+          </style>
+          <iron-ajax url="users.json" last-response="{{users}}" auto></iron-ajax>
+          <custom-expansion>
+            <iron-data-table items="[[users.results]]" details-enabled>
+              <template is="row-detail">
+                <div class="detail">
+                  <img src="[[item.user.picture.medium]]" />
+                  <p>[[item.user.username]]</p>
+                  <p>[[item.user.email]]</p>
+                </div>
+              </template>
+              <data-table-column name="First Name">
+                <template>[[item.user.name.first]]</template>
+              </data-table-column>
+              <data-table-column name="Last Name">
+                <template>[[item.user.name.first]]</template>
+              </data-table-column>
+              <data-table-column name="Email">
+                <template>[[item.user.email]]</template>
+              </data-table-column>
+            </iron-data-table>
+          </custom-expansion>
+        </template>
+        <script>
+          document.addEventListener('WebComponentsReady', function() {
+            Polymer({
+              is: 'custom-expansion',
+              ready: function() {
+                var table = Polymer.dom(this).querySelector('iron-data-table');
+                var expandedItem;
+                table.addEventListener('expanding-item', function(e) {
+                  if (expandedItem) {
+                    table.collapseItem(expandedItem);
+                  }
+                  expandedItem = e.detail.item;
+                });
+              }
+            });
+          });
+        </script>
       </template>
     </demo-snippet>
   </div>

@@ -12,6 +12,7 @@
     <nav class="vertical-section">
       <ul class="layout horizontal wrap">
         <li><a href="index.html">Data Binding</a></li>
+        <li><a href="selecting.html">Selecting Items</a></li>
         <li><a href="templates.html">Templating</a></li>
         <li><a href="details.html">Row Details</a></li>
         <li><a href="columns.html">Column Properties</a></li>
@@ -25,6 +26,10 @@
       <template>
         <template is="dom-bind">
           <style is="custom-style">
+            #grid1 data-table-row:not([header]) data-table-cell {
+              height: 60px;
+            }
+
             #grid1 {
               --default-primary-color: red;
               font-family: 'Roboto', 'Noto', sans-serif;
@@ -142,10 +147,10 @@
           <script>
             document.querySelector('#grid4').beforeRowBind = function(data, row) {
               row.toggleClass('even', data.index % 2 === 0);
-            }
+            };
             document.querySelector('#grid4').beforeCellBind = function(data, cell) {
-              cell.toggleClass('index', cell.column.name === '#');
-            }
+              cell.toggleClass('index', data.column.name === '#');
+            };
           </script>
         </template>
       </template>

@@ -59,7 +59,17 @@
 
       properties: {
         beforeBind: Object,
-        bind: Object,
+        expanded: {
+          type: Boolean,
+          reflectToAttribute: true
+        },
+        index: Number,
+        item: Object,
+        selected: {
+          type: Boolean,
+          reflectToAttribute: true
+        },
+
 
         _static: {
           type: Object,
@@ -67,7 +77,7 @@
         }
       },
 
-      observers: ['_bindChanged(bind, beforeBind)'],
+      observers: ['_beforeBind(beforeBind, index, item.*, selected, expanded)'],
 
       attached: function() {
         if (this.domHost && this.domHost.tagName === 'IRON-DATA-TABLE') {
@@ -89,7 +99,14 @@
         }
       },
 
-      _bindChanged: function(data, beforeBind) {
+      _beforeBind: function(beforeBind, index, item, selected, expanded) {
+        var data = {
+          index: index,
+          item: item.base,
+          expanded: expanded,
+          selected: selected
+        };
+
         beforeBind(data, this);
       }
     });

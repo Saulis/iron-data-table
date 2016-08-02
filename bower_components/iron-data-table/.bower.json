@@ -35,11 +35,10 @@
     "polymer": "^1.2.4",
     "iron-list": "polymerelements/iron-list#^1.2.0",
     "iron-resizable-behavior": "polymerelements/iron-resizable-behavior#^1.0.2",
-    "iron-icons": "polymerelements/iron-icons#^1.1.3",
-    "iron-icon": "polymerelements/iron-icon#^1.0.7",
     "paper-input": "polymerelements/paper-input#^1.1.5",
     "paper-spinner": "polymerelements/paper-spinner#^1.1.1",
-    "paper-icon-button": "polymerelements/paper-icon-button#^1.0.7"
+    "paper-icon-button": "polymerelements/paper-icon-button#^1.0.7",
+    "iron-iconset-svg": "polymerelements/iron-iconset-svg#^1.0.9"
   },
   "devDependencies": {
     "webcomponentsjs": "^0.7.20",
@@ -52,21 +51,22 @@
     "iron-flex-layout": "polymerelements/iron-flex-layout#^1.2.3",
     "iron-component-page": "polymerelements/iron-component-page#^1.1.4",
     "iron-ajax": "polymerelements/iron-ajax#^1.1.1",
+    "iron-icons": "polymerelements/iron-icons#^1.1.3",
     "vaadin-combo-box": "^1.0.0-beta1",
     "paper-slider": "polymerelements/paper-slider#^1.0.9"
   },
   "resolutions": {
     "iron-list": "^1.1.0"
   },
-  "version": "1.0.0-beta3",
-  "_release": "1.0.0-beta3",
+  "version": "1.0.1",
+  "_release": "1.0.1",
   "_resolution": {
     "type": "version",
-    "tag": "v1.0.0-beta3",
-    "commit": "66796304a38bf6aa23b7b331d831dac970c86ed2"
+    "tag": "v1.0.1",
+    "commit": "1e1e68c77fdfe1278ff7377bda48efeb39a714ea"
   },
   "_source": "https://github.com/Saulis/iron-data-table.git",
-  "_target": "1.0.0-beta3",
+  "_target": "1.0.1",
   "_originalSource": "iron-data-table",
   "_direct": true
 }

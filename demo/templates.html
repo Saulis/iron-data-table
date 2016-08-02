@@ -12,6 +12,7 @@
     <nav class="vertical-section">
       <ul class="layout horizontal wrap">
         <li><a href="index.html">Data Binding</a></li>
+        <li><a href="selecting.html">Selecting Items</a></li>
         <li><b>Templating</b></li>
         <li><a href="details.html">Row Details</a></li>
         <li><a href="columns.html">Column Properties</a></li>
@@ -85,7 +86,9 @@
         <template is="dom-bind">
           <style is="custom-style">
             paper-input {
-              margin-bottom: 20px;
+              --paper-input-container: {
+                margin-bottom: 20px;
+              };
               --paper-input-container-label: {
                 font-size: inherit;
               }

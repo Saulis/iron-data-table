@@ -1,6 +1,8 @@
+<link rel="import" href="data-table-templatizer-behavior.html">
+
 <dom-module id="data-table-cell">
   <template>
-    <style is="custom-style">
+    <style>
       :host {
         flex: 1 0 100px;
         padding: 0 24px 0 24px;
@@ -25,35 +27,36 @@
   <script>
     Polymer({
       is: 'data-table-cell',
+      behaviors: [saulis.DataTableTemplatizerBehavior],
 
       properties: {
-        bind: Object,
-        order: Number,
-        header: Boolean,
-        width: String,
+        alignRight: Boolean,
+        column: Object,
         flex: Number,
-
-        column: {
-          type: Object,
-          observer: '_columnChanged'
-        },
+        header: Boolean,
+        hidden: Boolean,
+        order: Number,
+        template: Object,
+        width: String,
 
         beforeBind: {
           type: Object,
           value: function() {
             return function(data, cell) {};
           }
-        },
-
-        _instance: {
-          type: Object,
-          computed: '_templatize(column, _templatizer)'
-        },
-
-        _templatizer: Object
+        }
       },
 
-      observers: ['_bindData(_instance, bind)'],
+      observers: [
+                  '_beforeBind(beforeBind, column.*, index, item.*, expanded, selected)',
+                  '_beforeBindHeader(beforeBind, column.*)',
+                  '_alignRightChanged(alignRight)',
+                  '_columnChanged(_instance, column)',
+                  '_columnPathChanged(_instance, column.*)',
+                  '_flexChanged(flex)',
+                  '_hiddenChanged(hidden)',
+                  '_orderChanged(order)',
+                  '_widthChanged(width)'],
 
       attached: function() {
         if (!Polymer.Settings.useNativeShadow) {
@@ -63,95 +66,63 @@
             Polymer.StyleTransformer.dom(this, this.domHost.tagName.toLowerCase(), this._scopeCssViaAttr, false);
           }
         }
-
-        // in some cases the _columnChanged observer is run before the cell has
-        // been turned into a html element and the inline styles don't get applied.
-        // Applying them after attaching fixes makes sure they're applied.
-        this._setColumnStyleProperties(this.column);
-
-        // TODO: for some reason this needs to be done async to work with Shadow
-        // DOM. Left the sync call there also to prevent flickering with Shady DOM.
-        this.async(function() {
-          this._setColumnStyleProperties(this.column);
-        });
       },
 
-      _setColumnStyleProperties: function(column) {
-        this.style.flexGrow = column.flex;
-        this.style.flexDirection = column.alignRight ? 'row-reverse' : 'row';
-        this.style.flexBasis = column.width;
-        this.style.flexGrow = column.flex;
+      _alignRightChanged: function(alignRight) {
+        this.style.flexDirection = alignRight ? 'row-reverse' : 'row';
       },
 
-      _orderChanged: function(e) {
-        this.style.order = e.detail.value;
+      _beforeBind: function(beforeBind, column, index, item, expanded, selected) {
+        var data = {
+          column: column.base,
+          index: index,
+          item: item.base,
+          expanded: expanded,
+          selected: selected
+        };
+
+        beforeBind(data, this);
       },
 
-      _widthChanged: function(e) {
-        this.style.flexBasis = e.detail.value;
-      },
-
-      _flexChanged: function(e) {
-        this.style.flexGrow = e.detail.value;
-      },
-
-      _hiddenChanged: function(e) {
-        this.hidden = e.detail.value;
-      },
-
-      _templatizeRowChanged: function(e) {
-        if (!this.header) {
-          this._templatizer = e.detail.value;
-        }
-      },
-
-      _templatizeHeaderChanged: function(e) {
+      // header cells aren't bound with item, index etc. so _beforeBind is never
+      // called for them so we need a separate observer.
+      _beforeBindHeader: function(beforeBind, column) {
         if (this.header) {
-          this._templatizer = e.detail.value;
+          var data = {
+            column: column.base
+          };
+
+          beforeBind(data, this);
         }
       },
 
-      _templatize: function(column, templatizer) {
-        return templatizer.bind(column)(this);
+      _hiddenChanged: function(hidden) {
+        this.toggleAttribute('hidden', hidden);
       },
 
-      _bindData: function(instance, data) {
-        if (!this.header) {
-          this.beforeBind(data, this);
-        }
-        instance.bind(data);
+      _orderChanged: function(order) {
+        this.style.order = order;
       },
 
-      _columnChanged: function(column, oldColumn) {
-        this._setColumnStyleProperties(column);
-
-        this._addListener(column, oldColumn, 'width');
-        this._addListener(column, oldColumn, 'flex');
-        this._addListener(column, oldColumn, 'order');
-
-        this.hidden = column.hidden;
-        this._addListener(column, oldColumn, 'hidden');
-
-        if (this.header && column.templatizeHeader) {
-          this._templatizer = column.templatizeHeader;
-        } else if (column.templatizeRow) {
-          this._templatizer = column.templatizeRow;
-        }
-        this._addListener(column, oldColumn, 'templatizeRow');
-        this._addListener(column, oldColumn, 'templatizeHeader');
+      _flexChanged: function(flex) {
+        this.style.flexGrow = flex;
       },
 
-      // Adding listeners manually *seems* to work better with forwarded parent props
-      // than normal data-binding. Something to do with notifying the paths correctly.
-      _addListener: function(column, oldColumn, prop) {
-        var eventName = Polymer.CaseMap.camelToDashCase(prop) + '-changed';
-        var observerName = '_' + prop + 'Changed';
+      _widthChanged: function(width) {
+        this.style.flexBasis = width;
+      },
 
-        if (oldColumn) {
-          this.unlisten(oldColumn, eventName);
-        }
+      _columnChanged: function(instance, column) {
+        instance.column = column;
+      },
 
-        this.listen(column, eventName, observerName);
+      _columnPathChanged: function(instance, column) {
+        // sometimes instance isn't ready to be notified yet and throws an error.
+        this.async(function() {
+          // TODO: hack to avoid: https://github.com/Polymer/polymer/issues/3307
+          this._parentProps = this._parentProps || {};
+          instance.notifyPath(column.path, column.value);
+        });
       }
     });
   </script>
