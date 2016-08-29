@@ -168,7 +168,7 @@
 
         it('should not show row detail when row is clicked', function(done) {
           var firstRow = grid.querySelector('data-table-row:not([header])');
-          firstCell.click();
+          firstRow.querySelector('data-table-cell').click();
 
           setTimeout(function() {
             var rowDetail = firstRow.querySelector('data-table-row-detail');
