@@ -415,9 +415,10 @@ inspired styles to your `iron-data-table`.
         },
 
         _pagesLoading: {
-          type: Number,
-          observer: '_pagesLoadingChanged',
-          value: 0
+          type: Array,
+          value: function() {
+            return [];
+          },
         },
 
         /**
@@ -741,7 +742,7 @@ inspired styles to your `iron-data-table`.
       },
 
       _currentPageChanged: function(dataSource, page) {
-        if (this._cachedPages && this._cachedPages.indexOf(page) === -1) {
+        if (!this._isPageCached(page)) {
           this.loading = true;
         }
 
@@ -758,12 +759,39 @@ inspired styles to your `iron-data-table`.
         }.bind(this), 100);
       },
 
+      _isPageLoading: function(page) {
+        return this._pagesLoading.indexOf(page) > -1;
+      },
+
+      _addLoadingPage: function(page) {
+        if (!this._isPageLoading(page)) {
+          this.push('_pagesLoading', page);
+        }
+
+        this.loading = this._pagesLoading.length > 0;
+      },
+
+      _removeLoadingPage: function(page) {
+        var index = this._pagesLoading.indexOf(page);
+        if (index !== -1) {
+          this.splice('_pagesLoading', index, 1);
+        }
+
+        this.loading = this._pagesLoading.length > 0;
+      },
+
+      _isPageCached: function(page) {
+        return this._cachedPages && this._cachedPages.indexOf(page) > -1;
+      },
+
       _loadPage: function(dataSource, page) {
-        if (this._cachedPages && this._cachedPages.indexOf(page) === -1) {
-          this._pagesLoading++;
-          this.push('_cachedPages', page);
+        if (this._isPageCached(page)) {
+          this._removeLoadingPage(page);
+        } else if (!this._isPageLoading(page)) {
+          this._addLoadingPage(page);
 
           var success = function(items, size) {
+            this.push('_cachedPages', page);
             this.size = size || this.size;
             var start = page * this.pageSize;
 
@@ -792,14 +820,11 @@ inspired styles to your `iron-data-table`.
               this.$.list.notifyResize();
             }.bind(this), 100);
 
-            this._pagesLoading--;
+            this._removeLoadingPage(page);
           }.bind(this);
 
           var err = function() {
-            var index = this._cachedPages.indexOf(page);
-            this._cachedPages.splice(index, 1);
-
-            this._pagesLoading--;
+            this._removeLoadingPage(page);
           }.bind(this);
 
           dataSource({
@@ -842,10 +867,6 @@ inspired styles to your `iron-data-table`.
 
         // Force reload on currently visible pages.
         this._currentPageChanged(this.dataSource, this._currentPage);
-      },
-
-      _pagesLoadingChanged: function(pagesLoading) {
-        this.loading = pagesLoading > 0;
       },
 
       _updateSizeForItem: function(event) {
