@@ -312,6 +312,18 @@
 
           first.click();
         });
+
+        it('should be able to select using checkbox when selection not enabled', function(done) {
+          table.selectionEnabled = false;
+          table.multiSelection = true;
+
+          table.querySelector('data-table-checkbox:not([header])').click();
+
+          table.async(function() {
+            expect(table.selectedItems[0]).to.eql('foo')
+            done();
+          });
+        });
       });
 
       describe('using two-way binding', function() {
