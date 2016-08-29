@@ -416,7 +416,6 @@ inspired styles to your `iron-data-table`.
 
         _pagesLoading: {
           type: Number,
-          observer: '_pagesLoadingChanged',
           value: 0
         },
 
@@ -427,7 +426,8 @@ inspired styles to your `iron-data-table`.
           type: Boolean,
           notify: true,
           reflectToAttribute: true,
-          value: false
+          value: false,
+          computed: '_pagesLoadingChanged(_pagesLoading)'
         },
 
         _cachedItems: {
@@ -621,10 +621,11 @@ inspired styles to your `iron-data-table`.
         // Resetting scroll position and selection for consistency here. They are
         // both reset implicitly when a new _cachedItems is set to iron-list, but
         // that doesn't happen when size of the dataset changes only by a few items.
-        this.clearSelection();
-
-        this.clearCache();
-        this.$.list.scrollToIndex(0);
+        this.debounce('clears', function() {
+          this.clearSelection();
+          this.clearCache();
+          this.$.list.scrollToIndex(0);
+        }.bind(this), 5);
       },
 
       _sortDirectionChanged: function(e) {
@@ -740,9 +741,13 @@ inspired styles to your `iron-data-table`.
         }
       },
 
+      _pageNotCached: function(page) {
+        return this._cachedPages.indexOf(page) === -1;
+      },
+
       _currentPageChanged: function(dataSource, page) {
-        if (this._cachedPages && this._cachedPages.indexOf(page) === -1) {
-          this.loading = true;
+        if (this._pageNotCached(page) && !this._pagesLoading) {
+          this._pagesLoading += 1;
         }
 
         this.debounce('loading', function() {
@@ -750,17 +755,20 @@ inspired styles to your `iron-data-table`.
 
           if (page + 1 < (this.size / this.pageSize)) {
             this._loadPage(dataSource, page + 1);
-          }
-
-          if (page > 0) {
+          } else if (page > 0) {
             this._loadPage(dataSource, page - 1);
           }
+
+          if (!!this._pagesLoading) {
+            this._pagesLoading -= 1;
+          }
+
         }.bind(this), 100);
       },
 
       _loadPage: function(dataSource, page) {
-        if (this._cachedPages && this._cachedPages.indexOf(page) === -1) {
-          this._pagesLoading++;
+        if (this._pageNotCached(page)) {
+          this._pagesLoading += 1;
           this.push('_cachedPages', page);
 
           var success = function(items, size) {
@@ -791,15 +799,14 @@ inspired styles to your `iron-data-table`.
             this.debounce('resizing', function() {
               this.$.list.notifyResize();
             }.bind(this), 100);
-
-            this._pagesLoading--;
+            this._pagesLoading -= 1;
           }.bind(this);
 
           var err = function() {
             var index = this._cachedPages.indexOf(page);
-            this._cachedPages.splice(index, 1);
+            this.splice('_cachedPages', index, 1);
 
-            this._pagesLoading--;
+            this._pagesLoading -= 1;
           }.bind(this);
 
           dataSource({
@@ -838,14 +845,13 @@ inspired styles to your `iron-data-table`.
        * Clears the cached pages and reloads data from datasource when needed.
        */
       clearCache: function() {
-        this._cachedPages = [];
-
+        this.splice('_cachedPages', 0);
         // Force reload on currently visible pages.
         this._currentPageChanged(this.dataSource, this._currentPage);
       },
 
       _pagesLoadingChanged: function(pagesLoading) {
-        this.loading = pagesLoading > 0;
+        return !!pagesLoading;
       },
 
       _updateSizeForItem: function(event) {
