@@ -197,6 +197,26 @@
 
         });
       });
+
+      describe('refresh page', function() {
+        it('should reload a page', function() {
+          table._currentPage = 10;
+
+          table.async(function() {
+            expect(table._cachedPages).to.contain.members([10]);
+
+            table.refreshPage(10);
+
+            expect(table._cachedPages).not.to.contain.members([10]);
+
+            table.async(function() {
+              expect(table._cachedPages).to.contain.members([10]);
+              done();
+            }, 250);
+          }, 250);
+
+        });
+      });
     });
   </script>
 

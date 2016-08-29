@@ -743,6 +743,10 @@ inspired styles to your `iron-data-table`.
             this.set('items.' + index + '.' + e.detail.path, e.detail.value);
           }
         }
+
+        if (this.autoRefresh) {
+
+        }
       },
 
       _currentPageChanged: function(dataSource, page) {
@@ -870,7 +874,21 @@ inspired styles to your `iron-data-table`.
         this._cachedPages = [];
 
         // Force reload on currently visible pages.
-        this._currentPageChanged(this.dataSource, this._currentPage);
+        this.refreshPage(this._currentPage);
+      },
+
+      /**
+       * Clears the cache for a page and reloads the data from datasource.
+       */
+      refreshPage: function(page) {
+        if (this._cachedPages) {
+          var index = this._cachedPages.indexOf(page);
+          if (index > -1) {
+            this.splice('_cachedPages', index, 1);
+          }
+        }
+
+        this._currentPageChanged(this.dataSource, page);
       },
 
       _updateSizeForItem: function(event) {
