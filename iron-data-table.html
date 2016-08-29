@@ -596,6 +596,10 @@ inspired styles to your `iron-data-table`.
         selectedItems.filters = this.filter.slice(0) || [];
 
         this._setSelectedItems(selectedItems);
+
+        if (this.selectedItem !== undefined) {
+          this._setSelectedItem(null);
+        }
       },
 
       _toggleSelectAll: function() {

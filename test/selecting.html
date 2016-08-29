@@ -378,6 +378,14 @@
         expect(grid.selectedItem).to.be.null;
       });
 
+      it('should deselect on clear', function() {
+        grid.selectItem(0);
+
+        grid.clearSelection();
+
+        expect(grid.selectedItem).to.be.null;
+      });
+
       describe('multi-select', function() {
         beforeEach(function() {
           grid.multiSelection = true;
