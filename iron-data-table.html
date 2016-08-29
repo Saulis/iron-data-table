@@ -250,6 +250,12 @@ inspired styles to your `iron-data-table`.
       properties: {
 
         /**
+         * Timeout after which the data on the currently visible page will be automatically
+         * refreshed after an item has been changed through a two-way binding.
+         */
+        autoRefresh: Number,
+
+        /**
          * A function that is called before data is bound to a row or header cell.
          * Can be used to customize the cell element depending on the data.
          * #### Example:
@@ -744,8 +750,10 @@ inspired styles to your `iron-data-table`.
           }
         }
 
-        if (this.autoRefresh) {
-
+        if (this.autoRefresh !== undefined) {
+          this.debounce('auto-refresh', function() {
+            this.refreshPage(this._currentPage);
+          }, this.autoRefresh);
         }
       },
 
