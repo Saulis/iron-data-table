@@ -80,7 +80,7 @@
       observers: ['_beforeBind(beforeBind, index, item.*, selected, expanded)'],
 
       attached: function() {
-        if (this.domHost && this.domHost.tagName === 'IRON-DATA-TABLE') {
+        if (this.domHost && this.domHost.tagName.toUpperCase() === 'IRON-DATA-TABLE') {
           var id = this._static.id++;
 
           var item = this.parentElement;
