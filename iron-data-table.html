@@ -386,6 +386,14 @@ inspired styles to your `iron-data-table`.
         },
 
         /**
+         * If set to true, only one column at a time can be sorted.
+         */
+        noMultiSort: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
          * An array of `data-table-column` elements which contain the templates
          * to be stamped with items.
          */
@@ -633,17 +641,24 @@ inspired styles to your `iron-data-table`.
       },
 
       _sortDirectionChanged: function(e) {
-        for (var i = 0; i < this.sortOrder.length; i++) {
-          if (this.sortOrder[i].path === e.detail.path) {
-            if (e.detail.direction) {
-              this.set('sortOrder.' + i + '.direction', e.detail.direction);
-            } else {
-              this.splice('sortOrder', i, 1);
+        if (this.noMultiSort) {
+          for (var i = 0; i < this.sortOrder.length; i++) {
+            this.set('sortOrder.' + i + '.direction', null);
+          }
+          this.sortOrder = [];
+        }
+        else {
+          for (var i = 0; i < this.sortOrder.length; i++) {
+            if (this.sortOrder[i].path === e.detail.path) {
+              if (e.detail.direction) {
+                this.set('sortOrder.' + i + '.direction', e.detail.direction);
+              } else {
+                this.splice('sortOrder', i, 1);
+              }
+              return;
             }
-            return;
           }
         }
-
         this.push('sortOrder', {
           path: e.detail.path,
           direction: e.detail.direction
