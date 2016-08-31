@@ -171,6 +171,8 @@ inspired styles to your `iron-data-table`.
           <data-table-checkbox header hidden$="[[!multiSelection]]" on-tap="_toggleSelectAll" checked="[[_isSelectAllChecked(selectedItems.length, selectedItems.inverted, size)]]" indeterminate="[[_isSelectAllIndeterminate(selectedItems.length, size)]]"></data-table-checkbox>
           <template is="dom-repeat" items="[[columns]]" as="column">
             <data-table-cell header
+                             draggable="[[draggableColumns]]"
+                             on-change-column-order="_onChangeColumnOrder"
                              align-right="[[column.alignRight]]"
                              before-bind="[[beforeCellBind]]"
                              column="[[column]]"
@@ -404,6 +406,15 @@ inspired styles to your `iron-data-table`.
             return [];
           },
           observer: '_columnsChanged'
+        },
+
+        /**
+         * If `true`, columns can be reordered by dragging their headers
+         * Column reordering works only if `order` property has been set for each column
+         */
+        draggableColumns: {
+          type: Boolean,
+          value: false
         },
 
         /**
@@ -678,6 +689,20 @@ inspired styles to your `iron-data-table`.
             this.listen(column, 'filter-value-changed', '_onColumnFilterChanged');
           }.bind(this));
         }
+      },
+
+      _onChangeColumnOrder: function(e) {
+        this.columns.forEach(function(col) {
+          if (col.name === e.detail.sourceName) {
+            col.order = e.detail.targetOrder;
+          }
+          else if (col.name === e.detail.targetName) {
+            if (e.detail.targetOrder > e.detail.sourceOrder) col.order--;
+            else col.order++;
+          }
+          else if (col.order > e.detail.targetOrder)
+            col.order++;
+        });
       },
 
       _onColumnFilterChanged: function(e) {

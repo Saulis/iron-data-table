@@ -21,6 +21,28 @@
       :host([hidden]) {
         display: none;
       }
+
+      :host([draggable]) {
+        cursor: move;
+        -moz-user-select: none;
+        -khtml-user-select: none;
+        -webkit-user-select: none;
+        user-select: none;
+        -khtml-user-drag: element;
+        -webkit-user-drag: element;
+      }
+
+      :host([drag-over]) {
+        /*TODO: CSS mixin*/
+      }
+
+      :host([dragged]) {
+        /*TODO: CSS mixin*/
+        opacity: 0.25;
+        -webkit-transition: opacity 0.5s ease-in-out;
+        -moz-transition: opacity 0.5s ease-in-out;
+        transition: opacity 0.5s ease-in-out;
+      }
     </style>
     <content></content>
   </template>
@@ -57,6 +79,15 @@
                   '_hiddenChanged(hidden)',
                   '_orderChanged(order)',
                   '_widthChanged(width)'],
+
+      listeners: {
+        'dragstart': '_handleDragStart',
+        'dragenter': '_handleDragEnter',
+        'dragleave': '_handleDragLeave',
+        'dragover': '_handleDragOver',
+        'drop': '_handleDrop',
+        'dragend': '_handleDragEnd'
+      },
 
       attached: function() {
         if (!Polymer.Settings.useNativeShadow) {
@@ -110,6 +141,55 @@
 
       _widthChanged: function(width) {
         this.style.flexBasis = width;
+      },
+
+      _handleDragStart: function (e) {
+        if (!this.draggable) return;
+
+        this.setAttribute('dragged',"");
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('columnName', this.column.name);
+        e.dataTransfer.setData('columnOrder', this.column.order);
+      },
+
+      _handleDragEnter: function (e) {
+        if (!this.draggable) return;
+        this.setAttribute('drag-over',"");
+      },
+
+      _handleDragLeave: function (e) {
+        if (!this.draggable) return;
+        this.removeAttribute('drag-over');
+      },
+
+      _handleDragOver: function(e) {
+        if (!this.draggable) return;
+
+        if (e.preventDefault) e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        return false;
+      },
+
+      _handleDrop: function(e) {
+        if (!this.draggable) return;
+
+        if (e.stopPropagation) e.stopPropagation();
+        this.removeAttribute('drag-over');
+
+        this.fire('change-column-order', {
+          sourceName: e.dataTransfer.getData('columnName'),
+          sourceOrder: e.dataTransfer.getData('columnOrder'),
+          targetName: this.column.name,
+          targetOrder: this.order
+        });
+        return false;
+      },
+
+      _handleDragEnd: function(e) {
+        if (!this.draggable) return;
+
+        this.removeAttribute('drag-over');
+        this.removeAttribute('dragged');
       },
 
       _columnChanged: function(instance, column) {
