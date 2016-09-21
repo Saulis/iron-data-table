@@ -213,7 +213,7 @@ inspired styles to your `iron-data-table`.
                                  width="[[column.width]]"
                                  before-bind="[[beforeCellBind]]"></data-table-cell>
               </template>
-              <template is="dom-if" if="[[_isExpanded(item, expandedItems)]]" on-dom-change="_updateSizeForItem">
+              <template is="dom-if" if="[[_isExpanded(item, expandedItems, expandedItems.*)]]" on-dom-change="_updateSizeForItem">
                 <data-table-row-detail index="[[index]]"
                                        item="[[item]]"
                                        expanded="[[_isExpanded(item, expandedItems, expandedItems.*)]]"
@@ -938,9 +938,7 @@ inspired styles to your `iron-data-table`.
       expandItem: function(item) {
         if (this.rowDetail && this.expandedItems && !this._isExpanded(item, this.expandedItems)) {
 
-          // replacing the whole array here to simplify the observers.
-          this.expandedItems.push(item);
-          this.expandedItems = this.expandedItems.slice(0);
+          this.push('expandedItems', item);
         }
       },
 
@@ -951,9 +949,7 @@ inspired styles to your `iron-data-table`.
         if (this.rowDetail && this.expandedItems && this._isExpanded(item, this.expandedItems)) {
           var index = this.expandedItems.indexOf(item);
 
-          // replacing the whole array here to simplify the obsevers.
-          this.expandedItems.splice(index, 1);
-          this.expandedItems = this.expandedItems.slice(0);
+          this.splice('expandedItems', index, 1);
         }
       },
 
