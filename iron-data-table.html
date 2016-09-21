@@ -250,6 +250,12 @@ inspired styles to your `iron-data-table`.
       properties: {
 
         /**
+         * Timeout after which the data on the currently visible page will be automatically
+         * refreshed after an item has been changed through a two-way binding.
+         */
+        autoRefresh: Number,
+
+        /**
          * A function that is called before data is bound to a row or header cell.
          * Can be used to customize the cell element depending on the data.
          * #### Example:
@@ -371,7 +377,8 @@ inspired styles to your `iron-data-table`.
         size: {
           type: Number,
           notify: true,
-          value: 0
+          value: 0,
+          observer: '_sizeChanged'
         },
 
         /**
@@ -466,7 +473,6 @@ inspired styles to your `iron-data-table`.
       },
 
       observers: ['_itemsChanged(items.*)',
-        '_sizeChanged(size)',
         '_currentPageChanged(dataSource, _currentPage)',
         '_resetData(dataSource, filter.*, sortOrder.*)'
       ],
@@ -743,6 +749,12 @@ inspired styles to your `iron-data-table`.
             this.set('items.' + index + '.' + e.detail.path, e.detail.value);
           }
         }
+
+        if (this.autoRefresh !== undefined) {
+          this.debounce('auto-refresh', function() {
+            this.refreshPage(this._currentPage);
+          }, this.autoRefresh);
+        }
       },
 
       _currentPageChanged: function(dataSource, page) {
@@ -752,7 +764,6 @@ inspired styles to your `iron-data-table`.
 
         this.debounce('loading', function() {
           this._loadPage(dataSource, page);
-
           if (page + 1 < (this.size / this.pageSize)) {
             this._loadPage(dataSource, page + 1);
           }
@@ -840,7 +851,7 @@ inspired styles to your `iron-data-table`.
         }
       },
 
-      _sizeChanged: function(size) {
+      _sizeChanged: function(size, oldSize) {
         // Optimization: Calling `set` on _cachedItems will reset the scroll position and selections,
         // using `push` and `pop` with large changes (more than 1000 items) is a heavy operation
         // that jams things up.
@@ -861,6 +872,14 @@ inspired styles to your `iron-data-table`.
 
           this.set('_cachedItems', items);
         }
+
+        // when size increases, old last page needs to be refreshed.
+        if (size > oldSize) {
+          var oldLastPage = Math.floor(oldSize / this.pageSize);
+          if (this._isPageCached(oldLastPage) || oldLastPage === 0) {
+            this.refreshPage(oldLastPage);
+          }
+        }
       },
 
       /**
@@ -870,7 +889,21 @@ inspired styles to your `iron-data-table`.
         this._cachedPages = [];
 
         // Force reload on currently visible pages.
-        this._currentPageChanged(this.dataSource, this._currentPage);
+        this.refreshPage(this._currentPage);
+      },
+
+      /**
+       * Clears the cache for a page and reloads the data from datasource.
+       */
+      refreshPage: function(page) {
+        if (this._cachedPages) {
+          var index = this._cachedPages.indexOf(page);
+          if (index > -1) {
+            this.splice('_cachedPages', index, 1);
+          }
+        }
+
+        this._currentPageChanged(this.dataSource, page);
       },
 
       _updateSizeForItem: function(event) {
