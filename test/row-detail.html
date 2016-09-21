@@ -112,7 +112,7 @@
             e.preventDefault();
 
             grid.async(function() {
-              expect(grid._expandedItems).to.be.empty;
+              expect(grid.expandedItems).to.be.empty;
               done();
             });
           });
@@ -137,7 +137,7 @@
             e.preventDefault();
 
             grid.async(function() {
-              expect(grid._expandedItems).to.have.members([grid.items[0]]);
+              expect(grid.expandedItems).to.have.members([grid.items[0]]);
               done();
             });
           });
