@@ -807,7 +807,11 @@ inspired styles to your `iron-data-table`.
 
           var success = function(items, size) {
             this.push('_cachedPages', page);
-            this.size = size || this.size;
+
+            if (size !== undefined) {
+              this.size = size;
+            }
+
             var start = page * this.pageSize;
 
             for (var i = 0; i < this.pageSize; i++) {

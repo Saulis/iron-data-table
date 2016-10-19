@@ -4,7 +4,7 @@ module.exports = {
       "browsers": [{
           "browserName": "microsoftedge",
           "platform": "Windows 10",
-          "version": "20"
+          "version": "14"
         }, {
           "browserName": "internet explorer",
           "platform": "Windows 8.1",
