@@ -7,9 +7,9 @@ function ArrayDataSource(arr) {
     return Array.prototype.filter.call(items, function(item, index) {
       for (var i = 0; i < filter.length; i++) {
         var value = Polymer.Base.get(filter[i].path, item);
-        if (!filter[i].filter) {
+        if ([undefined, null].indexOf(filter[i].filter) > -1) {
           continue;
-        } else if (!value || value.toString().toLowerCase().indexOf(filter[i].filter.toString().toLowerCase()) === -1) {
+        } else if (value.toString().toLowerCase().indexOf(filter[i].filter.toString().toLowerCase()) === -1) {
           return false;
         }
       }

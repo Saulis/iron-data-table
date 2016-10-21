@@ -1,0 +1,128 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../test-fixture/test-fixture-mocha.js"></script>
+  <link rel="import" href="../../iron-test-helpers/iron-test-helpers.html">
+  <link rel="import" href="../iron-data-table.html">
+</head>
+
+<body>
+  <test-fixture id="grid">
+    <template>
+      <iron-data-table>
+        <data-table-column name="First" filter-by="value">
+          <template>[[item.value]]</template>
+        </data-table-column>
+        <data-table-column name="Second" filter-by="value2">
+          <template>[[item.value2]]</template>
+        </data-table-column>
+        <data-table-column name="Third">
+          <template>[[item.value]]</template>
+        </data-table-column>
+      </iron-data-table>
+    </template>
+  </test-fixture>
+
+  <script>
+    describe('Filtering', function() {
+      var grid;
+      beforeEach(function(done) {
+        grid = fixture('grid');
+
+        Polymer.dom.flush();
+
+        grid.items = [{
+          value: 'foo',
+          value2: 'fooz'
+        }, {
+          value: 'bar',
+          value2: 'bah'
+        }, {
+          value: 'qux',
+          value2: 'baz'
+        }];
+
+        Polymer.Base.async(done);
+      });
+
+      describe('using filter-value property', function() {
+        it('should update `filters`', function() {
+          grid.columns[0].filterValue = 'foo';
+
+          expect(grid.filter[0].filter).to.eql('foo');
+        });
+
+        it('should filter with `false` value', function() {
+          grid.columns[0].filterValue = false;
+
+          expect(grid.filter[0].filter).to.eql(false);
+        });
+      });
+
+      describe('using `filter` property', function() {
+        it('should pass filter to `dataSource`', function(done) {
+          grid.dataSource = function(params) {
+            expect(params.filter[0].filter).to.eql('foo');
+            done();
+          };
+
+          grid.push('filter', {filter: 'foo', path: 'bar'});
+        });
+
+        it('should filter with `false` filter', function() {
+          grid.push('filter', {filter: false, path: 'value'});
+
+          grid.flushDebouncer('loading');
+
+          expect(grid.size).to.eql(0);
+        });
+
+        it('should filter with empty string as filter', function() {
+          grid.push('filter', {filter: '', path: 'value'});
+
+          grid.flushDebouncer('loading');
+
+          expect(grid.size).to.eql(3);
+        });
+
+        it('should not filter with `undefined` filter', function() {
+          grid.push('filter', {filter: undefined, path: 'value'});
+
+          grid.flushDebouncer('loading');
+
+          expect(grid.size).to.eql(3);
+        });
+
+        it('should not filter with `null` filter', function() {
+          grid.push('filter', {filter: null, path: 'value'});
+
+          grid.flushDebouncer('loading');
+
+          expect(grid.size).to.eql(3);
+        });
+
+        it('should filter items with `false` value', function() {
+          grid.items[0].value = false;
+          grid.push('filter', {filter: false, path: 'value'});
+
+          grid.flushDebouncer('loading');
+
+          expect(grid.size).to.eql(1);
+        });
+      });
+
+      function columnSortElement(index) {
+        var headerCells = grid.$.header.querySelectorAll('data-table-cell');
+
+        return headerCells[index].querySelector('data-table-column-sort');
+      }
+    });
+  </script>
+
+</body>
+
+</html>
