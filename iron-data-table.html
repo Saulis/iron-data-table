@@ -611,8 +611,10 @@ inspired styles to your `iron-data-table`.
       _toggleSelectAll: function() {
         if (this._isSelectAllChecked(this.selectedItems.length, this.selectedItems.inverted, this.size)) {
           this.clearSelection();
+          this.fire("deselecting-all", {items: this.selectedItems});
         } else {
           this.selectAll();
+          this.fire("selecting-all", {items: this.selectedItems});
         }
       },
 
@@ -1043,7 +1045,20 @@ inspired styles to your `iron-data-table`.
       },
 
       _onCheckBoxTap: function(e) {
-        this._isSelected(e.model.item, this.selectedItems) ? this.deselectItem(e.model.item) : this.selectItem(e.model.item);
+        var fireEvent = function(eventName, item, defaultAction) {
+          var e = this.fire(eventName, {item: item}, {cancelable: true});
+          if (!e.defaultPrevented) {
+            defaultAction.call(this, item);
+          }
+        }.bind(this);
+
+        if (this._isSelected(e.model.item, this.selectedItems)) {
+          this.deselectItem(e.model.item);
+          fireEvent('deselecting-item', e.model.item, this.deselectItem);
+        } else {
+          this.selectItem(e.model.item);
+          fireEvent('selecting-item', e.model.item, this.selectItem);
+        }
       }
     });
   </script>
