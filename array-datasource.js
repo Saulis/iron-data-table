@@ -9,7 +9,8 @@ function ArrayDataSource(arr) {
         var value = Polymer.Base.get(filter[i].path, item);
         if ([undefined, null].indexOf(filter[i].filter) > -1) {
           continue;
-        } else if (value.toString().toLowerCase().indexOf(filter[i].filter.toString().toLowerCase()) === -1) {
+        } else if ([undefined, null].indexOf(value) > -1 || 
+                    value.toString().toLowerCase().indexOf(filter[i].filter.toString().toLowerCase()) === -1) {
           return false;
         }
       }
