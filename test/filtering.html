@@ -113,6 +113,28 @@
 
           expect(grid.size).to.eql(1);
         });
+
+        it('should filter out items with `null` value', function() {
+          grid.items[0].value = 'foo';
+          grid.items[1].value = null;
+
+          grid.push('filter', {filter: 'foo', path: 'value'});
+
+          grid.flushDebouncer('loading');
+
+          expect(grid.size).to.eql(1);
+        });
+
+        it('should filter out items with `undefined` value', function() {
+          grid.items[0].value = 'foo';
+          grid.items[1].value = undefined;
+
+          grid.push('filter', {filter: 'foo', path: 'value'});
+
+          grid.flushDebouncer('loading');
+
+          expect(grid.size).to.eql(1);
+        });
       });
 
       function columnSortElement(index) {
