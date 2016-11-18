@@ -345,6 +345,60 @@
             done();
           });
         });
+
+        it('should fire `selecting-all-items` from checkbox', function(done) {
+          table.multiSelection = true;
+
+          table.addEventListener('selecting-all-items', function(e) {
+            done();
+          });
+
+          table.querySelector('data-table-checkbox[header]').click();
+        });
+
+        it('should not select all when `selecting-all-items` is cancelled', function(done) {
+          table.multiSelection = true;
+
+          table.addEventListener('selecting-all-items', function(e) {
+            e.preventDefault();
+
+            table.async(function() {
+              expect(table.selectedItems).to.be.empty;
+              expect(table.selectedItems.inverted).to.be.false;
+              done();
+            });
+          });
+
+          table.querySelector('data-table-checkbox[header]').click();
+        });
+
+        it('should fire `deselecting-all-items` from checkbox', function(done) {
+          table.multiSelection = true;
+          table.selectAll();
+
+          table.addEventListener('deselecting-all-items', function(e) {
+            done();
+          });
+
+          table.querySelector('data-table-checkbox[header]').click();
+        });
+
+        it('should not deselect all when `deselecting-all-items` is cancelled', function(done) {
+          table.multiSelection = true;
+          table.selectAll();
+
+          table.addEventListener('deselecting-all-items', function(e) {
+            e.preventDefault();
+
+            table.async(function() {
+              expect(table.selectedItems).to.be.empty;
+              expect(table.selectedItems.inverted).to.be.true;
+              done();
+            });
+          });
+
+          table.querySelector('data-table-checkbox[header]').click();
+        });
       });
 
       describe('using two-way binding', function() {

@@ -610,11 +610,9 @@ inspired styles to your `iron-data-table`.
 
       _toggleSelectAll: function() {
         if (this._isSelectAllChecked(this.selectedItems.length, this.selectedItems.inverted, this.size)) {
-          this.clearSelection();
-          this.fire("deselecting-all", {items: this.selectedItems});
+          this._fireEvent("deselecting-all-items", {items: this.selectedItems}, this.clearSelection);
         } else {
-          this.selectAll();
-          this.fire("selecting-all", {items: this.selectedItems});
+          this._fireEvent("selecting-all-items", {items: this.selectedItems}, this.selectAll);
         }
       },
 
@@ -976,8 +974,7 @@ inspired styles to your `iron-data-table`.
       },
 
       /**
-       * Fired when user clicks on a item to select it. Note that this event is
-       * not fired when user clicks on a multi-selection checkbox.
+       * Fired when user clicks on a item to select it.
        *
        * @event selecting-item
        * @param {Object} detail
@@ -985,13 +982,28 @@ inspired styles to your `iron-data-table`.
        */
 
       /**
-       * Fired when user clicks on a item to deselect it. Note that this event is
-       * not fired when user clicks on a multi-selection checkbox.
+       * Fired when user clicks on a item to deselect it.
        *
        * @event deselecting-item
        * @param {Object} detail
        * @param {Object} detail.item item to be deselected
        */
+
+       /**
+        * Fired when user clicks on the select all checkbox to select items.
+        *
+        * @event selecting-all-items
+        * @param {Object} detail
+        * @param {Object} detail.items currently selected items
+        */
+
+       /**
+        * Fired when user clicks on the select all checkbox to deselect items.
+        *
+        * @event deselecting-all-items
+        * @param {Object} detail
+        * @param {Object} detail.items currently selected items
+        */
 
       /**
        * Fired when user clicks on a item to expand it.
