@@ -1019,45 +1019,36 @@ inspired styles to your `iron-data-table`.
         if (this._isFocusable(Polymer.dom(e).localTarget)) {
           return;
         } else {
-          var fireEvent = function(eventName, item, defaultAction) {
-            var e = this.fire(eventName, {item: item}, {cancelable: true});
-            if (!e.defaultPrevented) {
-              defaultAction.call(this, item);
-            }
-          }.bind(this);
-
           if (this.rowDetail && this.detailsEnabled) {
             if (this._isExpanded(e.model.item, this._expandedItems)) {
-              fireEvent('collapsing-item', e.model.item, this.collapseItem);
+              this._fireEvent('collapsing-item', e.model.item, this.collapseItem);
             } else {
-              fireEvent('expanding-item', e.model.item, this.expandItem);
+              this._fireEvent('expanding-item', e.model.item, this.expandItem);
             }
           }
 
           if (this.selectionEnabled) {
             if (this._isSelected(e.model.item, this.selectedItems)) {
-              fireEvent('deselecting-item', e.model.item, this.deselectItem);
+              this._fireEvent('deselecting-item', e.model.item, this.deselectItem);
             } else {
-              fireEvent('selecting-item', e.model.item, this.selectItem);
+              this._fireEvent('selecting-item', e.model.item, this.selectItem);
             }
           }
         }
       },
 
-      _onCheckBoxTap: function(e) {
-        var fireEvent = function(eventName, item, defaultAction) {
-          var e = this.fire(eventName, {item: item}, {cancelable: true});
-          if (!e.defaultPrevented) {
-            defaultAction.call(this, item);
-          }
-        }.bind(this);
+      _fireEvent: function(eventName, item, defaultAction) {
+        var e = this.fire(eventName, {item: item}, {cancelable: true});
+        if (!e.defaultPrevented) {
+          defaultAction.call(this, item);
+        }
+      },
 
+      _onCheckBoxTap: function(e) {
         if (this._isSelected(e.model.item, this.selectedItems)) {
-          this.deselectItem(e.model.item);
-          fireEvent('deselecting-item', e.model.item, this.deselectItem);
+          this._fireEvent('deselecting-item', e.model.item, this.deselectItem);
         } else {
-          this.selectItem(e.model.item);
-          fireEvent('selecting-item', e.model.item, this.selectItem);
+          this._fireEvent('selecting-item', e.model.item, this.selectItem);
         }
       }
     });

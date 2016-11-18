@@ -298,6 +298,27 @@
           first.click();
         });
 
+        it('should fire `selecting-item` from checkbox', function(done) {
+          table.multiSelection = true;
+
+          table.addEventListener('selecting-item', function(e) {
+            done();
+          });
+
+          table.querySelector('data-table-checkbox:not([header])').click();
+        });
+
+        it('should fire `deselecting-item` from checkbox', function(done) {
+          table.multiSelection = true;
+          first.click();
+
+          table.addEventListener('deselecting-item', function(e) {
+            done();
+          });
+
+          table.querySelector('data-table-checkbox:not([header])').click();
+        });
+
         it('should not deselect when `deselecting-item` is cancelled', function(done) {
           first.click();
 
