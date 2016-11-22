@@ -32,7 +32,7 @@
       beforeEach(function(done) {
         grid = fixture('grid');
         Polymer.dom.flush();
-        grid.items = Array.from(users);
+        grid.items = users;
 
         Polymer.Base.async(done, 200);
       });

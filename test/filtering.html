@@ -81,7 +81,16 @@
           expect(grid.size).to.eql(0);
         });
 
-        it('should filter with empty string as filter', function() {
+        it('should not filter with empty string as filter', function() {
+          grid.push('filter', {filter: '', path: 'value'});
+
+          grid.flushDebouncer('loading');
+
+          expect(grid.size).to.eql(3);
+        });
+
+        it('should not filter out items with `undefined` value with empty filter', function() {
+          grid.items[0].value = undefined;
           grid.push('filter', {filter: '', path: 'value'});
 
           grid.flushDebouncer('loading');
