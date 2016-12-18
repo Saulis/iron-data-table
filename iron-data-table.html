@@ -308,6 +308,15 @@ inspired styles to your `iron-data-table`.
         },
 
         /**
+         * When `false`, items may be sorted by many collumns at once.
+         * When `true`, items may be sorted only by one collumn.
+         */
+        disableMultiSort: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
          * An array containing path/filter value pairs that are used to filter the items
          */
         filter: {
@@ -324,15 +333,6 @@ inspired styles to your `iron-data-table`.
          * only one item may be selected at a time.
          */
         multiSelection: {
-          type: Boolean,
-          value: false
-        },
-
-        /**
-         * When `false`, items may be sorted by many collumns at once.
-         * When `true`, items may be sorted only by one collumn.
-         */
-        disableMultiSort: {
           type: Boolean,
           value: false
         },
