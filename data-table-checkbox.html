@@ -2,7 +2,7 @@
   <template>
     <style>
       :host {
-        height: 48px;
+        height: var(--data-table-cell-height, 48px);
         flex-basis: 48px;
         flex-grow: 0;
         flex-shrink: 0;
@@ -14,7 +14,7 @@
       }
 
       :host([header]) {
-        height: 56px;
+        height: var(--data-table-cell-header-height, 56px);
       }
 
       :host([hidden]) {
