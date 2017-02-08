@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <script type="text/javascript" src="../../webcomponentsjs/webcomponents.js"></script>
+    <link rel="import" href="../../polymer/polymer.html">
+    <link rel="import" href="../../paper-button/paper-button.html">
+    <link rel="import" href="../iron-data-table.html">
+    <style>
+    .header{
+      background: #ededed;
+      padding: 8px 24px;
+    }
+    </style>
+  </head>
+  
+  <body unresolved>
+    <paper-button onClick="onAddItem()">Add Item</paper-button>
+    <paper-button onClick="onRemoveItem()">Remove Item</paper-button>
+    <paper-button onClick="onChangeItem()">Change Items List</paper-button>
+    <h3 class="header">
+     Selected Items : 0
+    </h3>
+    
+    <iron-data-table id="dataTable"  class="view-dialog-table" selection-enabled multi-selection>
+      <data-table-column flex="1" name="Type" width="40px">
+        <template>
+          {{item.type}}
+          <paper-ripple></paper-ripple>
+        </template>
+      </data-table-column>
+      <data-table-column flex="1" name="amount" align-right width="140px">
+        <template>
+            <div>
+            {{item.amount}}
+              <amount-tag amount="{{item.amount}}"></amount-tag>
+          </div>
+          <paper-ripple></paper-ripple>
+        </template>
+      </data-table-column width="40px">
+      <data-table-column flex="1" name="Date">
+        <template>
+          {{item.date}}
+          <paper-ripple></paper-ripple>
+        </template>
+      </data-table-column>
+      <data-table-column flex="1" name="amount &#129129" align-right width="140px"> 
+        <template>
+            <div>
+            {{item.amount}}
+              <amount-tag amount="{{item.amount}}"></amount-tag>
+          </div>
+          <paper-ripple></paper-ripple>
+        </template>
+      </data-table-column>
+      <data-table-column flex="1" name="Payment Way">
+        <template>
+          {{item.paymentway}}
+          <paper-ripple></paper-ripple>
+        </template>
+      </data-table-column>
+      <data-table-column flex="3" name="Note">
+        <template>
+          {{item.note}}
+          <paper-ripple></paper-ripple>
+        </template>
+      </data-table-column>
+    </iron-data-table>
+    
+    <div></div>
+  </body>
+  
+  <script>
+  
+    var elDataTable = document.querySelector('#dataTable');
+    elDataTable.set('items', [{
+      _id: '1',
+      date:'1 Jan',
+      contact:'mahek',
+      type: 'CONTACT',
+      amount:1000000,
+      paymentway:'cash-on-hand',
+      note:'y'
+      },{
+        _id: '2',
+      date:'2 March',
+      contact:'Ravi',
+      amount:5000000,
+      type: 'CONTACT',
+      paymentway:'cash-on-hand',
+      note:'for entertain'
+    },{
+      _id: '3',
+      date:'3 Feb, 2016',
+      contact:'Fenil',
+      amount:-4000000,
+      type: 'CONTACT',
+      paymentway:'Phonepe',
+      note:'for dance'
+    },{
+      _id: '4',
+      date:'11-12-2016',
+      contact:'Neel',
+      amount:2000000,
+      type: 'CONTACT',
+      paymentway:'Paytm',
+      note:""
+    },{
+      _id: '5',
+      date:'3 Feb, 2016',
+      contact:'Fenil',
+      amount:-4000000,
+      type: 'CONTACT',
+      paymentway:'Phonepe',
+      note:'for dance'
+    },{
+      _id: '6',
+      date:'11-12-2016',
+      contact:'Neel',
+      amount:2000000,
+      type: 'CONTACT',
+      paymentway:'Paytm',
+      note:""
+    }]);
+    
+    function onAddItem(){
+      
+      var obj =  {date:'1 Jan',
+      contact:'mahek',
+      type: 'CONTACT',
+      amount:1000000,
+      paymentway:'cash-on-hand',
+      note:'y'
+      }
+      obj._id = elDataTable.items.length + 1;
+      elDataTable.splice('items', 0, 0, obj);
+    }
+    
+    function onRemoveItem(){
+      elDataTable.splice('items', 0, 1);
+    };
+    
+    function onChangeItem(){
+      elDataTable.set('items', [{
+        _id: '1',
+        date:'1 Jan',
+        contact:'Albert',
+        type: 'USER',
+        amount:1000000,
+        paymentway:'cash-on-hand',
+        note:'y'
+        },{
+          _id: '2',
+        date:'2 March',
+        contact:'Dicock',
+        amount:5000000,
+        type: 'USER',
+        paymentway:'cash-on-hand',
+        note:'for entertain'
+      },{
+        _id: '3',
+        date:'3 Feb, 2016',
+        contact:'Mark',
+        amount:-4000000,
+        type: 'USER',
+        paymentway:'Phonepe',
+        note:'for dance'
+      },{
+        _id: '4',
+        date:'11-12-2016',
+        contact:'Mendal',
+        amount:2000000,
+        type: 'USER',
+        paymentway:'Paytm',
+        note:""
+      },{
+        _id: '5',
+        date:'3 Feb, 2016',
+        contact:'Fedrar',
+        amount:-4000000,
+        type: 'USER',
+        paymentway:'Phonepe',
+        note:'for dance'
+      }]);
+      
+    };
+    
+    elDataTable.addEventListener('selected-items-changed', function(e){
+      document.querySelector('.header').innerHTML = "Selected Items : " + elDataTable.selectedItems.length
+    });
+  </script>
+</html>

@@ -474,7 +474,8 @@ inspired styles to your `iron-data-table`.
 
       observers: ['_itemsChanged(items.*)',
         '_currentPageChanged(dataSource, _currentPage)',
-        '_resetData(dataSource, filter.*, sortOrder.*)'
+        '_resetData(dataSource, filter.*, sortOrder.*)',
+        '_clearSelection(filter.*, sortOrder.*)'
       ],
 
       created: function() {
@@ -628,11 +629,14 @@ inspired styles to your `iron-data-table`.
         return index % 2 === 0;
       },
 
-      _resetData: function(dataSource, filter, sortOrder) {
+      _clearSelection: function(){
         // Resetting scroll position and selection for consistency here. They are
         // both reset implicitly when a new _cachedItems is set to iron-list, but
         // that doesn't happen when size of the dataset changes only by a few items.
         this.clearSelection();
+      },
+      
+      _resetData: function() {
 
         this.clearCache();
         this.$.list.scrollToIndex(0);
@@ -727,9 +731,23 @@ inspired styles to your `iron-data-table`.
        * Lazy loading
        */
       _itemsChanged: function(items) {
+        var self = this;
         if ((items.path === 'items' || items.path === 'items.splices') && Array.isArray(items.base)) {
+          
+          if(items.path === 'items.splices' && this.multiSelection){
+            
+            items.value.indexSplices.forEach(function(splice){
+                self._deselectItems(splice.removed);
+            });
+          }
+          
           this.size = items.base.length;
           this.dataSource = new ArrayDataSource(items.base);
+          
+          if(items.path === 'items'){
+              this._clearSelection();
+          }
+         
         } else if (items.path.indexOf('items.#') === 0 && Array.isArray(items.base)) {
           var index = items.path.split('.')[1].substring(1);
           var item = this.items[index];
@@ -742,6 +760,13 @@ inspired styles to your `iron-data-table`.
         }
       },
 
+      _deselectItems: function(items) {
+        var self = this;
+        items.forEach(function(item){
+          self.deselectItem(item);
+        });
+      },
+      
       _itemChanged: function(e) {
         if (this.items) {
           var index = this.items.indexOf(e.detail.item);
