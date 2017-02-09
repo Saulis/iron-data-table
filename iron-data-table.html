@@ -735,9 +735,24 @@ inspired styles to your `iron-data-table`.
         if ((items.path === 'items' || items.path === 'items.splices') && Array.isArray(items.base)) {
           
           if(items.path === 'items.splices' && this.multiSelection){
-            
+             if(this.selectedItems.inverted){
+                
+             items.value.indexSplices.forEach(function(splice){
+               self._deselectItems(splice.object.slice(splice.index, splice.addedCount));
+             });
+             items.value.indexSplices.forEach(function(splice){
+               self._selectItems(splice.removed);
+             });
+           } else {
+             items.value.indexSplices.forEach(function(splice){
+                 self._deselectItems(splice.removed);
+               });
+           }
+          }
+          
+          if(items.path === 'items.splices' && !this.multiSelection && this.selectionEnabled){
             items.value.indexSplices.forEach(function(splice){
-                self._deselectItems(splice.removed);
+              self._deselectItems(splice.removed);
             });
           }
           
@@ -764,6 +779,13 @@ inspired styles to your `iron-data-table`.
         var self = this;
         items.forEach(function(item){
           self.deselectItem(item);
+        });
+      },
+      
+      _selectItems: function(items){
+        var self = this;
+        items.forEach(function(item){
+          self.selectItem(item);
         });
       },
       

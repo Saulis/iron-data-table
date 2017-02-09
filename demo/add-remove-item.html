@@ -18,6 +18,7 @@
     <paper-button onClick="onAddItem()">Add Item</paper-button>
     <paper-button onClick="onRemoveItem()">Remove Item</paper-button>
     <paper-button onClick="onChangeItem()">Change Items List</paper-button>
+    <paper-button onClick="onSelectionModeChange()">Change selection Mode</paper-button>
     <h3 class="header">
      Selected Items : 0
     </h3>
@@ -140,6 +141,11 @@
       elDataTable.splice('items', 0, 1);
     };
     
+    function onSelectionModeChange(){
+      onChangeItem();
+      elDataTable.multiSelection ? elDataTable.set('multiSelection', false) : elDataTable.set('multiSelection', true);
+    };
+    
     function onChangeItem(){
       elDataTable.set('items', [{
         _id: '1',
@@ -186,7 +192,26 @@
     };
     
     elDataTable.addEventListener('selected-items-changed', function(e){
+      var selectedItems = elDataTable.selectedItems;
+      var selectedLength = selectedItems.length;
+      
+      if(selectedItems.inverted){
+        document.querySelector('.header').innerHTML = "Selected Items : " + (elDataTable.items.length - selectedLength);
+        return
+      }
       document.querySelector('.header').innerHTML = "Selected Items : " + elDataTable.selectedItems.length
     });
+    
+    elDataTable.addEventListener('items-changed', function(e){
+      var selectedItems = elDataTable.selectedItems;
+      var selectedLength = selectedItems.length;
+      
+      if(selectedItems.inverted){
+        document.querySelector('.header').innerHTML = "Selected Items : " + (elDataTable.items.length - selectedLength);
+        return
+      }
+    });
+    
+    
   </script>
 </html>
