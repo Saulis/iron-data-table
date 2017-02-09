@@ -634,12 +634,12 @@ inspired styles to your `iron-data-table`.
         // both reset implicitly when a new _cachedItems is set to iron-list, but
         // that doesn't happen when size of the dataset changes only by a few items.
         this.clearSelection();
+        this.$.list.scrollToIndex(0);
       },
       
       _resetData: function() {
 
         this.clearCache();
-        this.$.list.scrollToIndex(0);
       },
 
       _sortDirectionChanged: function(e) {
