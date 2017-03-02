@@ -1021,6 +1021,14 @@ inspired styles to your `iron-data-table`.
       },
 
       /**
+       * Fired when user clicks on a item.
+       *
+       * @event item-tap
+       * @param {Object} detail
+       * @param {Object} detail.item item to be selected
+       */
+       
+      /**
        * Fired when user clicks on a item to select it.
        *
        * @event selecting-item
@@ -1078,6 +1086,8 @@ inspired styles to your `iron-data-table`.
         if (this._isFocusable(Polymer.dom(e).localTarget)) {
           return;
         } else {
+          this.fire('item-tap', e.model.item);
+          
           if (this.rowDetail && this.detailsEnabled) {
             if (this._isExpanded(e.model.item, this._expandedItems)) {
               this._fireEvent('collapsing-item', e.model.item, this.collapseItem);
