@@ -6,7 +6,12 @@ function ArrayDataSource(arr) {
 
     return Array.prototype.filter.call(items, function(item, index) {
       for (var i = 0; i < filter.length; i++) {
-        var value = Polymer.Base.get(filter[i].path, item);
+			if(filter[i].method) {
+				if(filter[i].method(item, index, items)) continue;
+				else return false;
+			}
+			if(!filter[i].path) continue;
+		  var value = Polymer.Base.get(filter[i].path, item);
         if ([undefined, null, ''].indexOf(filter[i].filter) > -1) {
           continue;
         } else if ([undefined, null].indexOf(value) > -1 ||

@@ -41,6 +41,13 @@
         filterValue: String,
 
         /**
+         * Filter is a function or the name of a function of the host. This is similar
+			* to the filter property of Polymer's dom-repeat
+			* (https://www.polymer-project.org/1.0/docs/api/dom-repeat)
+         */
+		  filter: {},
+
+        /**
          * Minimum width of the column
          */
         width: {
@@ -129,8 +136,9 @@
 
       observers: [
         '_alignRightChanged(table, alignRight)',
-        '_filterValueChanged(table, filterValue, filterBy)',
+        '_filterChanged(table, filter)',
         '_filterByChanged(table, filterBy)',
+        '_filterValueChanged(table, filterValue)',
         '_flexChanged(table, flex)',
         '_headerTemplateChanged(table, headerTemplate)',
         '_hiddenChanged(table, hidden)',
@@ -186,11 +194,30 @@
 
       _filterByChanged: function(table, filterBy) {
         this._notifyTable(table, 'filterBy', filterBy);
+		  this._columnFilterChanged();
       },
 
-      _filterValueChanged: function(table, filterValue, filterBy) {
+      _filterValueChanged: function(table, filterValue) {
         this._notifyTable(table, 'filterValue', filterValue);
-        this.fire('column-filter-changed', {value: filterValue, filterBy: filterBy});
+		  this._columnFilterChanged();
+      },
+
+      _filterChanged: function(table, filter) {
+        this._notifyTable(table, 'filter', filter);
+		  this._columnFilterChanged();
+      },
+
+      _columnFilterChanged: function(table, filter, filterValue, filterBy) {
+			var siblings = this.parentNode.childNodes, idx;
+			for(var i = 0; i < siblings.length; i++) {
+				if(siblings[i] === this) idx = i;
+			}
+        this.fire('column-filter-changed', {
+			  index:idx,
+			  filter:this.filter,
+			  value: this.filterValue,
+			  filterBy: this.filterBy
+		  });
       }
     });
   </script>
