@@ -7,6 +7,7 @@
 [Demos](https://saulis.github.io/iron-data-table/demo/) and [API Documentation](https://saulis.github.io/iron-data-table/)
 
 ### Project currently inactive, [maintainers needed](https://github.com/Saulis/iron-data-table/issues/197)
+#### For a similar table component, I recommend using [`<vaadin-grid>` 2.0](https://github.com/vaadin/vaadin-grid/tree/v2.0.0-alpha4)
 
 To install, run: `bower install iron-data-table`
 
