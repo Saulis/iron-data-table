@@ -6,8 +6,6 @@
 
 [Demos](https://saulis.github.io/iron-data-table/demo/) and [API Documentation](https://saulis.github.io/iron-data-table/)
 
-For *Angular 2* support, see [angular2-iron-data-table](https://github.com/Saulis/angular2-iron-data-table/blob/master/README.md)
-
 To install, run: `bower install iron-data-table`
 
 ![](https://github.com/Saulis/iron-data-table/raw/master/iron-data-table.png)
@@ -89,17 +87,8 @@ bound from the model object provided to the template scope):
 - Basic Angular 2 support with directives
 - Row Details (thanks to @gazal-k)
 
-## Roadmap (1.1)
-In random order: (please let me know if something is missing or misplaced)
-- Frozen Columns
-- Drag and Drop Column Resizing
-- Drag and Drop Column Reordering
-
-## Roadmap (1.x)
-In random order: (please let me know if something is missing or misplaced)
-- Nested Row Grouping (Tree)
-- Row Grouping
-- Custom Footer templates
+## Roadmap
+- `<iron-data-table>` is not actively maintained. For a similar table component, I recommend using [`<vaadin-grid>` 2.0](https://github.com/vaadin/vaadin-grid/tree/v2.0.0-alpha4)
 
 # Contributing
 I'd appreciate any help and feedback on the component. If you have any ideas, opinions, nitpicks or anything at all about it, please don't hesitate to send an issue, PR or a message in the Gitter chat.
