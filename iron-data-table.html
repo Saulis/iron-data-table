@@ -296,7 +296,8 @@ inspired styles to your `iron-data-table`.
          * instances.
          */
         items: {
-          type: Array
+          type: Array,
+          observer: '_onInitialItemsChanged'
         },
 
         /**
@@ -506,6 +507,12 @@ inspired styles to your `iron-data-table`.
           }
 
         }.bind(this));
+      },
+      
+      _onInitialItemsChanged: function(newValue, oldValue){
+        if(oldValue && !oldValue.length){
+          this.clearCache();
+        }
       },
 
       _stopPropagation: function(e) {
