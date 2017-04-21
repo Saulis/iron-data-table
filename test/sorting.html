@@ -129,6 +129,50 @@
           expect(columnSort.direction).to.eql('desc');
         });
       });
+
+      describe('sorting empty values', function() {
+        beforeEach(function() {
+        });
+
+        it('should sort null values', function(done) {
+          grid.items = [{value: 'foo'}, {value: null}, {value: 'bar'}];
+
+          grid.push('sortOrder', {path: 'value', direction: 'asc'});
+
+          grid.async(function() {
+            expect(grid.$.list.items[0]).to.eql({value: 'bar'});
+            expect(grid.$.list.items[1]).to.eql({value: 'foo'});
+            expect(grid.$.list.items[2]).to.eql({value: null});
+            done();
+          }, 100);
+        });
+
+        it('should sort undefined values', function(done) {
+          grid.items = [{value: 'foo'}, {value: undefined}, {value: 'bar'}];
+
+          grid.push('sortOrder', {path: 'value', direction: 'asc'});
+
+          grid.async(function() {
+            expect(grid.$.list.items[0]).to.eql({value: 'bar'});
+            expect(grid.$.list.items[1]).to.eql({value: 'foo'});
+            expect(grid.$.list.items[2]).to.eql({value: undefined});
+            done();
+          }, 100);
+        });
+
+        it('should sort empty string values', function(done) {
+          grid.items = [{value: 'foo'}, {value: ''}, {value: 'bar'}];
+
+          grid.push('sortOrder', {path: 'value', direction: 'asc'});
+
+          grid.async(function() {
+            expect(grid.$.list.items[0]).to.eql({value: 'bar'});
+            expect(grid.$.list.items[1]).to.eql({value: 'foo'});
+            expect(grid.$.list.items[2]).to.eql({value: ''});
+            done();
+          }, 100);
+        });
+      })
     });
   </script>
 
