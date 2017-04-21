@@ -12,10 +12,12 @@
         align-items: center;
         overflow: hidden;
         transition: flex-basis 200ms, flex-grow 200ms;
+        @apply(--iron-data-table-cell);
       }
 
       :host([header]) {
         height: 56px;
+        @apply(--iron-data-table-header-cell);
       }
 
       :host([hidden]) {
