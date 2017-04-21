@@ -659,6 +659,7 @@ inspired styles to your `iron-data-table`.
       _columnsChanged: function(columns, oldColumns) {
         if (oldColumns) {
           oldColumns.forEach(function(column) {
+            this.unlisten(column, 'column-filter-changed');
             this.unlisten(column, 'filter-value-changed');
           }.bind(this));
         }
@@ -666,32 +667,32 @@ inspired styles to your `iron-data-table`.
         if (columns) {
           columns.forEach(function(column) {
             column.table = this;
-            this.listen(column, 'filter-value-changed', '_onColumnFilterChanged');
+            this.listen(column, 'column-filter-changed', '_onColumnFilterChanged');
           }.bind(this));
         }
       },
 
       _onColumnFilterChanged: function(e) {
+        var filter = {
+			  index:e.detail.index,
+			  method: (typeof(e.detail.filter) === "string") ? this.domHost[e.detail.filter] : e.detail.filter,
+			  filter:e.detail.value,
+			  path: e.detail.filterBy
+		  };
         for (var i = 0; i < this.filter.length; i++) {
-          if (this.filter[i].path === e.detail.filterBy) {
-            this.set('filter.' + i + '.filter', e.detail.value);
+          if (this.filter[i].index === e.detail.index) {
+            this.set('filter.' + i, filter);
 
             // selectedItems.filter is actually already set at this point when
             // clearSelection is called after filter is set.
-            this.set('selectedItems.filters.' + i + '.filter', e.detail.value);
+            this.set('selectedItems.filters.' + i, filter);
             return;
           }
         }
 
-        this.push('filter', {
-          path: e.detail.filterBy,
-          filter: e.detail.value
-        });
+        this.push('filter', filter);
 
-        this.push('selectedItems.filters', {
-          path: e.detail.filterBy,
-          filter: e.detail.value
-        });
+        this.push('selectedItems.filters', filter);
       },
 
       _resizeCellContainers: function() {
