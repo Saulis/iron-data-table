@@ -308,6 +308,15 @@ inspired styles to your `iron-data-table`.
         },
 
         /**
+         * When `false`, items may be sorted by many collumns at once.
+         * When `true`, items may be sorted only by one collumn.
+         */
+        disableMultiSort: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
          * An array containing path/filter value pairs that are used to filter the items
          */
         filter: {
@@ -648,6 +657,18 @@ inspired styles to your `iron-data-table`.
             }
             return;
           }
+        }
+
+        // disable multiSorting
+        if(this.disableMultiSort && this.sortOrder.length) {
+          // clear currently selected column
+          this.set('sortOrder.0.direction', null);
+
+          this.set('sortOrder', [{
+            path: e.detail.path,
+            direction: e.detail.direction
+          }]);
+          return;
         }
 
         this.push('sortOrder', {
