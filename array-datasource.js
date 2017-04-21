@@ -19,13 +19,7 @@ function ArrayDataSource(arr) {
   }
 
   function _compare(a, b) {
-    if (a < b) {
-      return -1;
-    }
-    if (a > b) {
-      return 1;
-    }
-    return 0;
+    return (a===undefined)-(b===undefined) ||  (a==='')-(b==='') || (a===null)-(b===null) || +(a>b)||-(a<b);
   }
 
   function _sort(items, sortOrder) {
