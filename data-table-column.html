@@ -81,10 +81,16 @@
           type: String
         },
 
-        /*
+        /**
          * Reference to the parent <iron-data-table> element.
          */
         table: Object,
+
+        /**
+         * Setter and Getter when is creating dynamic columns
+         * commonly set during <template is="dom-repeat">
+         */
+        columnItem: Object,
 
         /**
          * Template for the header cell

@@ -32,6 +32,7 @@
       properties: {
         alignRight: Boolean,
         column: Object,
+        columnIndex: Number,
         flex: Number,
         header: Boolean,
         hidden: Boolean,
@@ -48,7 +49,7 @@
       },
 
       observers: [
-                  '_beforeBind(beforeBind, column.*, index, item.*, expanded, selected)',
+                  '_beforeBind(beforeBind, column.*, index, columnIndex, item.*, expanded, selected)',
                   '_beforeBindHeader(beforeBind, column.*)',
                   '_alignRightChanged(alignRight)',
                   '_columnChanged(_instance, column)',
@@ -72,10 +73,11 @@
         this.style.flexDirection = alignRight ? 'row-reverse' : 'row';
       },
 
-      _beforeBind: function(beforeBind, column, index, item, expanded, selected) {
+      _beforeBind: function(beforeBind, column, index, columnIndex, item, expanded, selected) {
         var data = {
           column: column.base,
           index: index,
+          columnIndex: columnIndex,
           item: item.base,
           expanded: expanded,
           selected: selected
