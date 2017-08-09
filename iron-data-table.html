@@ -477,33 +477,35 @@ inspired styles to your `iron-data-table`.
         '_resetData(dataSource, filter.*, sortOrder.*)'
       ],
 
-      created: function() {
-        this._observer = Polymer.dom(this).observeNodes(function(info) {
-          var hasColumns = function(node) {
-            return (node.nodeType === Node.ELEMENT_NODE && node.tagName.toUpperCase() === 'DATA-TABLE-COLUMN');
-          };
+      attached: function() {
+        this.async(function(){
+           this._observer = Polymer.dom(this).observeNodes(function(info) {
+             var hasColumns = function(node) {
+               return (node.nodeType === Node.ELEMENT_NODE && node.tagName.toUpperCase() === 'DATA-TABLE-COLUMN');
+             };
 
-          var hasDetails = function(node) {
-            return (node.nodeType === Node.ELEMENT_NODE &&
-              node.tagName.toUpperCase() === 'TEMPLATE' && node.hasAttribute('is') &&
-              node.getAttribute('is') === 'row-detail');
-          };
+             var hasDetails = function(node) {
+               return (node.nodeType === Node.ELEMENT_NODE &&
+                 node.tagName.toUpperCase() === 'TEMPLATE' && node.hasAttribute('is') &&
+                 node.getAttribute('is') === 'row-detail');
+             };
 
-          if (info.addedNodes.filter(hasColumns).length > 0 ||
-            info.removedNodes.filter(hasColumns).length > 0) {
-            this.set('columns', this.getContentChildren('[select=data-table-column]'));
-            this.notifyResize();
-          }
+             if (info.addedNodes.filter(hasColumns).length > 0 ||
+               info.removedNodes.filter(hasColumns).length > 0) {
+               this.set('columns', this.getContentChildren('[select=data-table-column]'));
+               this.notifyResize();
+             }
 
-          if (info.addedNodes.filter(hasDetails).length > 0) {
-            this.set('rowDetail', this.getContentChildren('[select="template[is=row-detail]"]')[0]);
+             if (info.addedNodes.filter(hasDetails).length > 0) {
+               this.set('rowDetail', this.getContentChildren('[select="template[is=row-detail]"]')[0]);
 
-            // assuming parent element is always a Polymer element.
-            // set dataHost to the same context the template was declared in
-            var parent = Polymer.dom(this.rowDetail).parentNode;
-            this.rowDetail._rootDataHost = parent.dataHost ? (parent.dataHost._rootDataHost || parent.dataHost) : parent;
-          }
+               // assuming parent element is always a Polymer element.
+               // set dataHost to the same context the template was declared in
+               var parent = Polymer.dom(this.rowDetail).parentNode;
+               this.rowDetail._rootDataHost = parent.dataHost ? (parent.dataHost._rootDataHost || parent.dataHost) : parent;
+             }
 
+           }.bind(this));
         }.bind(this));
       },
 
